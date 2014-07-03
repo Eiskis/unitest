@@ -27,13 +27,29 @@ include_once 'baseline.php';
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-
 		<meta charset="utf-8">
+
+
+
+		<title>Unitest</title>
+
+		<meta name="application-name" content="'.htmlspecialchars($page->siteName()).'">
+		<meta property="og:site_name" content="'.htmlspecialchars($page->siteName()).'">
+
+		<meta name="description" content="A one-class miniature unit testing framework for PHP">
+		<meta property="og:description" content="A one-class miniature unit testing framework for PHP">
+
+		<meta name="mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+
+
 
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimal-ui">
 		<meta name="msapplication-tap-highlight" content="no">
-        <meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+
 
 		<style type="text/css">
 			@-ms-viewport{width: device-width;}
@@ -47,7 +63,7 @@ include_once 'baseline.php';
 		<style type="text/css">
 			body {
 				font-family: sans-serif;
-				padding: 2% 6% 6% 6%;
+				padding: 2% 6%;
 				max-width: 50em;
 				margin-left: auto;
 				margin-right: auto;
@@ -56,20 +72,22 @@ include_once 'baseline.php';
 				color: #444;
 			}
 			.canvas {
-				padding: 3em;
+				margin-bottom: 6%;
+				padding: 2% 6% 4% 6%;
 				border-radius: 3px;
 				border: 1px solid #ddd;
 				background-color: #fcfcfc;
 				box-shadow: 0 0.4em 2em #ddd;
 			}
-			h1, h2, h3, h4 {
+			h1 {
+				text-transform: uppercase;
+				font-weight: 900;
+				color: #ddd;
+			}
+			h2, h3, h4 {
 				font-weight: 100;
 				text-transform: uppercase;
-				color: #999;
-			}
-			h2 {
-				padding-top: 1.34em;
-				border-top: 1px dashed #ddd;
+				color: #bbb;
 			}
 			pre {
 				padding: 2em;
@@ -79,7 +97,6 @@ include_once 'baseline.php';
 			}
 			a {
 				transition: color 200ms;
-				display: inline-block;
 				text-decoration: none;
 				color: hsl(200, 100%, 45%);
 			}
@@ -92,15 +109,21 @@ include_once 'baseline.php';
 
 	<body class="language-php">
 
+		<h1>Dump</h1>
+
+		<div class="canvas">
+			<pre><code><?php echo $dump; ?></code></pre>
+		</div>
+
+
+
+		<h1>Unitest</h1>
+
 		<div class="canvas">
 
-			<pre><code><?php echo $dump; ?></code></pre>
+			<h2>About</h2>
 
-
-
-			<h1>Unitest</h1>
-
-			<p><big>A one-class miniature unit testing framework for PHP.</big></p>
+			<p><em>Unitest</em> is a one-class miniature unit testing framework for PHP.</p>
 
 			<ul>
 				<li><a href="https://bitbucket.org/Eiskis/unitest/">Bitbucket repo</a></li>
@@ -112,16 +135,38 @@ include_once 'baseline.php';
 			<h2>Usage</h2>
 
 			<pre><code>include_once 'Unitest.php';
-	include_once 'testCases.php';</code></pre>
+$suite = new Unitest();
+$suite->scrape('tests/');
+$results = $suite->run();</code></pre>
+
+		</div>
 
 
+
+		<h1>Development</h1>
+
+		<div class="canvas">
 
 			<h2>To do</h2>
 
 			<ul>
-				<li>Public <code>rglob</code> helper to scrape for case files</li>
 				<li><code>ReflectionClass</code>-based solution to detect test method's input variable names</li>
 				<li>Fail if script variable is missing</li>
+				<li>Actually construct test case objects
+					<ol>
+						<li>Scrape for files</li>
+						<li>Find out which classes will be available</li>
+						<li>Include file</li>
+						<li>Instantiate custom case</li>
+						<li>Add to a parent case</li>
+					</ol>
+				</li>
+			</ul>
+
+			<h2>Read up</h2>
+
+			<ul>
+				<li><a href="http://stackoverflow.com/questions/928928/determining-what-classes-are-defined-in-a-php-class-file">Find out which classes are defined in a file - without including the file</a></li>
 			</ul>
 
 		</div>
