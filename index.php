@@ -28,15 +28,25 @@ include_once 'baseline.php';
 			body{-webkit-tap-highlight-color: transparent;-webkit-text-size-adjust: none;-moz-text-size-adjust: none;-ms-text-size-adjust: none;}
 		</style>
 
+		<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/prism/0.0.1/prism.min.css">
+
 		<style type="text/css">
 			body {
 				font-family: sans-serif;
-				padding: 2% 6%;
-				max-width: 40em;
+				padding: 2% 6% 6% 6%;
+				max-width: 50em;
 				margin-left: auto;
 				margin-right: auto;
-				background-color: #fafafa;
+				background-color: #f0f0f0;
+				line-height: 1.6;
 				color: #444;
+			}
+			.canvas {
+				padding: 3em;
+				border-radius: 3px;
+				border: 1px solid #ddd;
+				background-color: #fcfcfc;
+				box-shadow: 0 0.4em 2em #ddd;
 			}
 			h1, h2, h3, h4 {
 				font-weight: 100;
@@ -51,6 +61,7 @@ include_once 'baseline.php';
 				padding: 2em;
 				border: 1px solid #eee;
 				background-color: #fff;
+				font-size: 0.8em;
 			}
 			a {
 				transition: color 200ms;
@@ -65,62 +76,59 @@ include_once 'baseline.php';
 
 	</head>
 
-	<body>
+	<body class="language-php">
 
-		<h1>Unitest</h1>
+		<div class="canvas">
 
-
-
-		<h2>Test dump</h2>
-
-		<?php
-			$u = new Unitest();
-			echo html_dump(array(
-				'parent' => $u->parent(),
-				'ownTests' => $u->ownTests(),
-			));
-		?>
+			<?php
+				$u = new Unitest();
+				echo html_dump(array(
+					'parent' => $u->parent(),
+					'ownTests' => $u->ownTests(),
+				));
+			?>
 
 
 
-		<h2>About</h2>
+			<h1>Unitest</h1>
 
-		<p><big>A one-class miniature unit testing framework for PHP.</big></p>
+			<p><big>A one-class miniature unit testing framework for PHP.</big></p>
 
-		<ul>
-			<li><a href="https://bitbucket.org/Eiskis/unitest/">Bitbucket repo</a></li>
-			<li><a href="https://bitbucket.org/Eiskis/unitest/src/master/Unitest.php">Download</a></li>
-		</ul>
-
-
-
-		<h2>Usage</h2>
-
-		<pre><code>
-			include_once 'Unitest.php';
-			include_once 'testCases.php';
-
-			
-
-		</code></pre>
-
-		<?php
-			$u = new Unitest();
-			echo html_dump(array(
-				'parent' => $u->parent(),
-				'ownTests' => $u->ownTests(),
-			));
-		?>
+			<ul>
+				<li><a href="https://bitbucket.org/Eiskis/unitest/">Bitbucket repo</a></li>
+				<li><a href="https://bitbucket.org/Eiskis/unitest/src/master/Unitest.php">Download</a></li>
+			</ul>
 
 
 
-		<h2>To do</h2>
+			<h2>Usage</h2>
 
-		<ul>
-			<li>Public <code>rglob</code> helper to scrape for case files</li>
-			<li><code>ReflectionClass</code>-based solution to detect test method's input variable names</li>
-			<li>Fail if script variable is missing</li>
-		</ul>
+			<pre><code>include_once 'Unitest.php';
+	include_once 'testCases.php';</code></pre>
+
+			<?php
+				$u = new Unitest();
+				echo html_dump(array(
+					'children' => $u->children(),
+					'parent' => $u->parent(),
+					'ownTests' => $u->ownTests(),
+					'scriptVariables' => $u->scriptVariables(),
+				));
+			?>
+
+
+
+			<h2>To do</h2>
+
+			<ul>
+				<li>Public <code>rglob</code> helper to scrape for case files</li>
+				<li><code>ReflectionClass</code>-based solution to detect test method's input variable names</li>
+				<li>Fail if script variable is missing</li>
+			</ul>
+
+		</div>
+
+		<script type="application/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/prism/0.0.1/prism.min.js"></script>
 
 	</body>
 </html>

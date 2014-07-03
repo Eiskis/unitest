@@ -37,17 +37,17 @@ class Unitest {
 	// Getters
 
 	/**
+	* Child cases
+	*/
+	final public function children () {
+		return $this->propertyChildren;
+	}
+
+	/**
 	* Parent case
 	*/
 	final public function parent () {
 		return $this->propertyParent;
-	}
-
-	/**
-	* Child test cases
-	*/
-	final public function children () {
-		return $this->propertyChildren;
 	}
 
 	/**
