@@ -52,6 +52,15 @@ include_once 'baseline.php';
 				border: 1px solid #eee;
 				background-color: #fff;
 			}
+			a {
+				transition: color 200ms;
+				display: inline-block;
+				text-decoration: none;
+				color: hsl(200, 100%, 45%);
+			}
+			a:hover {
+				color: hsl(200, 100%, 30%);
+			}
 		</style>
 
 	</head>
@@ -60,9 +69,40 @@ include_once 'baseline.php';
 
 		<h1>Unitest</h1>
 
-		<p><big>is a mini <em>unit testing</em> framework for PHP. It comes in one class.</big></p>
 
-		<h2>Test output</h2>
+
+		<h2>Test dump</h2>
+
+		<?php
+			$u = new Unitest();
+			echo html_dump(array(
+				'parent' => $u->parent(),
+				'ownTests' => $u->ownTests(),
+			));
+		?>
+
+
+
+		<h2>About</h2>
+
+		<p><big>A one-class miniature unit testing framework for PHP.</big></p>
+
+		<ul>
+			<li><a href="https://bitbucket.org/Eiskis/unitest/">Bitbucket repo</a></li>
+			<li><a href="https://bitbucket.org/Eiskis/unitest/src/master/Unitest.php">Download</a></li>
+		</ul>
+
+
+
+		<h2>Usage</h2>
+
+		<pre><code>
+			include_once 'Unitest.php';
+			include_once 'testCases.php';
+
+			
+
+		</code></pre>
 
 		<?php
 			$u = new Unitest();
