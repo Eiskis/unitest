@@ -5,14 +5,14 @@ ini_set('error_log', 'errors.log');
 mb_internal_encoding('UTF-8');
 date_default_timezone_set('UTC');
 
-include_once 'Unitest.php';
+include_once 'release/Unitest.php';
 include_once 'baseline.php';
 
 ?>
 
 <?php
 	$u = new Unitest();
-	$dump = dump(array(
+	$dump = array(
 		'getters' => array(
 			'children' => $u->children(),
 			'parent' => $u->parent(),
@@ -21,7 +21,7 @@ include_once 'baseline.php';
 		),
 		'scrape' => $u->scrape('spec'),
 		'available cases' => $u->availableCases(),
-	));
+	);
 ?>
 
 <!DOCTYPE html>
@@ -84,10 +84,14 @@ include_once 'baseline.php';
 				font-weight: 900;
 				color: #ddd;
 			}
-			h2, h3, h4 {
+			h2, h3 {
 				font-weight: 100;
 				text-transform: uppercase;
 				color: #bbb;
+			}
+			h4 {
+				border-top: 1px dashed #ddd;
+				padding-top: 2em;
 			}
 			pre {
 				padding: 2em;
@@ -112,7 +116,12 @@ include_once 'baseline.php';
 		<h1>Dump</h1>
 
 		<div class="canvas">
-			<pre><code><?php echo $dump; ?></code></pre>
+
+			<h2>Test results</h2>
+			<pre><code><?php echo dump($u->runOwnTests()); ?></code></pre>
+
+			<h2>Properties</h2>
+			<pre><code><?php echo dump($dump); ?></code></pre>
 		</div>
 
 
@@ -132,12 +141,93 @@ include_once 'baseline.php';
 
 
 
-			<h2>Usage</h2>
+			<h2>Kickstart</h2>
 
 			<pre><code>include_once 'Unitest.php';
 $suite = new Unitest();
 $suite->scrape('tests/');
 $results = $suite->run();</code></pre>
+
+		</div>
+
+
+
+		<h1>API</h1>
+
+		<div class="canvas">
+
+			<h2>Construct</h2>
+
+			<pre><code>$case = new Unitest($parent = null, $scriptVariables = array())</code></pre>
+			<p>Parent case and script variables can be passed</p>
+
+			<h2>Properties</h2>
+
+			<h4>children</h4>
+			<p>Child cases</p>
+			<pre><code>$case->children()</code></pre>
+
+			<h4>parent</h4>
+			<p>Parent case</p>
+			<pre><code>$case->parent()</code></pre>
+
+			<h4>scriptVariables</h4>
+			<p>Script variables</p>
+			<pre><code>$case->scriptVariables()</code></pre>
+
+			<h2>Dynamic getters</h2>
+
+			<h4>ownTests</h4>
+			<p>All test methods</p>
+			<pre><code>$case->ownTests()</code></pre>
+
+
+
+			<h2>Managing cases</h2>
+
+			<h4>availableCases</h4>
+			<p>Find declared classes that extend Unitest.</p>
+			<pre><code>$case->availableCases()</code></pre>
+
+			<h4>scrape</h4>
+			<p>Find PHP files with classes under <code>$directory</code>. Multiple paths can be passed.</p>
+			<pre><code>$case->scrape($directory)</code></pre>
+
+			<h4>addChild</h4>
+			<p>Add a valid child test case as a child</p>
+			<pre><code>$case->addChild($case)</code></pre>
+
+			<h4>nest</h4>
+			<p>Generate a new child case. <code>$case</code> will be set as parent, and scriptVariables are passed on.</p>
+			<pre><code>$case->nest()</code></pre>
+
+
+
+			<h2>Running tests</h2>
+
+			<h4>runTest</h4>
+			<p>Run an individual test method</p>
+			<pre><code>$case->runTest($method)</code></pre>
+
+			<h4>runOwnTests</h4>
+			<p>Run all own tests</p>
+			<pre><code>$case->runOwnTests()</code></pre>
+
+			<h4>runChildrensOwnTests</h4>
+			<p>Run tests of all children</p>
+			<pre><code>$case->runChildrensOwnTests()</code></pre>
+
+
+
+			<h2>Assertions</h2>
+
+			<h4>assert</h4>
+			<p>Truey</p>
+			<pre><code>$case->assert()</code></pre>
+
+			<h4>assertEquals</h4>
+			<p>Equality</p>
+			<pre><code>$case->assertEquals()</code></pre>
 
 		</div>
 

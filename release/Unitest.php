@@ -2,6 +2,16 @@
 
 class Unitest {
 
+	// Tests (just for debugging)
+
+	public function testMinus () {
+		return $this->assert(1-1===0);
+	}
+
+	public function testPlus () {
+		return $this->assert(1+1===2);
+	}
+
 
 
 	// Basics
@@ -62,7 +72,7 @@ class Unitest {
 	// Dynamic getters
 
 	/**
-	* All test methods
+	* All test methods of this case
 	*/
 	final public function ownTests () {
 		$tests = array();
@@ -78,7 +88,21 @@ class Unitest {
 
 
 
-	// Actions
+	// Managing cases
+
+	/**
+	* Find declared classes that extend Unitest
+	*/
+	final public function availableCases () {
+		$available = array();
+		foreach(get_declared_classes() as $class){
+			$ref = new ReflectionClass($class);
+			if ($ref->isSubclassOf($this->propertyClassName)) {
+				$available[] = $class;
+			}
+		}
+		return $available;
+	}
 
 	/**
 	* Add a valid child test case as a child
@@ -101,6 +125,33 @@ class Unitest {
 		return $this;
 	}
 
+	/**
+	* Find PHP files
+	*/
+	final public function scrape () {
+		$results = array();
+		$arguments = func_get_args();
+
+		// Multiple paths can be provided
+		foreach ($arguments as $argument) {
+
+			// Scrape path for PHP files
+			if (is_string($argument)) {
+				foreach ($this->rglobFiles($argument, array('php')) as $file) {
+					include_once $file;
+					$results[] = $file;
+				}
+
+			// Recurse
+			} else if (is_array($argument)) {
+				call_user_func_array(array($this, 'scrape'), $argument);
+			}
+
+		}
+
+		return $results;
+	}
+
 
 
 	// Running tests
@@ -110,29 +161,32 @@ class Unitest {
 	*/
 	final public function runTest ($method) {
 		if (method_exists($this, $method)) {
-			call_user_func_array(array($this, $method), $this->scriptVariables());
+			$result = call_user_func_array(array($this, $method), $this->scriptVariables());
+			return $result ? true : false;
 		}
-		return $this;
+		return null;
 	}
 
 	/**
 	* Run all own tests
 	*/
 	final public function runOwnTests () {
-		foreach ($this->ownTests() as $testMethod) {
-			$this->runTest($testMethod);
+		$results = array();
+		foreach ($this->ownTests() as $method) {
+			$results[$method] = $this->runTest($method);
 		}
-		return $this;
+		return $results;
 	}
 
 	/**
 	* Run tests of all children
 	*/
 	final public function runChildrensOwnTests () {
+		$results = array();
 		foreach ($this->children() as $childCase) {
-			$childCase->runOwnTests();
+			$results[$childCase.''] = $childCase->runOwnTests();
 		}
-		return $this;
+		return $results;
 	}
 
 
@@ -166,51 +220,6 @@ class Unitest {
 			}
 		}
 		return true;
-	}
-
-
-
-	// Public helpers
-
-	/**
-	* Find PHP files
-	*/
-	final public function availableCases () {
-		$available = array();
-		foreach(get_declared_classes() as $class){
-			$ref = new ReflectionClass($class);
-			if ($ref->isSubclassOf($this->propertyClassName)) {
-				$available[] = $class;
-			}
-		}
-		return $available;
-	}
-
-	/**
-	* Find PHP files
-	*/
-	final public function scrape () {
-		$results = array();
-		$arguments = func_get_args();
-
-		// Multiple paths can be provided
-		foreach ($arguments as $argument) {
-
-			// Scrape path for PHP files
-			if (is_string($argument)) {
-				foreach ($this->rglobFiles($argument, array('php')) as $file) {
-					include_once $file;
-					$results[] = $file;
-				}
-
-			// Recurse
-			} else if (is_array($argument)) {
-				call_user_func_array(array($this, 'scrape'), $argument);
-			}
-
-		}
-
-		return $results;
 	}
 
 
