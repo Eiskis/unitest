@@ -10,6 +10,20 @@ include_once 'baseline.php';
 
 ?>
 
+<?php
+	$u = new Unitest();
+	$dump = dump(array(
+		'getters' => array(
+			'children' => $u->children(),
+			'parent' => $u->parent(),
+			'ownTests' => $u->ownTests(),
+			'scriptVariables' => $u->scriptVariables(),
+		),
+		'scrape' => $u->scrape('spec'),
+		'available cases' => $u->availableCases(),
+	));
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 	<head>
@@ -80,13 +94,7 @@ include_once 'baseline.php';
 
 		<div class="canvas">
 
-			<?php
-				$u = new Unitest();
-				echo html_dump(array(
-					'parent' => $u->parent(),
-					'ownTests' => $u->ownTests(),
-				));
-			?>
+			<pre><code><?php echo $dump; ?></code></pre>
 
 
 
@@ -105,16 +113,6 @@ include_once 'baseline.php';
 
 			<pre><code>include_once 'Unitest.php';
 	include_once 'testCases.php';</code></pre>
-
-			<?php
-				$u = new Unitest();
-				echo html_dump(array(
-					'children' => $u->children(),
-					'parent' => $u->parent(),
-					'ownTests' => $u->ownTests(),
-					'scriptVariables' => $u->scriptVariables(),
-				));
-			?>
 
 
 

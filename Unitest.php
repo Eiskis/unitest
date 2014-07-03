@@ -170,6 +170,51 @@ class Unitest {
 
 
 
+	// Public helpers
+
+	/**
+	* Find PHP files
+	*/
+	final public function availableCases () {
+		$available = array();
+		foreach(get_declared_classes() as $class){
+			$ref = new ReflectionClass($class);
+			if ($ref->isSubclassOf($this->propertyClassName)) {
+				$available[] = $class;
+			}
+		}
+		return $available;
+	}
+
+	/**
+	* Find PHP files
+	*/
+	final public function scrape () {
+		$results = array();
+		$arguments = func_get_args();
+
+		// Multiple paths can be provided
+		foreach ($arguments as $argument) {
+
+			// Scrape path for PHP files
+			if (is_string($argument)) {
+				foreach ($this->rglobFiles($argument, array('php')) as $file) {
+					include_once $file;
+					$results[] = $file;
+				}
+
+			// Recurse
+			} else if (is_array($argument)) {
+				call_user_func_array(array($this, 'scrape'), $argument);
+			}
+
+		}
+
+		return $results;
+	}
+
+
+
 	// Setters
 
 	/**
@@ -220,6 +265,69 @@ class Unitest {
 			is_subclass_of($case, $this->propertyClassName)
 		);
 	}
+
+	/**
+	* Finding files
+	*/
+
+	private function rglobFiles ($path = '', $filetypes = array()) {
+
+		// Run glob_files for this directory and its subdirectories
+		$files = $this->globFiles($path, $filetypes);
+		foreach ($this->globDir($path) as $child) {
+			$files = array_merge($files, $this->rglobFiles($child, $filetypes));
+		}
+
+		return $files;
+	}
+
+	private function globFiles ($path = '', $filetypes = array()) {
+		$files = array();
+
+		// Handle filetype input
+		if (empty($filetypes)) {
+			$brace = '';
+		} else {
+			$brace = '.{'.implode(',', $filetypes).'}';
+		}
+
+		// Handle path input
+		if (!empty($path)) {
+			$path = preg_replace('/(\*|\?|\[)/', '[$1]', suffix($path, '/'));
+		}
+
+		// Do the glob()
+		foreach (glob($path.'*'.$brace, GLOB_BRACE) as $value) {
+			if (is_file($value)) {
+				$files[] = $value;
+			}
+		}
+
+		// Sort results
+		usort($files, 'strcasecmp');
+
+		return $files;
+	}
+
+	private function globDir ($path = '') {
+
+		// Normalize path
+		if (!empty($path)) {
+			$path = preg_replace('/(\*|\?|\[)/', '[$1]', suffix($path, '/'));
+		}
+
+		// Find directories in the path
+		$directories = glob($path.'*', GLOB_MARK | GLOB_ONLYDIR);
+		foreach ($directories as $key => $value) {
+			$directories[$key] = str_replace('\\', '/', $value);
+		}
+		
+		// Sort results
+		usort($directories, 'strcasecmp');
+
+		return $directories;
+	}
+
 
 }
 
