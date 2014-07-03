@@ -2,16 +2,6 @@
 
 class Unitest {
 
-	// Tests (just for debugging)
-
-	public function testMinus () {
-		return $this->assert(1-1===0);
-	}
-
-	public function testPlus () {
-		return $this->assert(1+1===2);
-	}
-
 
 
 	// Basics

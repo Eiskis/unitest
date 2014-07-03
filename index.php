@@ -6,12 +6,13 @@ mb_internal_encoding('UTF-8');
 date_default_timezone_set('UTC');
 
 include_once 'release/Unitest.php';
+include_once 'spec/arithmetics.php';
 include_once 'baseline.php';
 
 ?>
 
 <?php
-	$u = new Unitest();
+	$u = new UnitestArithmetics();
 	$dump = array(
 		'getters' => array(
 			'children' => $u->children(),
@@ -119,6 +120,9 @@ include_once 'baseline.php';
 
 			<h2>Test results</h2>
 			<pre><code><?php echo dump($u->runOwnTests()); ?></code></pre>
+
+			<h2>Test results as JSON</h2>
+			<pre><code><?php echo json_encode($u->runOwnTests()); ?></code></pre>
 
 			<h2>Properties</h2>
 			<pre><code><?php echo dump($dump); ?></code></pre>
