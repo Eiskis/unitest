@@ -105,9 +105,9 @@ include_once 'baseline.php';
 
 			<?php
 				$u = new Unitest();
-				$u->addScriptVariable('foo', 1);
-				$u->addScriptVariable('bar', 2);
-				$u->addScriptVariable('string', 'Some string value');
+				$u->passArgument('foo', 1);
+				$u->passArgument('bar', 2);
+				$u->passArgument('string', 'Some string value');
 				$u->scrape('spec');
 			?>
 
@@ -170,7 +170,7 @@ $results = $suite->run();</code></pre>
 
 			<h2>Construct</h2>
 
-			<pre><code>$case = new Unitest($parent = null, $scriptVariables = array())</code></pre>
+			<pre><code>$case = new Unitest($parent = null)</code></pre>
 			<p>Parent case and script variables can be passed</p>
 
 			<h2>Properties</h2>
@@ -183,9 +183,9 @@ $results = $suite->run();</code></pre>
 			<p>Parent case</p>
 			<pre><code>$case->parent()</code></pre>
 
-			<h4>scriptVariables</h4>
+			<h4>arguments</h4>
 			<p>Script variables</p>
-			<pre><code>$case->scriptVariables()</code></pre>
+			<pre><code>$case->arguments()</code></pre>
 
 			<h2>Dynamic getters</h2>
 

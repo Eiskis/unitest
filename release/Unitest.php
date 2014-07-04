@@ -17,7 +17,7 @@ class Unitest {
 			'class' => ''.$this,
 			'parent' => $this->parent() ? ''.$this->parent() : null,
 			'ownTests' => $this->ownTests(),
-			'scriptVariables' => $this->scriptVariables(),
+			'arguments' => $this->arguments(),
 			'children' => array(),
 		);
 
@@ -37,7 +37,7 @@ class Unitest {
 	*/
 	private $propertyParent          = null;
 	private $propertyChildren        = array();
-	private $propertyScriptVariables = array();
+	private $propertyArguments = array();
 
 	/**
 	* Initialization
@@ -76,12 +76,12 @@ class Unitest {
 	/**
 	* Script variables
 	*/
-	final public function scriptVariables () {
+	final public function arguments () {
 		$results = array();
 		if ($this->parent()) {
-			$results = array_merge($results, $this->parent()->scriptVariables());
+			$results = array_merge($results, $this->parent()->arguments());
 		}
-		$results = array_merge($results, $this->propertyScriptVariables);	
+		$results = array_merge($results, $this->propertyArguments);	
 		return $results;
 	}
 
@@ -105,14 +105,14 @@ class Unitest {
 	/**
 	* Add a script variable
 	*/
-	final public function addScriptVariable ($name, $value) {
+	final public function passArgument ($name, $value) {
 
 		if (is_string($name)) {
 
 			// Validate variable name
 			$name = str_replace('-', '', preg_replace('/\s+/', '', $name));
 			if (!empty($name)) {
-				$this->propertyScriptVariables[$name] = $value;
+				$this->propertyArguments[$name] = $value;
 			}
 		}
 
@@ -166,7 +166,7 @@ class Unitest {
 		if (method_exists($this, $method)) {
 			set_error_handler('UnitestHandleError');
 			try {
-				$result = call_user_func_array(array($this, $method), $this->scriptVariables()) ? true : false;
+				$result = call_user_func_array(array($this, $method), $this->arguments()) ? true : false;
 			} catch (Exception $e) {
 				$result = $e->getMessage().' ('.$e->getFile().' line '.$e->getLine().')';
 			}
