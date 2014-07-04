@@ -11,19 +11,6 @@ include_once 'baseline.php';
 
 ?>
 
-<?php
-	$u = new UnitestArithmetics();
-	$dump = array(
-		'getters' => array(
-			'children' => $u->children(),
-			'parent' => $u->parent(),
-			'ownTests' => $u->ownTests(),
-			'scriptVariables' => $u->scriptVariables(),
-		),
-		'available suites' => $u->availableSuites(),
-	);
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 	<head>
@@ -117,14 +104,16 @@ include_once 'baseline.php';
 
 		<div class="canvas">
 
-			<h2>Test results</h2>
-			<pre><code><?php echo dump($u->runOwnTests()); ?></code></pre>
+			<?php
+				$u = new Unitest();
+				$u->scrape('spec');
+			?>
 
-			<h2>Test results as JSON</h2>
-			<pre><code><?php echo json_encode($u->runOwnTests()); ?></code></pre>
+			<h2>Test results</h2>
+			<?php echo html_dump($u->run()); ?>
 
 			<h2>Properties</h2>
-			<pre><code><?php echo dump($dump); ?></code></pre>
+			<?php echo html_dump($u->dump()); ?>
 		</div>
 
 
@@ -188,10 +177,6 @@ $results = $suite->run();</code></pre>
 
 			<h2>Managing cases</h2>
 
-			<h4>availableSuites</h4>
-			<p>Find declared classes that extend Unitest.</p>
-			<pre><code>$case->availableSuites()</code></pre>
-
 			<h4>scrape</h4>
 			<p>Find PHP files with classes under <code>$directory</code>. Multiple paths can be passed.</p>
 			<pre><code>$case->scrape($directory)</code></pre>
@@ -241,13 +226,13 @@ $results = $suite->run();</code></pre>
 			<ul>
 				<li><code>ReflectionClass</code>-based solution to detect test method's input variable names</li>
 				<li>Fail if script variable is missing</li>
-				<li>Script variables should bubble</li>
 				<li>Actually construct test case objects
 					<ol>
 						<li>Scrape for files</li>
 						<li>Find out which classes will be available</li>
 						<li>Include file</li>
 						<li>Instantiate custom case</li>
+						<li><a href="http://stackoverflow.com/questions/928928/determining-what-classes-are-defined-in-a-php-class-file">Find out which classes are defined in a file - without including the file</a></li>
 						<li>Add to a parent case</li>
 					</ol>
 				</li>
@@ -256,7 +241,6 @@ $results = $suite->run();</code></pre>
 			<h2>Read up</h2>
 
 			<ul>
-				<li><a href="http://stackoverflow.com/questions/928928/determining-what-classes-are-defined-in-a-php-class-file">Find out which classes are defined in a file - without including the file</a></li>
 			</ul>
 
 		</div>
