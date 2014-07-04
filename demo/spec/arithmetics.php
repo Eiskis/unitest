@@ -6,11 +6,11 @@
 class UnitestArithmetics extends Unitest {
 
 	public function testMinus () {
-		return $this->assert(1 - 1 === 0);
+		return $this->shouldBeEqual(0, 1-1, 2-2, 3-3);
 	}
 
 	public function testPlus () {
-		return $this->assert(1 + 1=== 2);
+		return $this->should(1 + 1=== 2);
 	}
 
 }
