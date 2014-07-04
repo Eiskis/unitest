@@ -46,12 +46,8 @@ class Unitest {
 	*
 	* Parent suite and script variables can be passed
 	*/
-	final public function __construct ($parent = null, $scriptVariables = array()) {
-
-		$this->setParent($parent);
-		$this->setScriptVariables($scriptVariables);
-
-		return $this;
+	final public function __construct ($parent = null) {
+		return $this->setParent($parent);
 	}
 
 	/**
@@ -107,6 +103,25 @@ class Unitest {
 		}
 		return $this;
 	}
+
+	/**
+	* Add a script variable
+	*/
+	final public function addScriptVariable ($name, $value) {
+
+		if (is_string($name)) {
+
+			// Validate variable name
+			$name = str_replace('-', '', preg_replace('/\s+/', '', $name));
+			if (!empty($name)) {
+				$this->propertyScriptVariables[$name] = $value;
+			}
+		}
+
+		return $this;
+	}
+
+
 
 	/**
 	* Run tests, some or all
@@ -316,25 +331,6 @@ class Unitest {
 			$this->propertyParent = $parentCase;
 
 		}
-		return $this;
-	}
-
-	/**
-	* Script variables
-	*
-	* Each will have to have a valid variable name as key
-	*/
-	private function setScriptVariables ($scriptVariables = array()) {
-		$results = array();
-
-		foreach ($scriptVariables as $key => $value) {
-			if (is_string($key)) {
-				$results[preg_replace('/\s+/', '', $key)] = $value;
-			}
-		}
-
-		$this->propertyScriptVariables = $results;
-
 		return $this;
 	}
 

@@ -106,6 +106,7 @@ include_once 'baseline.php';
 
 			<?php
 				$u = new Unitest();
+				$u->addScriptVariable('foo', 'bar');
 				$u->scrape('spec');
 			?>
 
@@ -137,8 +138,23 @@ include_once 'baseline.php';
 
 			<pre><code>include_once 'Unitest.php';
 $suite = new Unitest();
-$suite->scrape('tests/');
+$suite->scrape('my-tests/');
 $results = $suite->run();</code></pre>
+
+		</div>
+
+
+
+		<h1>Development</h1>
+
+		<div class="canvas">
+
+			<h2>To do</h2>
+
+			<ul>
+				<li><code>ReflectionClass</code>-based solution to detect test method's input variable names</li>
+				<li>Fail if script variable is missing</li>
+			</ul>
 
 		</div>
 
@@ -216,34 +232,6 @@ $results = $suite->run();</code></pre>
 		</div>
 
 
-
-		<h1>Development</h1>
-
-		<div class="canvas">
-
-			<h2>To do</h2>
-
-			<ul>
-				<li><code>ReflectionClass</code>-based solution to detect test method's input variable names</li>
-				<li>Fail if script variable is missing</li>
-				<li>Actually construct test case objects
-					<ol>
-						<li>Scrape for files</li>
-						<li>Find out which classes will be available</li>
-						<li>Include file</li>
-						<li>Instantiate custom case</li>
-						<li><a href="http://stackoverflow.com/questions/928928/determining-what-classes-are-defined-in-a-php-class-file">Find out which classes are defined in a file - without including the file</a></li>
-						<li>Add to a parent case</li>
-					</ol>
-				</li>
-			</ul>
-
-			<h2>Read up</h2>
-
-			<ul>
-			</ul>
-
-		</div>
 
 		<script type="application/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/prism/0.0.1/prism.min.js"></script>
 
