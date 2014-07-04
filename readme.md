@@ -8,8 +8,6 @@ Unitest is a one-class miniature unit testing framework for PHP. It's a great wa
 - [Bitbucket repo](https://bitbucket.org/Eiskis/unitest/)
 - [Download](https://bitbucket.org/Eiskis/unitest/src/master/Unitest.php)
 
-
-
 ## Kickstart
 
 	// Init
@@ -27,92 +25,104 @@ Unitest is a one-class miniature unit testing framework for PHP. It's a great wa
 
 
 
-## API
+# API
 
-### Construct
+## Construct
 
 Parent case and script variables can be passed.
 
 	$case = new Unitest($parent = null)
 
-### Properties
+## Getters
 
-#### children
+#### children ()
 
-Child cases.
+Child suites
 
-	$case->children()
+#### parameters ()
 
-#### parent
+Script variables available for test methods
 
-Parent case.
+#### ownTests ()
 
-	$case->parent()
+All test methods of this suite
 
-#### parameters
+#### parent ()
 
-Script variables that will be passed to test methods that ask for them.
+Parent suite
 
-	$case->parameters()
+#### prefix ()
 
-### Dynamic getters
-
-#### ownTests
-
-All test methods.
-
-	$case->ownTests()
+Test method prefix
 
 
 
-### Managing cases
+## Public setters
 
-#### scrape
+#### setChild ()
 
-Find PHP files with classes under <code>$directory</code>. Multiple paths can be passed.
+Add a suite as a child of this suite
 
-	$case->scrape($directory)
+#### setParameter ($name, $value)
 
-#### addChild
+Add a parameter that can be passed to functions
 
-Add a valid child test case as a child.
+#### setParent ($parentCase, $parentKnows = false)
 
-	$case->addChild($case)
-
-
-
-### Running tests
-
-#### runTest
-
-Run an individual test method.
-
-	$case->runTest($method)
-
-#### runOwnTests
-
-Run all own tests.
-
-	$case->runOwnTests()
-
-#### runChildrensOwnTests
-
-Run tests of all children.
-
-	$case->runChildrensOwnTests()
+Parent
 
 
 
-### Assertions
+## Running tests
 
-#### assert
+#### run ()
 
-Truey.
+Run tests, some or all
 
-	$case->assert()
+#### runTest ($method)
 
-#### assertEquals
+Run an individual test method
 
-Equality.
+#### scrape ()
 
-	$case->assertEquals()
+Find tests in locations
+
+
+
+## Assessing a test result
+
+#### assess ($value)
+
+#### failed ($value)
+
+#### passed ($value)
+
+#### skipped ($value)
+
+
+
+## Reports
+
+#### asNumbers ($report)
+
+#### byStatus ($report, $key = '')
+
+
+
+## Assertions
+
+#### should ()
+
+Truey
+
+#### shouldBeEqual ()
+
+Equality
+
+#### shouldBeOfClass ($className)
+
+Should be of a specific class. Fails if passed non-objects or no objects.
+
+#### shouldExtendClass ($className)
+
+Should be of any class that extends a specific class. Fails if passed non-objects or no objects.
