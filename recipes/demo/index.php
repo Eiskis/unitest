@@ -5,10 +5,18 @@ ini_set('error_log', 'errors.log');
 mb_internal_encoding('UTF-8');
 date_default_timezone_set('UTC');
 
-include_once '../release/Unitest.php';
+include_once '../../Unitest.php';
 include_once 'baseline.php';
-include_once 'helpers.php';
 
+?>
+
+<?php
+	$u = new Unitest();
+	$u->scrape('../../spec/');
+	$u->setParameter('foo', 1);
+	$u->setParameter('bar', 2);
+	$u->setParameter('string', 'Some string value');
+	$results = $u->run();
 ?>
 
 <!DOCTYPE html>
@@ -20,8 +28,8 @@ include_once 'helpers.php';
 
 		<title>Unitest</title>
 
-		<meta name="application-name" content="'.htmlspecialchars($page->siteName()).'">
-		<meta property="og:site_name" content="'.htmlspecialchars($page->siteName()).'">
+		<meta name="application-name" content="Unitest">
+		<meta property="og:site_name" content="Unitest">
 
 		<meta name="description" content="A one-class miniature unit testing framework for PHP">
 		<meta property="og:description" content="A one-class miniature unit testing framework for PHP">
@@ -50,15 +58,6 @@ include_once 'helpers.php';
 
 	<body class="language-php">
 
-		<?php
-			$u = new Unitest();
-			$u->scrape('spec');
-			$u->setParameter('foo', 1);
-			$u->setParameter('bar', 2);
-			$u->setParameter('string', 'Some string value');
-			$results = $u->run();
-		?>
-
 
 
 		<h1>Unitest demo</h1>
@@ -83,30 +82,6 @@ $u->setParameter('string', 'Some string value');</code></pre>
 
 
 
-		<h1>Get results</h1>
-
-		<div class="canvas">
-
-			<p>This is what <code>$u->run()</code> returns:</p>
-
-			<pre><code><?php echo dump($results); ?></code></pre>
-
-		</div>
-
-
-
-		<h1>Showing results as JSON</h1>
-
-		<div class="canvas">
-
-			<p>Convert into JSON with <code>$u->asJson($results)</code> (formatted for clarity here only):</p>
-
-			<pre class="language-javascript"><code><?php echo prettyPrintJson($u->asJson($results)); ?></code></pre>
-
-		</div>
-
-
-
 		<h1>Sort results</h1>
 
 		<div class="canvas">
@@ -126,6 +101,18 @@ $u->setParameter('string', 'Some string value');</code></pre>
 			<p>Get statistics (number of passed objects etc.) <code>$u->asNumbers($results)</code>:</p>
 
 			<pre><code><?php echo dump($u->asNumbers($results)); ?></code></pre>
+
+		</div>
+
+
+
+		<h1>Get results</h1>
+
+		<div class="canvas">
+
+			<p>This is what <code>$u->run()</code> returns:</p>
+
+			<pre><code><?php echo dump($results); ?></code></pre>
 
 		</div>
 

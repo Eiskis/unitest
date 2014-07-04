@@ -284,10 +284,6 @@ class Unitest {
 
 	// Reports
 
-	final public function asJson ($report) {
-		return json_encode($report);
-	}
-
 	final public function asNumbers ($report) {
 		$results = array();
 		foreach ($this->byStatus($report) as $key => $values) {
@@ -314,14 +310,16 @@ class Unitest {
 
 			// Merge child suite results
 			foreach ($report['children'] as $name => $childResults) {
-				$results = array_merge($results, $this->byStatus($childResults, $name.'/'));
+				$new = $this->byStatus($childResults, $name.'/');
+				foreach ($results as $key => $existing) {
+					$results[$key] = array_merge($results[$key], $new[$key]);
+				}
 			}
 
 		}
 
 		return $results;
 	}
-
 
 
 
