@@ -14,8 +14,8 @@ class Unitest {
 	public function dump () {
 
 		$results = array(
-			'class' => get_class($this),
-			'parent' => get_class($this->parent()),
+			'class' => ''.$this,
+			'parent' => $this->parent() ? ''.$this->parent() : null,
 			'ownTests' => $this->ownTests(),
 			'scriptVariables' => $this->scriptVariables(),
 			'children' => array(),
@@ -35,8 +35,6 @@ class Unitest {
 	/**
 	* Properties
 	*/
-	private $propertyTestPrefix      = 'test';
-
 	private $propertyParent          = null;
 	private $propertyChildren        = array();
 	private $propertyScriptVariables = array();
@@ -79,12 +77,12 @@ class Unitest {
 	* Script variables
 	*/
 	final public function scriptVariables () {
-		$scriptVariables = array();
+		$results = array();
 		if ($this->parent()) {
-			$scriptVariables = array_merge($scriptVariables, $scriptVariables);
+			$results = array_merge($results, $this->parent()->scriptVariables());
 		}
-		$scriptVariables = array_merge($scriptVariables, $this->propertyScriptVariables);	
-		return $scriptVariables;
+		$results = array_merge($results, $this->propertyScriptVariables);	
+		return $results;
 	}
 
 
@@ -182,11 +180,12 @@ class Unitest {
 	* All test methods of this suite
 	*/
 	final public function ownTests () {
+		$prefix = 'test';
 		$tests = array();
 		$all = get_class_methods($this);
 
 		foreach ($all as $methodName) {
-			if (substr($methodName, 0, strlen($this->propertyTestPrefix)) === $this->propertyTestPrefix) {
+			if (substr($methodName, 0, strlen($prefix)) === $prefix) {
 				$tests[] = $methodName;
 			}
 		}
@@ -230,16 +229,14 @@ class Unitest {
 
 		if (is_dir($path)) {
 
-			// Create parent suite for the directory
-			$directorySuite = new Unitest($parent);
-
 			// PHP files
 			foreach ($this->globFiles($path, array('php')) as $file) {
-				$this->scrapeFile($file, $directorySuite);
+				$this->scrapeFile($file, $parent);
 			}
 
 			// Subdirectories
 			foreach ($this->globDir($path) as $dir) {
+				$directorySuite = new Unitest($parent);
 				call_user_func(array($this, 'scrapeDirectory'), $dir, $directorySuite);
 			}
 
@@ -265,11 +262,11 @@ class Unitest {
 
 		if (is_file($path)) {
 
-			// These Unitest classes will be defined
-			$classes = $this->getValidClassesDefinedInScript(file_get_contents($path));
-
 			// We include them here
 			include_once $path;
+
+			// These Unitest classes will be defined
+			$classes = $this->getValidClassesDefinedInScript(file_get_contents($path));
 
 			// Instantiate new classes as child suites under this
 			foreach ($classes as $class) {

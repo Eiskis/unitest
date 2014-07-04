@@ -6,7 +6,6 @@ mb_internal_encoding('UTF-8');
 date_default_timezone_set('UTC');
 
 include_once 'release/Unitest.php';
-include_once 'spec/arithmetics.php';
 include_once 'baseline.php';
 
 ?>
@@ -106,7 +105,9 @@ include_once 'baseline.php';
 
 			<?php
 				$u = new Unitest();
-				$u->addScriptVariable('foo', 'bar');
+				$u->addScriptVariable('foo', 1);
+				$u->addScriptVariable('bar', 2);
+				$u->addScriptVariable('string', 'Some string value');
 				$u->scrape('spec');
 			?>
 
@@ -138,6 +139,9 @@ include_once 'baseline.php';
 
 			<pre><code>include_once 'Unitest.php';
 $suite = new Unitest();
+
+include_once 'YourClass.php';
+
 $suite->scrape('my-tests/');
 $results = $suite->run();</code></pre>
 
