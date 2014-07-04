@@ -20,8 +20,7 @@ include_once 'baseline.php';
 			'ownTests' => $u->ownTests(),
 			'scriptVariables' => $u->scriptVariables(),
 		),
-		'scrape' => $u->scrape('spec'),
-		'available cases' => $u->availableCases(),
+		'available suites' => $u->availableSuites(),
 	);
 ?>
 
@@ -189,9 +188,9 @@ $results = $suite->run();</code></pre>
 
 			<h2>Managing cases</h2>
 
-			<h4>availableCases</h4>
+			<h4>availableSuites</h4>
 			<p>Find declared classes that extend Unitest.</p>
-			<pre><code>$case->availableCases()</code></pre>
+			<pre><code>$case->availableSuites()</code></pre>
 
 			<h4>scrape</h4>
 			<p>Find PHP files with classes under <code>$directory</code>. Multiple paths can be passed.</p>
@@ -200,10 +199,6 @@ $results = $suite->run();</code></pre>
 			<h4>addChild</h4>
 			<p>Add a valid child test case as a child</p>
 			<pre><code>$case->addChild($case)</code></pre>
-
-			<h4>nest</h4>
-			<p>Generate a new child case. <code>$case</code> will be set as parent, and scriptVariables are passed on.</p>
-			<pre><code>$case->nest()</code></pre>
 
 
 
@@ -246,6 +241,7 @@ $results = $suite->run();</code></pre>
 			<ul>
 				<li><code>ReflectionClass</code>-based solution to detect test method's input variable names</li>
 				<li>Fail if script variable is missing</li>
+				<li>Script variables should bubble</li>
 				<li>Actually construct test case objects
 					<ol>
 						<li>Scrape for files</li>
