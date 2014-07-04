@@ -105,9 +105,9 @@ include_once 'baseline.php';
 
 			<?php
 				$u = new Unitest();
-				$u->passArgument('foo', 1);
-				$u->passArgument('bar', 2);
-				$u->passArgument('string', 'Some string value');
+				$u->passParameter('foo', 1);
+				$u->passParameter('bar', 2);
+				$u->passParameter('string', 'Some string value');
 				$u->scrape('spec');
 			?>
 
@@ -183,9 +183,9 @@ $results = $suite->run();</code></pre>
 			<p>Parent case</p>
 			<pre><code>$case->parent()</code></pre>
 
-			<h4>arguments</h4>
-			<p>Script variables</p>
-			<pre><code>$case->arguments()</code></pre>
+			<h4>parameters</h4>
+			<p>Script variables that will be passed to test methods that ask for them.</p>
+			<pre><code>$case->parameters()</code></pre>
 
 			<h2>Dynamic getters</h2>
 

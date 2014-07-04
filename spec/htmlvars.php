@@ -19,6 +19,10 @@ class UnitestVars extends Unitest {
 		return $this->assert(isset($string) and is_string($string));
 	}
 
+	public function testUnavailableVar ($someKey) {
+		return $this->assert(isset($someKey));
+	}
+
 }
 
 ?>

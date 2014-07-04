@@ -13,15 +13,6 @@ class UnitestArithmetics extends Unitest {
 		return $this->assert(1 + 1=== 2);
 	}
 
-	public function testThatFails () {
-		return $this->assert(1 + 2 === 2);
-	}
-
-	public function testThatFailsWithException () {
-		$foo = array(1, 2);
-		return $this->assert(strlen($foo) === 2);
-	}
-
 }
 
 ?>

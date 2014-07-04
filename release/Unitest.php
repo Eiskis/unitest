@@ -17,7 +17,7 @@ class Unitest {
 			'class' => ''.$this,
 			'parent' => $this->parent() ? ''.$this->parent() : null,
 			'ownTests' => $this->ownTests(),
-			'arguments' => $this->arguments(),
+			'parameters' => $this->parameters(),
 			'children' => array(),
 		);
 
@@ -35,9 +35,9 @@ class Unitest {
 	/**
 	* Properties
 	*/
-	private $propertyParent          = null;
-	private $propertyChildren        = array();
-	private $propertyArguments = array();
+	private $propertyParent     = null;
+	private $propertyChildren   = array();
+	private $propertyParameters = array();
 
 	/**
 	* Initialization
@@ -76,12 +76,12 @@ class Unitest {
 	/**
 	* Script variables
 	*/
-	final public function arguments () {
+	final public function parameters () {
 		$results = array();
 		if ($this->parent()) {
-			$results = array_merge($results, $this->parent()->arguments());
+			$results = array_merge($results, $this->parent()->parameters());
 		}
-		$results = array_merge($results, $this->propertyArguments);	
+		$results = array_merge($results, $this->propertyParameters);	
 		return $results;
 	}
 
@@ -103,16 +103,16 @@ class Unitest {
 	}
 
 	/**
-	* Add a script variable
+	* Add a parameter that can be passed to functions
 	*/
-	final public function passArgument ($name, $value) {
+	final public function passParameter ($name, $value) {
 
 		if (is_string($name)) {
 
 			// Validate variable name
 			$name = str_replace('-', '', preg_replace('/\s+/', '', $name));
 			if (!empty($name)) {
-				$this->propertyArguments[$name] = $value;
+				$this->propertyParameters[$name] = $value;
 			}
 		}
 
@@ -166,7 +166,27 @@ class Unitest {
 		if (method_exists($this, $method)) {
 			set_error_handler('UnitestHandleError');
 			try {
-				$result = call_user_func_array(array($this, $method), $this->arguments()) ? true : false;
+
+				// Find parameters to pass to test method
+				$parameters = array();
+				$availableParameters = $this->parameters();
+				foreach ($this->getMethodParameterNames($method) as $parameterName) {
+
+					// Use value available in passable parameters
+					if (array_key_exists($parameterName, $availableParameters)) {
+						$parameters[] = $availableParameters[$parameterName];
+
+					// Test method expects a parameter that's not available
+					// } else {
+						// throw new Exception('The test method "'.$method.'" expects the parameter "'.$parameterName.'" but it is not available.');
+						
+					}
+
+				}
+
+				// Call test method
+				$result = call_user_func_array(array($this, $method), $parameters) ? true : false;
+
 			} catch (Exception $e) {
 				$result = $e->getMessage().' ('.$e->getFile().' line '.$e->getLine().')';
 			}
@@ -354,6 +374,18 @@ class Unitest {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	* Find out which variables a method is expecing
+	*/
+	private function getMethodParameterNames ($method) {
+		$results = array();
+		$ref = new ReflectionMethod($this, $method);
+		foreach ($ref->getParameters() as $parameter) {
+			$results[] = $parameter->name;
+		}
+		return $results;
 	}
 
 	/**
