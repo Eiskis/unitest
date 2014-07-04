@@ -21,6 +21,7 @@ body {
 	box-shadow: 0 0.4em 2em #ddd;
 }
 h1 {
+	margin-top: 6%;
 	text-transform: uppercase;
 	font-weight: 900;
 	color: #ccc;

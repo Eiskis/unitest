@@ -67,14 +67,15 @@ include_once 'helpers.php';
 $u->scrape('spec');
 $u->setParameter('foo', 1);
 $u->setParameter('bar', 2);
-$u->setParameter('string', 'Some string value');
-$results = $u->run();</code></pre>
+$u->setParameter('string', 'Some string value');</code></pre>
 
 
 
-		<div class="canvas hidden">
+		<h1>Dump</h1>
 
-			<h2><code>$u->dump()</code></h2>
+		<div class="canvas">
+
+			<p><code>$u->dump()</code></p>
 
 			<pre><code><?php echo dump($u->dump()); ?></code></pre>
 
@@ -82,11 +83,11 @@ $results = $u->run();</code></pre>
 
 
 
-		<h2>Get results</h2>
+		<h1>Get results</h1>
 
 		<div class="canvas">
 
-			<p>This is what <code>$results</code>, returned by <code>$u->run()</code>, looks like:</p>
+			<p>This is what <code>$u->run()</code> returns:</p>
 
 			<pre><code><?php echo dump($results); ?></code></pre>
 
@@ -94,7 +95,7 @@ $results = $u->run();</code></pre>
 
 
 
-		<h2>Showing results as JSON</h2>
+		<h1>Showing results as JSON</h1>
 
 		<div class="canvas">
 
@@ -106,7 +107,7 @@ $results = $u->run();</code></pre>
 
 
 
-		<h2>Sort results</h2>
+		<h1>Sort results</h1>
 
 		<div class="canvas">
 
@@ -118,7 +119,7 @@ $results = $u->run();</code></pre>
 
 
 
-		<h2>Tally results</h2>
+		<h1>Tally results</h1>
 
 		<div class="canvas">
 

@@ -288,6 +288,14 @@ class Unitest {
 		return json_encode($report);
 	}
 
+	final public function asNumbers ($report) {
+		$results = array();
+		foreach ($this->byStatus($report) as $key => $values) {
+			$results[$key] = count($values);
+		}
+		return $results;
+	}
+
 	final public function byStatus ($report, $key = '') {
 
 		$results = array(
@@ -311,14 +319,6 @@ class Unitest {
 
 		}
 
-		return $results;
-	}
-
-	final public function asNumbers ($report) {
-		$results = array();
-		foreach ($this->byStatus($report) as $key => $values) {
-			$results[$key] = count($values);
-		}
 		return $results;
 	}
 
