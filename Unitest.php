@@ -286,9 +286,12 @@ class Unitest {
 
 	final public function asNumbers ($report) {
 		$results = array();
+		$total = 0;
 		foreach ($this->byStatus($report) as $key => $values) {
 			$results[$key] = count($values);
+			$total += $results[$key];
 		}
+		$results = array_merge(array('total' => $total), $results);
 		return $results;
 	}
 

@@ -1,4 +1,13 @@
 
+/*Tools*/
+.hidden {
+	display: none;
+}
+.clear {
+	clear: both;
+}
+
+/*Layout*/
 body {
 	padding: 2% 6% 12% 6%;
 	max-width: 50em;
@@ -11,9 +20,6 @@ body {
 	font-weight: 200;
 	line-height: 1.6;
 	font-size: 0.9em;
-}
-.hidden {
-	display: none;
 }
 .canvas {
 	margin-bottom: 6%;
@@ -65,7 +71,7 @@ a:hover {
 	color: hsl(200, 100%, 30%);
 }
 
-/*Tables*/
+/*Results*/
 dt {
 	font-weight: bold;
 	margin-top: 1.34em;
@@ -75,16 +81,31 @@ dd {
 	margin-left: 0;
 }
 
+/*Stats*/
+.stats {
+	list-style-type: none;
+	padding-left: 0;
+}
+.stats li {
+	float: left;
+	clear: none;
+	margin-right: 2em;
+}
+
 /*Coloring*/
 .failed.canvas {
 	border-color: #d6203e;
 }
-	.failed dt {
+	.stats .failed, .failed dt {
 		color: #d6203e;
 	}
 .passed.canvas {
 	border-color: #6aab35;
 }
-	.passed dt {
+	.stats .passed, .passed dt {
 		color: #6aab35;
 	}
+.failed dt em, .passed dt em {
+	font-style: inherit;
+	color: #aaafb3;
+}

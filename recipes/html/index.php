@@ -50,8 +50,13 @@ include_once 'baseline.php';
 		<?php $report = $u->run(); ?>
 
 		<ul class="stats">
-			<li></li>
+			<?php
+				foreach ($u->asNumbers($report) as $key => $value) {
+					echo '<li class="'.$key.'">'.$value.' '.$key.'</li>';
+				}
+			?>
 		</ul>
+		<div class="clear"></div>
 
 		<?php
 			foreach ($u->byStatus($report) as $status => $results) {
@@ -59,7 +64,7 @@ include_once 'baseline.php';
 				if (count($results)) {
 					echo '<dl class="canvas '.$status.'">';
 					foreach ($results as $pointer => $result) {
-						echo '<dt>'.$pointer.'</dt>';
+						echo '<dt>'.str_replace('/', '<em> &#8594; </em>', $pointer).'()</dt>';
 						if ($status === 'failed') {
 							echo '<dd>'.(is_string($result) ? $result : dump($result)).'</dd>';
 						}
