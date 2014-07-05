@@ -86,7 +86,7 @@ $u->inject('string', 'Some string value');</code></pre>
 
 		<div class="canvas">
 
-			<p>This is what <code>$u->run()</code> returns:</p>
+			<p>This is the report that <code>$u->run()</code> returns:</p>
 
 			<pre><code><?php echo dump($results); ?></code></pre>
 
@@ -98,9 +98,9 @@ $u->inject('string', 'Some string value');</code></pre>
 
 		<div class="canvas">
 
-			<p>Get all test results by status with <code>$u->byStatus($results)</code>:</p>
+			<p>Get all test results by status with <code>$u->digest($results)</code>:</p>
 
-			<pre><code><?php echo dump($u->byStatus($results)); ?></code></pre>
+			<pre><code><?php echo dump($u->digest($results)); ?></code></pre>
 
 		</div>
 
@@ -110,9 +110,9 @@ $u->inject('string', 'Some string value');</code></pre>
 
 		<div class="canvas">
 
-			<p>Get statistics (number of passed objects etc.) <code>$u->asNumbers($results)</code>:</p>
+			<p>Get statistics (number of passed objects etc.) <code>$u->counts($results)</code>:</p>
 
-			<pre><code><?php echo dump($u->asNumbers($results)); ?></code></pre>
+			<pre><code><?php echo dump($u->counts($results)); ?></code></pre>
 
 		</div>
 

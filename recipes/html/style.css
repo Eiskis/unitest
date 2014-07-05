@@ -100,25 +100,24 @@ dt em, dd em {
 	border-left-style: solid;
 	border-left-width: 0.2em;
 }
-.failed.canvas {
-	border-color: #d6203e;
+
+.failed {
+	color: #d6203e;
 }
-	.stats .failed, .failed dt {
-		color: #d6203e;
-	}
-	dt.failed em, dd.failed em {
+	.failed em {
 		border-color: #d6203e;
 	}
-.passed.canvas {
-	border-color: #6aab35;
+
+.passed {
+	color: #6aab35;
 }
-	.stats .passed, .passed dt {
-		color: #6aab35;
-	}
-	dt.passed em, dd.passed em {
+	.passed em {
 		border-color: #6aab35;
 	}
 
-.total .failed {
-	color: #d6203e;
+.skipped {
+	color: #ccc;
 }
+	.skipped em {
+		border-color: #ccc;
+	}

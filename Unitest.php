@@ -28,7 +28,6 @@ class Unitest {
 	* Properties
 	*/
 	private $propertyChildren   = array();
-	private $propertyId     	= '';
 	private $propertyInjections = array();
 	private $propertyParent     = null;
 	private $propertyPrefix     = 'test';
@@ -74,16 +73,6 @@ class Unitest {
 
 		// Get
 		return $this->propertyChildren;
-	}
-
-	/**
-	* Optional ID
-	*/
-	final public function id ($id = null) {
-		if (isset($id) and is_string($id)) {
-			return $this->setId($id);
-		}
-		return $this->propertyId;
 	}
 
 	/**
@@ -161,7 +150,6 @@ class Unitest {
 
 		$results = array(
 			'class'    => get_class($this),
-			'id'       => $this->id(),
 			'tests'    => array(),
 			'children' => array(),
 		);
@@ -213,17 +201,24 @@ class Unitest {
 				}
 
 				// Call test method
-				$result = call_user_func_array(array($this, $method), $injections) ? true : false;
+				$result = call_user_func_array(array($this, $method), $injections);
 
 			// Fail test if there are errors/exceptions
 			} catch (Exception $e) {
 				$result = $this->fail($e->getMessage().' ('.$e->getFile().' line '.$e->getLine().')');
 			}
+
 			restore_error_handler();
 
 		}
 
-		return $result;
+		$status = $this->assess($result);
+		return array(
+			'class' => ''.$this,
+			'name' => $method,
+			'status' => $status,
+			'message' => $result,
+		);
 	}
 
 	/**
@@ -249,70 +244,46 @@ class Unitest {
 
 
 
-	// Assessing a test result
-
-	final public function assess ($value) {
-		if ($this->passed($value)) {
-			return 'passed';
-		} else if ($this->skipped($value)) {
-			return 'skipped';
-		}
-		return 'failed';
-	}
-
-	final public function failed ($value) {
-		return !($this->passed($value) or $this->skipped($value));
-	}
-
-	final public function passed ($value) {
-		return $value === true;
-	}
-
-	final public function skipped ($value) {
-		return $value === null;
-	}
-
-
-
 	// Reports
 
-	final public function asNumbers ($report) {
-		$results = array();
-		$total = 0;
-		foreach ($this->byStatus($report) as $key => $values) {
-			$results[$key] = count($values);
-			$total += $results[$key];
+	final public function counts ($report) {
+		$counts = array(
+			'total' => 0,
+			'failed' => 0,
+			'passed' => 0,
+			'skipped' => 0,
+		);
+
+		foreach ($this->digest($report) as $suite) {
+			$counts['total'] += count($suite);
+			foreach ($suite as $test) {
+				$counts[$test['status']]++;
+			}
 		}
-		$results = array_merge(array('total' => $total), $results);
-		return $results;
+
+		return $counts;
 	}
 
-	final public function byStatus ($report, $key = '') {
-
-		$results = array(
-			'total' => array(),
-			'failed' => array(),
-			'passed' => array(),
-			'skipped' => array(),
-		);
+	final public function digest ($report) {
+		$results = array();
 
 		// Quickly validate incoming report
 		if (is_array($report) and isset($report['children']) and isset($report['tests'])) {
 
 			// Sort test results by status
-			foreach ($report['tests'] as $name => $testResult) {
-				$results['total'][$key][$name] = $testResult;
-				$results[$this->assess($testResult)][$key][$name] = $testResult;
+			foreach ($report['tests'] as $testResult) {
+				$results[$testResult['class']][] = $testResult;
 			}
 
 			// Merge child suite results
 			foreach ($report['children'] as $childResults) {
-				$new = $this->byStatus($childResults, $childResults['class'].($childResults['id'] ? ' ('.$childResults['id'].')' : ''));
-				foreach ($results as $key => $existing) {
-					$results[$key] = array_merge($results[$key], $new[$key]);
-				}
+				$new = $this->digest($childResults);
+				$results = array_merge($results, $new);
 			}
 
+		// Return report as it was given
+		} else {
+			$results = $report;
 		}
 
 		return $results;
@@ -419,6 +390,31 @@ class Unitest {
 
 
 
+	// Assessing a test result
+
+	final protected function assess ($value) {
+		if ($this->passes($value)) {
+			return 'passed';
+		} else if ($this->skips($value)) {
+			return 'skipped';
+		}
+		return 'failed';
+	}
+
+	final protected function fails ($value) {
+		return !($this->passes($value) or $this->skips($value));
+	}
+
+	final protected function passes ($value) {
+		return $value === true;
+	}
+
+	final protected function skips ($value) {
+		return $value === null;
+	}
+
+
+
 	// Setters
 
 	/**
@@ -436,17 +432,6 @@ class Unitest {
 				$this->propertyChildren[] = $argument;
 
 			}
-		}
-		return $this;
-	}
-
-	/**
-	* Add an optional ID for this suite
-	*/
-	private function setId ($id) {
-		if (isset($id) and is_string($id)) {
-			$id = $this->trim($id);
-			$this->propertyId = $id;
 		}
 		return $this;
 	}
@@ -711,7 +696,6 @@ class Unitest {
 			// Instantiate new classes as child suites under this
 			foreach ($classes as $class) {
 				$suite = new $class($parent);
-				$suite->id($path);
 			}
 
 		}

@@ -4,10 +4,30 @@ class UnitestAssessments extends Unitest {
 
 
 
+	// Skips
+
+	function testNullSkips () {
+		return $this->should($this->skips(null));
+	}
+
+	function testTrueDoesNotSkip () {
+		return $this->shouldNot($this->skips(true));
+	}
+
+	function testFalseDoesNotSkip () {
+		return $this->shouldNot($this->skips(false));
+	}
+
+	function testStringDoesNotSkip () {
+		return $this->shouldNot($this->skips('foo bar'));
+	}
+
+
+
 	// Passes
 
 	function testTruePasses () {
-		return $this->should($this->passed(true));
+		return $this->should($this->passes(true));
 	}
 
 
@@ -15,19 +35,19 @@ class UnitestAssessments extends Unitest {
 	// Not passes
 
 	function testArrayDoesNotPass () {
-		return $this->shouldNot($this->passed(array(1, 2, 3)));
+		return $this->shouldNot($this->passes(array(1, 2, 3)));
 	}
 
 	function testEmptyArrayDoesNotPass () {
-		return $this->shouldNot($this->passed(array()));
+		return $this->shouldNot($this->passes(array()));
 	}
 
 	function testStringDoesNotPass () {
-		return $this->shouldNot($this->passed('Foo bar'));
+		return $this->shouldNot($this->passes('Foo bar'));
 	}
 
 	function testNullDoesNotPass () {
-		return $this->shouldNot($this->passed(null));
+		return $this->shouldNot($this->passes(null));
 	}
 
 
@@ -35,19 +55,19 @@ class UnitestAssessments extends Unitest {
 	// Fails
 
 	function testFalseFails () {
-		return $this->should($this->failed(false));
+		return $this->should($this->fails(false));
 	}
 
 	function testStringFails () {
-		return $this->should($this->failed('Foo bar'));
+		return $this->should($this->fails('Foo bar'));
 	}
 
 	function testArrayFails () {
-		return $this->should($this->failed(array(1, 2, 3)));
+		return $this->should($this->fails(array(1, 2, 3)));
 	}
 
 	function testEmptyArrayFails () {
-		return $this->should($this->failed(array()));
+		return $this->should($this->fails(array()));
 	}
 
 
@@ -55,11 +75,11 @@ class UnitestAssessments extends Unitest {
 	// Not fails
 
 	function testTrueDoesNotFail () {
-		return $this->shouldNot($this->failed(true));
+		return $this->shouldNot($this->fails(true));
 	}
 
 	function testNullDoesNotFail () {
-		return $this->shouldNot($this->failed(null));
+		return $this->shouldNot($this->fails(null));
 	}
 
 }

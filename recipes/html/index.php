@@ -50,7 +50,13 @@ foreach ($injections as $key => $value) {
 
 	<body>
 
-		<?php $report = $u->run(); $stats = $u->asNumbers($report); ?>
+		<?php
+			$report = $u->run();
+			$stats = $u->counts($report);
+			$digested = $u->digest($report);
+		?>
+
+		<h1><?php count($digested) ?> suites</h1>
 
 		<ul class="stats">
 			<?php
@@ -62,26 +68,30 @@ foreach ($injections as $key => $value) {
 		<div class="clear"></div>
 
 		<?php
-			foreach ($u->byStatus($report) as $group => $suites) {
-				echo '<h1>'.count($suites).'/'.$stats['total'].' '.$group.'</h1>';
-				if (count($suites)) {
-					echo '<dl class="canvas '.$group.'">';
-					foreach ($suites as $name => $suite) {
-						echo '<dt>'.$name.'</dt>';
-						foreach ($suite as $test => $testResult) {
-							$status = $u->assess($testResult);
-							echo '<dd class="'.$status.'">';
-							if ($status === 'failed') {
-								echo '<strong>'.$test.'</strong><em>'.(is_string($testResult) ? $testResult : var_export($testResult, true)).'</em>';
-							} else {
-								echo $test;
-							}
-							echo '</dd>';
-						}
+			echo '<dl class="canvas">';
+
+			// Each suite
+			foreach ($digested as $class => $tests) {
+				echo '<dt>'.$class.'</dt>';
+				foreach ($tests as $test) {
+
+					// Each test
+					echo '<dd class="'.$test['status'].'">';
+
+					// Fail
+					if ($test['status'] === 'failed') {
+						echo '<strong>'.$test['name'].'</strong><em>'.(is_string($test['message']) ? $test['message'] : var_export($test['message'], true)).'</em>';
+
+					// Skip or pass
+					} else {
+						echo $test['name'];
 					}
-					echo '</dl>';
+					echo '</dd>';
+
 				}
+
 			}
+			echo '</dl>';
 		?>
 
 	</body>
