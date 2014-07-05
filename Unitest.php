@@ -342,6 +342,14 @@ class Unitest {
 	}
 
 	/**
+	* Falsey
+	*/
+	final public function shouldNot () {
+		$arguments = func_get_args();
+		return !call_user_func_array(array($this, 'should'), $arguments);
+	}
+
+	/**
 	* Equality
 	*/
 	final public function shouldBeEqual () {

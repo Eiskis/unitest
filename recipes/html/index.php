@@ -47,11 +47,11 @@ include_once 'baseline.php';
 
 	<body>
 
-		<?php $report = $u->run(); ?>
+		<?php $report = $u->run(); $stats = $u->asNumbers($report); ?>
 
 		<ul class="stats">
 			<?php
-				foreach ($u->asNumbers($report) as $key => $value) {
+				foreach ($stats as $key => $value) {
 					echo '<li class="'.$key.'">'.$value.' '.$key.'</li>';
 				}
 			?>
@@ -60,7 +60,7 @@ include_once 'baseline.php';
 
 		<?php
 			foreach ($u->byStatus($report) as $status => $results) {
-				echo '<h1>'.count($results).' '.$status.'</h1>';
+				echo '<h1>'.count($results).'/'.$stats['total'].' '.$status.'</h1>';
 				if (count($results)) {
 					echo '<dl class="canvas '.$status.'">';
 					foreach ($results as $pointer => $result) {
