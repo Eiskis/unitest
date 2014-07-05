@@ -54,9 +54,25 @@ class Unitest {
 	// Public getters
 
 	/**
+	* Add child suite
+	*/
+	final public function child () {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'setChild'), $arguments);
+	}
+
+	/**
 	* Child suites
 	*/
 	final public function children () {
+
+		// Set
+		$arguments = func_get_args();
+		if (!empty($arguments)) {
+			return call_user_func_array(array($this, 'child'), $arguments);
+		}
+
+		// Get
 		return $this->propertyChildren;
 	}
 
@@ -71,7 +87,7 @@ class Unitest {
 	}
 
 	/**
-	* Script variables available for test methods
+	* Add script variables
 	*/
 	final public function inject () {
 		$arguments = func_get_args();
@@ -84,9 +100,9 @@ class Unitest {
 	final public function injections () {
 
 		// Set
-		if (func_num_args() > 1) {
-			$arguments = func_get_args();
-			return $this->setInjection($arguments[0], $arguments[1]);
+		$arguments = func_get_args();
+		if (!empty($arguments)) {
+			return call_user_func_array(array($this, 'setInjection'), $arguments);
 		}
 
 		// Get own injections, bubble
@@ -408,16 +424,16 @@ class Unitest {
 	/**
 	* Add a suite as a child of this suite
 	*/
-	private function setChild () {
+	private function setChild ($child) {
 		$arguments = func_get_args();
-		foreach ($arguments as $child) {
-			if ($this->isValidSuite($child)) {
+		foreach ($arguments as $argument) {
+			if ($this->isValidSuite($argument)) {
 
 				// Store reference to this in the child
-				$child->parent($this, true);
+				$argument->parent($this, true);
 
 				// Add to own flock
-				$this->propertyChildren[] = $child;
+				$this->propertyChildren[] = $argument;
 
 			}
 		}
@@ -460,7 +476,7 @@ class Unitest {
 
 			// Parent case adds this to its flock if needed
 			if (!$parentKnows) {
-				$parentCase->setChild($this);
+				$parentCase->child($this);
 			}
 
 			// This stores a reference to its dad
