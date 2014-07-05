@@ -5,18 +5,21 @@ ini_set('error_log', 'errors.log');
 mb_internal_encoding('UTF-8');
 date_default_timezone_set('UTC');
 
-include_once '../../Unitest.php';
-include_once 'baseline.php';
+// Lib
+require_once '../../Unitest.php';
 
-?>
+// Variables
+$specPath = '';
+$injections = array();
+require_once 'conf.php';
 
-<?php
-	$u = new Unitest();
-	$u->scrape('../../spec/');
+// Init
+$u = new Unitest();
+$u->scrape($specPath);
+foreach ($injections as $key => $value) {
+	$u->inject($key, $value);
+}
 
-	$u->setParameter('foo', 1);
-	$u->setParameter('bar', 2);
-	$u->setParameter('string', 'Some string value');
 ?>
 
 <!DOCTYPE html>
@@ -69,7 +72,7 @@ include_once 'baseline.php';
 							$status = $u->assess($testResult);
 							echo '<dd class="'.$status.'">';
 							if ($status === 'failed') {
-								echo '<strong>'.$test.'</strong><em>'.(is_string($testResult) ? $testResult : dump($testResult)).'</em>';
+								echo '<strong>'.$test.'</strong><em>'.(is_string($testResult) ? $testResult : var_export($testResult, true)).'</em>';
 							} else {
 								echo $test;
 							}

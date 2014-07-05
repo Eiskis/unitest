@@ -29,7 +29,7 @@ class Unitest {
 	*/
 	private $propertyChildren   = array();
 	private $propertyId     	= '';
-	private $propertyParameters = array();
+	private $propertyInjections = array();
 	private $propertyParent     = null;
 	private $propertyPrefix     = 'test';
 
@@ -39,7 +39,7 @@ class Unitest {
 	* Parent suite and script variables can be passed
 	*/
 	final public function __construct ($parent = null) {
-		return $this->setParent($parent);
+		return $this->parent($parent);
 	}
 
 	/**
@@ -65,8 +65,7 @@ class Unitest {
 	*/
 	final public function id ($id = null) {
 		if (isset($id) and is_string($id)) {
-			$id = $this->trim($id);
-			$this->propertyId = $id;
+			return $this->setId($id);
 		}
 		return $this->propertyId;
 	}
@@ -74,12 +73,30 @@ class Unitest {
 	/**
 	* Script variables available for test methods
 	*/
-	final public function parameters () {
+	final public function inject () {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'setInjection'), $arguments);
+	}
+
+	/**
+	* Script variables available for test methods
+	*/
+	final public function injections () {
+
+		// Set
+		if (func_num_args() > 1) {
+			$arguments = func_get_args();
+			return $this->setInjection($arguments[0], $arguments[1]);
+		}
+
+		// Get own injections, bubble
 		$results = array();
 		if ($this->parent()) {
-			$results = array_merge($results, $this->parent()->parameters());
+			$results = array_merge($results, $this->parent()->injections());
 		}
-		$results = array_merge($results, $this->propertyParameters);	
+		$results = array_merge($results, $this->propertyInjections);	
+
+
 		return $results;
 	}
 
@@ -102,7 +119,10 @@ class Unitest {
 	/**
 	* Parent suite
 	*/
-	final public function parent () {
+	final public function parent ($parent = null, $parentKnows = false) {
+		if (isset($parent)) {
+			return $this->setParent($parent, $parentKnows);
+		}
 		return $this->propertyParent;
 	}
 
@@ -111,64 +131,6 @@ class Unitest {
 	*/
 	final public function prefix () {
 		return $this->propertyPrefix;
-	}
-
-
-
-	// Public setters
-
-	/**
-	* Add a suite as a child of this suite
-	*/
-	final public function setChild () {
-		$arguments = func_get_args();
-		foreach ($arguments as $child) {
-			if ($this->isValidSuite($child)) {
-
-				// Store reference to this in the child
-				$child->setParent($this, true);
-
-				// Add to own flock
-				$this->propertyChildren[] = $child;
-
-			}
-		}
-		return $this;
-	}
-
-	/**
-	* Add a parameter that can be passed to functions
-	*/
-	final public function setParameter ($name, $value) {
-
-		if (is_string($name)) {
-
-			// Validate variable name
-			$name = str_replace('-', '', $this->trim($name));
-			if (!empty($name)) {
-				$this->propertyParameters[$name] = $value;
-			}
-		}
-
-		return $this;
-	}
-
-	/**
-	* Parent
-	*/
-	final public function setParent ($parentCase, $parentKnows = false) {
-		if ($this->isValidSuite($parentCase)) {
-
-			// Parent case adds this to its flock if needed
-			if (!$parentKnows) {
-				$parentCase->setChild($this);
-			}
-
-			// This stores a reference to its dad
-			$this->propertyParent = $parentCase;
-
-		}
-		return $this;
 	}
 
 
@@ -224,18 +186,18 @@ class Unitest {
 			// Contain errors/exceptions
 			set_error_handler('UnitestHandleError');
 			try {
-				$parameters = array();
-				$availableParameters = $this->parameters();
+				$injections = array();
+				$availableInjections = $this->injections();
 
 				// Find parameters to pass to test method
 				foreach ($this->methodParameterNames($method) as $parameterName) {
-					if (array_key_exists($parameterName, $availableParameters)) {
-						$parameters[] = $availableParameters[$parameterName];
+					if (array_key_exists($parameterName, $availableInjections)) {
+						$injections[] = $availableInjections[$parameterName];
 					}
 				}
 
 				// Call test method
-				$result = call_user_func_array(array($this, $method), $parameters) ? true : false;
+				$result = call_user_func_array(array($this, $method), $injections) ? true : false;
 
 			// Fail test if there are errors/exceptions
 			} catch (Exception $e) {
@@ -441,6 +403,75 @@ class Unitest {
 
 
 
+	// Setters
+
+	/**
+	* Add a suite as a child of this suite
+	*/
+	private function setChild () {
+		$arguments = func_get_args();
+		foreach ($arguments as $child) {
+			if ($this->isValidSuite($child)) {
+
+				// Store reference to this in the child
+				$child->parent($this, true);
+
+				// Add to own flock
+				$this->propertyChildren[] = $child;
+
+			}
+		}
+		return $this;
+	}
+
+	/**
+	* Add an optional ID for this suite
+	*/
+	private function setId ($id) {
+		if (isset($id) and is_string($id)) {
+			$id = $this->trim($id);
+			$this->propertyId = $id;
+		}
+		return $this;
+	}
+
+	/**
+	* Add an injectable value that can be passed to functions as parameter
+	*/
+	private function setInjection ($name, $value) {
+
+		if (is_string($name)) {
+
+			// Validate variable name
+			$name = str_replace('-', '', $this->trim($name));
+			if (!empty($name)) {
+				$this->propertyInjections[$name] = $value;
+			}
+		}
+
+		return $this;
+	}
+
+	/**
+	* Parent
+	*/
+	private function setParent ($parentCase, $parentKnows = false) {
+		if ($this->isValidSuite($parentCase)) {
+
+			// Parent case adds this to its flock if needed
+			if (!$parentKnows) {
+				$parentCase->setChild($this);
+			}
+
+			// This stores a reference to its dad
+			$this->propertyParent = $parentCase;
+
+		}
+		return $this;
+	}
+
+
+
 	// Private helpers: assertions
 
 	/**
@@ -510,10 +541,11 @@ class Unitest {
 	private function flattenArray ($array) {
 		$result = array();
 		foreach ($array as $key => $value) {
-			if (!is_array($value)) {
+			if (is_array($value)) {
+				$result = array_merge($result, $this->flattenArray($value));
+			} else {
 				$result[] = $value;
 			}
-			$result = array_merge($result, array_flatten($value));
 		}
 		return $result;
 	}
@@ -562,7 +594,10 @@ class Unitest {
 
 		// Normalize path
 		if (!empty($path)) {
-			$path = preg_replace('/(\*|\?|\[)/', '[$1]', suffix($path, '/'));
+			$path = preg_replace('/(\*|\?|\[)/', '[$1]', $path);
+			if (substr($path, -1) !== '/') {
+				$path .= '/';
+			}
 		}
 
 		// Find directories in the path
@@ -592,7 +627,10 @@ class Unitest {
 
 		// Handle path input
 		if (!empty($path)) {
-			$path = preg_replace('/(\*|\?|\[)/', '[$1]', suffix($path, '/'));
+			$path = preg_replace('/(\*|\?|\[)/', '[$1]', $path);
+			if (substr($path, -1) !== '/') {
+				$path .= '/';
+			}
 		}
 
 		// Do the glob()
@@ -684,7 +722,7 @@ class Unitest {
 		$results = array(
 			'class' => ''.$this,
 			'parent' => $this->parent() ? ''.$this->parent() : null,
-			'parameters' => $this->parameters(),
+			'injections' => $this->injections(),
 			'ownTests' => $this->ownTests(),
 			'children' => array(),
 		);

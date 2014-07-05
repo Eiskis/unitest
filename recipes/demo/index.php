@@ -13,9 +13,9 @@ include_once 'baseline.php';
 <?php
 	$u = new Unitest();
 	$u->scrape('../../spec/');
-	$u->setParameter('foo', 1);
-	$u->setParameter('bar', 2);
-	$u->setParameter('string', 'Some string value');
+	$u->inject('foo', 1);
+	$u->inject('bar', 2);
+	$u->inject('string', 'Some string value');
 	$results = $u->run();
 ?>
 
@@ -64,9 +64,9 @@ include_once 'baseline.php';
 
 		<pre><code>$u = new Unitest();
 $u->scrape('spec');
-$u->setParameter('foo', 1);
-$u->setParameter('bar', 2);
-$u->setParameter('string', 'Some string value');</code></pre>
+$u->inject('foo', 1);
+$u->inject('bar', 2);
+$u->inject('string', 'Some string value');</code></pre>
 
 
 

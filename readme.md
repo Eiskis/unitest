@@ -23,15 +23,6 @@ Unitest is a one-class miniature unit testing framework for PHP. It's a great wa
 
 
 
-# To do
-
-- Use getter methods as setters as well
-- Only load class files if they have classes that extend Unitest
-- Unitest objects could use an optional ID and/or file path that can be used in reports
-- Maybe it's best to create classes for test result and report
-
-
-
 # Instructions
 
 
@@ -104,9 +95,9 @@ Parent case and script variables can be passed.
 
 Child suites
 
-#### parameters ()
+#### injections ()
 
-Script variables available for test methods
+Injected variables available for test methods
 
 #### ownTests ()
 
@@ -119,22 +110,6 @@ Parent suite
 #### prefix ()
 
 Test method prefix
-
-
-
-## Public setters
-
-#### setChild ()
-
-Add a suite as a child of this suite
-
-#### setParameter ($name, $value)
-
-Add a parameter that can be passed to functions
-
-#### setParent ($parentCase, $parentKnows = false)
-
-Parent
 
 
 
