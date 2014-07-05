@@ -43,9 +43,9 @@ Any Unitest object can contain both test methods and child suites.
 
 ## Writing tests
 
-You write tests as methods (prefixed with `test`) to any class that extends the `Unitest` class. Example:
+You write tests as methods (prefixed with `test`) to any class that extends the `Unitest` class. Each test suite you write should have its own class. For example:
 
-	class TestMath extends Unitest {
+	class TestSomeMath extends Unitest {
 
 		function testPlus () {
 			return $this->should(0 + 1);
@@ -69,15 +69,26 @@ Since your tests come in classes, to run them you need to load the classes and i
 
 	$mainSuite->scrape('path/to/your/test/files/');
 
-Unitest will look for all PHP files that contain Unitest-based classes, load them and create new Unitest objects under `$mainSuite`. To run all tests of your suite, call:
+Unitest will:
+
+- look for PHP files
+- see if they contain definitions of classes that extend Unitest
+- load any file with valid classes
+- instantiate objects under `$mainSuite`
+
+Now `$mainSuite` contains all suites you scraped for.
+
+To run all tests of your suite, call:
 
 	$report = $mainSuite->run();
 
 You can run only part of your tests as well:
 
-	$ownTestReport = $mainSuite->run($mainSuite->ownTests());
-	$childrensTestReport = $mainSuite->run($mainSuite->children());
-	$arbitraryTestReport = $mainSuite->run('nameOfTestMethod');
+	$mainSuite->run($mainSuite->ownTests());
+	$mainSuite->run($mainSuite->children());
+	$mainSuite->run('nameOfTestMethod');
+	$anySuite->run();
+	$anySuite->run('anyTestMehod');
 
 
 

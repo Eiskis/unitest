@@ -74,9 +74,11 @@ $u->inject('string', 'Some string value');</code></pre>
 
 		<div class="canvas">
 
-			<p><code>$u->dump()</code></p>
-
-			<pre><code><?php echo dump($u->dump()); ?></code></pre>
+			<pre><code><?php echo html_dump(array(
+					// $u->dump(),
+					$u->run($u->children()[3]->children()[0]),
+				));
+			?></code></pre>
 
 		</div>
 

@@ -1,7 +1,5 @@
 
 # To do
 
-- Use getter methods as setters as well
-- Only load class files if they have classes that extend Unitest
-- Unitest objects could use an optional ID and/or file path that can be used in reports
-- Maybe it's best to create classes for test result and report
+- No info on file paths or line numbers is stored. Locating failing tests could be difficult.
+- Maybe it's best to create classes for a test result and/or a report.

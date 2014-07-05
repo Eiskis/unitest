@@ -20,6 +20,10 @@ foreach ($injections as $key => $value) {
 	$u->inject($key, $value);
 }
 
+// Run tests
+$report = $u->run();
+$stats = $u->counts($report);
+$digested = $u->digest($report);
 ?>
 
 <!DOCTYPE html>
@@ -49,12 +53,6 @@ foreach ($injections as $key => $value) {
 	</head>
 
 	<body>
-
-		<?php
-			$report = $u->run();
-			$stats = $u->counts($report);
-			$digested = $u->digest($report);
-		?>
 
 		<h1><?php count($digested) ?> suites</h1>
 

@@ -522,12 +522,22 @@ class Unitest {
 		// Find tokens that are classes
 		$tokens = token_get_all($code);
 		for ($i = 2; $i < count($tokens); $i++) {
-			if ($tokens[$i - 2][0] === T_CLASS && $tokens[$i - 1][0] === T_WHITESPACE && $tokens[$i][0] === T_STRING) {
-				$class = $tokens[$i][1];
+
+			// Assess tokens to find class declarations of subclasses
+			if (
+				$tokens[$i-2][0] === T_CLASS and
+				$tokens[$i-1][0] === T_WHITESPACE and
+				$tokens[$i][0]   === T_STRING and
+				$tokens[$i+1][0] === T_WHITESPACE and
+				$tokens[$i+2][0] === T_EXTENDS and
+				$tokens[$i+3][0] === T_WHITESPACE and
+				$tokens[$i+4][0] === T_STRING
+			) {
+				$inheritedFrom = $tokens[$i+4][1];
 
 				// See if class extends Unitest
-				if ($this->isValidSuiteClass($class)) {
-					$classes[] = $class;
+				if ($this->isValidSuiteClass($inheritedFrom)) {
+					$classes[] = $tokens[$i][1];
 				}
 
 			}
@@ -566,7 +576,7 @@ class Unitest {
 	*/
 	private function isValidSuiteClass ($class) {
 		$ref = new ReflectionClass($class);
-		if ($ref->isSubclassOf('Unitest')) {
+		if ($class === 'Unitest' or $ref->isSubclassOf('Unitest')) {
 			return true;
 		}
 		return false;
@@ -687,11 +697,13 @@ class Unitest {
 
 		if (is_file($path)) {
 
-			// We include them here
-			include_once $path;
-
-			// These Unitest classes will be defined
+			// Look for any Unitest classes
 			$classes = $this->classesInScript(file_get_contents($path));
+
+			// Include if found
+			if (!empty($classes)) {
+				include_once $path;
+			}
 
 			// Instantiate new classes as child suites under this
 			foreach ($classes as $class) {
