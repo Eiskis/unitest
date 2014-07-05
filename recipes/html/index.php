@@ -63,10 +63,16 @@ include_once 'baseline.php';
 				echo '<h1>'.count($results).'/'.$stats['total'].' '.$status.'</h1>';
 				if (count($results)) {
 					echo '<dl class="canvas '.$status.'">';
-					foreach ($results as $pointer => $result) {
-						echo '<dt>'.str_replace('/', '<em> &#8594; </em>', $pointer).'()</dt>';
-						if ($status === 'failed') {
-							echo '<dd>'.(is_string($result) ? $result : dump($result)).'</dd>';
+					foreach ($results as $key => $tests) {
+						echo '<dt>'.$key.'</dt>';
+						foreach ($tests as $test => $result) {
+							echo '<dd>';
+							if ($status === 'failed') {
+								echo '<strong>'.$test.'</strong>: '.(is_string($result) ? $result : dump($result));
+							} else {
+								echo $test;
+							}
+							echo '</dd>';
 						}
 					}
 					echo '</dl>';

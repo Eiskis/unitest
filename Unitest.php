@@ -27,10 +27,11 @@ class Unitest {
 	/**
 	* Properties
 	*/
-	private $propertyPrefix     = 'test';
-	private $propertyParent     = null;
 	private $propertyChildren   = array();
+	private $propertyId     	= '';
 	private $propertyParameters = array();
+	private $propertyParent     = null;
+	private $propertyPrefix     = 'test';
 
 	/**
 	* Initialization
@@ -57,6 +58,17 @@ class Unitest {
 	*/
 	final public function children () {
 		return $this->propertyChildren;
+	}
+
+	/**
+	* Optional ID
+	*/
+	final public function id ($id = null) {
+		if (isset($id) and is_string($id)) {
+			$id = $this->trim($string);
+			$this->propertyId = $id;
+		}
+		return $this->propertyId;
 	}
 
 	/**
@@ -132,7 +144,7 @@ class Unitest {
 		if (is_string($name)) {
 
 			// Validate variable name
-			$name = str_replace('-', '', preg_replace('/\s+/', '', $name));
+			$name = str_replace('-', '', $this->trim($name));
 			if (!empty($name)) {
 				$this->propertyParameters[$name] = $value;
 			}
@@ -170,8 +182,10 @@ class Unitest {
 		$arguments = func_get_args();
 
 		$results = array(
+			'class'    => get_class($this),
+			'id'       => $this->id(),
+			'tests'    => array(),
 			'children' => array(),
-			'tests' => array(),
 		);
 
 		// Default to tests of this and children arguments
@@ -187,7 +201,7 @@ class Unitest {
 
 			// Child suite
 			if ($this->isValidSuite($suiteOrTest)) {
-				$results['children'][''.$suiteOrTest] = $suiteOrTest->run(array_merge($suiteOrTest->ownTests(), $suiteOrTest->children()));
+				$results['children'][] = $suiteOrTest->run(array_merge($suiteOrTest->ownTests(), $suiteOrTest->children()));
 
 			// Test method
 			} else if (is_string($suiteOrTest)) {
@@ -308,12 +322,12 @@ class Unitest {
 
 			// Sort test results by status
 			foreach ($report['tests'] as $name => $testResult) {
-				$results[$this->assess($testResult)][$key.$name] = $testResult;
+				$results[$this->assess($testResult)][$key][$name] = $testResult;
 			}
 
 			// Merge child suite results
-			foreach ($report['children'] as $name => $childResults) {
-				$new = $this->byStatus($childResults, $name.'/');
+			foreach ($report['children'] as $childResults) {
+				$new = $this->byStatus($childResults, $childResults['class'].($childResults['id'] ? $childResults['id'].'/' : ''));
 				foreach ($results as $key => $existing) {
 					$results[$key] = array_merge($results[$key], $new[$key]);
 				}
@@ -646,6 +660,13 @@ class Unitest {
 		}
 
 		return $this;
+	}
+
+	/**
+	* Trim whitespace from string
+	*/
+	final private function trim ($string) {
+		return is_string($string) ? preg_replace('/\s+/', '', $string) : $string;
 	}
 
 

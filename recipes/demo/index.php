@@ -82,6 +82,18 @@ $u->setParameter('string', 'Some string value');</code></pre>
 
 
 
+		<h1>Get results</h1>
+
+		<div class="canvas">
+
+			<p>This is what <code>$u->run()</code> returns:</p>
+
+			<pre><code><?php echo dump($results); ?></code></pre>
+
+		</div>
+
+
+
 		<h1>Sort results</h1>
 
 		<div class="canvas">
@@ -101,18 +113,6 @@ $u->setParameter('string', 'Some string value');</code></pre>
 			<p>Get statistics (number of passed objects etc.) <code>$u->asNumbers($results)</code>:</p>
 
 			<pre><code><?php echo dump($u->asNumbers($results)); ?></code></pre>
-
-		</div>
-
-
-
-		<h1>Get results</h1>
-
-		<div class="canvas">
-
-			<p>This is what <code>$u->run()</code> returns:</p>
-
-			<pre><code><?php echo dump($results); ?></code></pre>
 
 		</div>
 

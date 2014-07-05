@@ -15,19 +15,19 @@ class UnitestAssessments extends Unitest {
 	// Not passes
 
 	function testArrayDoesNotPass () {
-		return $this->should(!$this->passed(array(1, 2, 3)));
+		return $this->shouldNot($this->passed(array(1, 2, 3)));
 	}
 
 	function testEmptyArrayDoesNotPass () {
-		return $this->should(!$this->passed(array()));
+		return $this->shouldNot($this->passed(array()));
 	}
 
 	function testStringDoesNotPass () {
-		return $this->should(!$this->passed('Foo bar'));
+		return $this->shouldNot($this->passed('Foo bar'));
 	}
 
 	function testNullDoesNotPass () {
-		return $this->should(!$this->passed(null));
+		return $this->shouldNot($this->passed(null));
 	}
 
 
