@@ -19,7 +19,6 @@ body {
 	color: #373f45;
 	font-weight: 200;
 	line-height: 1.6;
-	font-size: 0.9em;
 }
 .canvas {
 	margin-bottom: 6%;
@@ -93,11 +92,22 @@ dd {
 }
 
 /*Coloring*/
+dt em, dd em {
+	display: block;
+	font-style: inherit;
+	margin-left: 1em;
+	padding-left: 1em;
+	border-left-style: solid;
+	border-left-width: 0.2em;
+}
 .failed.canvas {
 	border-color: #d6203e;
 }
 	.stats .failed, .failed dt {
 		color: #d6203e;
+	}
+	dt.failed em, dd.failed em {
+		border-color: #d6203e;
 	}
 .passed.canvas {
 	border-color: #6aab35;
@@ -105,7 +115,10 @@ dd {
 	.stats .passed, .passed dt {
 		color: #6aab35;
 	}
-.failed dt em, .passed dt em {
-	font-style: inherit;
-	color: #aaafb3;
+	dt.passed em, dd.passed em {
+		border-color: #6aab35;
+	}
+
+.total .failed {
+	color: #d6203e;
 }

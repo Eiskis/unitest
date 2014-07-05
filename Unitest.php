@@ -65,7 +65,7 @@ class Unitest {
 	*/
 	final public function id ($id = null) {
 		if (isset($id) and is_string($id)) {
-			$id = $this->trim($string);
+			$id = $this->trim($id);
 			$this->propertyId = $id;
 		}
 		return $this->propertyId;
@@ -312,6 +312,7 @@ class Unitest {
 	final public function byStatus ($report, $key = '') {
 
 		$results = array(
+			'total' => array(),
 			'failed' => array(),
 			'passed' => array(),
 			'skipped' => array(),
@@ -322,12 +323,13 @@ class Unitest {
 
 			// Sort test results by status
 			foreach ($report['tests'] as $name => $testResult) {
+				$results['total'][$key][$name] = $testResult;
 				$results[$this->assess($testResult)][$key][$name] = $testResult;
 			}
 
 			// Merge child suite results
 			foreach ($report['children'] as $childResults) {
-				$new = $this->byStatus($childResults, $childResults['class'].($childResults['id'] ? $childResults['id'].'/' : ''));
+				$new = $this->byStatus($childResults, $childResults['class'].($childResults['id'] ? ' ('.$childResults['id'].')' : ''));
 				foreach ($results as $key => $existing) {
 					$results[$key] = array_merge($results[$key], $new[$key]);
 				}
@@ -655,6 +657,7 @@ class Unitest {
 			// Instantiate new classes as child suites under this
 			foreach ($classes as $class) {
 				$suite = new $class($parent);
+				$suite->id($path);
 			}
 
 		}

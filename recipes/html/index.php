@@ -59,16 +59,17 @@ include_once 'baseline.php';
 		<div class="clear"></div>
 
 		<?php
-			foreach ($u->byStatus($report) as $status => $results) {
-				echo '<h1>'.count($results).'/'.$stats['total'].' '.$status.'</h1>';
-				if (count($results)) {
-					echo '<dl class="canvas '.$status.'">';
-					foreach ($results as $key => $tests) {
-						echo '<dt>'.$key.'</dt>';
-						foreach ($tests as $test => $result) {
-							echo '<dd>';
+			foreach ($u->byStatus($report) as $group => $suites) {
+				echo '<h1>'.count($suites).'/'.$stats['total'].' '.$group.'</h1>';
+				if (count($suites)) {
+					echo '<dl class="canvas '.$group.'">';
+					foreach ($suites as $name => $suite) {
+						echo '<dt>'.$name.'</dt>';
+						foreach ($suite as $test => $testResult) {
+							$status = $u->assess($testResult);
+							echo '<dd class="'.$status.'">';
 							if ($status === 'failed') {
-								echo '<strong>'.$test.'</strong>: '.(is_string($result) ? $result : dump($result));
+								echo '<strong>'.$test.'</strong><em>'.(is_string($testResult) ? $testResult : dump($testResult)).'</em>';
 							} else {
 								echo $test;
 							}
