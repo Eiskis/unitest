@@ -78,11 +78,11 @@ $digested = $u->digest($report);
 
 					// Fail
 					if ($test['status'] === 'failed') {
-						echo '<strong>'.$test['name'].'</strong><em>'.(is_string($test['message']) ? $test['message'] : var_export($test['message'], true)).'</em>';
+						echo '<strong>'.$test['method'].'</strong><em>'.(is_string($test['message']) ? $test['message'] : var_export($test['message'], true)).'</em>';
 
 					// Skip or pass
 					} else {
-						echo $test['name'];
+						echo $test['method'];
 					}
 					echo '</dd>';
 

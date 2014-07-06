@@ -100,27 +100,35 @@ Parent case and script variables can be passed.
 
 	$case = new Unitest($parent = null)
 
-## Getters
+## Properties
+
+#### child ($suite [, $suite2, ...])
+
+Add one or more new child suites.
 
 #### children ()
 
-Child suites
+List child suites, or add new ones.
 
-#### injections ()
+#### inject ($name, $value)
 
-Injected variables available for test methods
+Add a new injected variable.
 
-#### ownTests ()
+#### injections ([$name, $value])
 
-All test methods of this suite
+List injected variables available for test methods, or add new ones.
 
-#### parent ()
+#### parent ([$suite])
 
-Parent suite
+Get parent suite, or `null` if such does not exists. Sets a parent suite if such is provided.
 
 #### prefix ()
 
-Test method prefix
+Get test method prefix.
+
+#### tests ()
+
+List all test methods of this suite.
 
 
 
@@ -142,35 +150,37 @@ Find tests in locations
 
 ## Assessing a test result
 
+Protected methods (only available in extended classes).
+
 #### assess ($value)
 
-#### failed ($value)
+#### fails ($value)
 
-#### passed ($value)
+#### passes ($value)
 
-#### skipped ($value)
-
-
-
-## Reports
-
-#### asNumbers ($report)
-
-#### byStatus ($report, $key = '')
+#### skips ($value)
 
 
 
 ## Assertions
 
-#### should ()
+#### should ($value [, $value2, ...])
 
-Truey
+Trueyness. Passes unless provided a falsey value.
 
-#### shouldBeEqual ()
+#### shouldNot ($value [, $value2, ...])
 
-Equality
+Falseyness. Passes unless provided fails.
 
-#### shouldBeOfClass ($className)
+#### shouldBeEqual ($value [, $value2, ...])
+
+Equality. Passes if passed zero or only one value.
+
+#### shouldNotBeEqual ($value [, $value2, ...])
+
+Non-equality. Fails if passed zero or only one value.
+
+#### shouldBeOfClass ($className, $value [, $value2, ...])
 
 Should be of a specific class. Fails if passed non-objects or no objects.
 

@@ -53,11 +53,22 @@ class Unitest {
 	// Public getters
 
 	/**
-	* Add child suite
+	* Add a suite as a child of this suite
 	*/
-	final public function child () {
+	private function child ($child) {
 		$arguments = func_get_args();
-		return call_user_func_array(array($this, 'setChild'), $arguments);
+		foreach ($arguments as $argument) {
+			if ($this->isValidSuite($argument)) {
+
+				// Store reference to this in the child
+				$argument->parent($this, true);
+
+				// Add to own flock
+				$this->propertyChildren[] = $argument;
+
+			}
+		}
+		return $this;
 	}
 
 	/**
@@ -76,11 +87,19 @@ class Unitest {
 	}
 
 	/**
-	* Add script variables
+	* Add an injectable value that can be passed to functions as parameter
 	*/
-	final public function inject () {
-		$arguments = func_get_args();
-		return call_user_func_array(array($this, 'setInjection'), $arguments);
+	final public function inject ($name, $value) {
+		if (is_string($name)) {
+
+			// Sanitize variable name
+			$name = str_replace('-', '', preg_replace('/\s+/', '', $name));
+			if (!empty($name)) {
+				$this->propertyInjections[$name] = $value;
+			}
+
+		}
+		return $this;
 	}
 
 	/**
@@ -91,7 +110,7 @@ class Unitest {
 		// Set
 		$arguments = func_get_args();
 		if (!empty($arguments)) {
-			return call_user_func_array(array($this, 'setInjection'), $arguments);
+			return call_user_func_array(array($this, 'inject'), $arguments);
 		}
 
 		// Get own injections, bubble
@@ -106,29 +125,44 @@ class Unitest {
 	}
 
 	/**
-	* All test methods of this suite
-	*/
-	final public function ownTests () {
-		$tests = array();
-
-		// Filter from all class methods
-		foreach (get_class_methods($this) as $methodName) {
-			if (substr($methodName, 0, strlen($this->prefix())) === $this->prefix()) {
-				$tests[] = $methodName;
-			}
-		}
-
-		return $tests;
-	}
-
-	/**
 	* Parent suite
 	*/
 	final public function parent ($parent = null, $parentKnows = false) {
+
+		// Set
 		if (isset($parent)) {
-			return $this->setParent($parent, $parentKnows);
+
+			// Validate parent
+			if (!$this->isValidSuite($parent)) {
+				throw new Exception('Invalid parent suite passed to "scrapeDirectory".');
+			} else {
+
+				// Parent case adds this to its flock if needed
+				if (!$parentKnows) {
+					$parent->child($this);
+				}
+
+				// This stores a reference to its dad
+				$this->propertyParent = $parent;
+
+			}
+
+			return $this;
 		}
+
+		// Get
 		return $this->propertyParent;
+	}
+
+	/**
+	* All parents
+	*/
+	final public function parents () {
+		$parents = array();
+		if ($this->parent()) {
+			$parents = array_merge(array(''.$this->parent()), $this->parent()->parents());
+		}
+		return $parents;
 	}
 
 	/**
@@ -136,6 +170,31 @@ class Unitest {
 	*/
 	final public function prefix () {
 		return $this->propertyPrefix;
+	}
+
+	/**
+	* All test methods of this suite
+	*/
+	final public function tests () {
+		$tests = array();
+
+		// All class methods
+		foreach (get_class_methods($this) as $method) {
+
+			// Class methods with the correct prefix
+			if (substr($method, 0, strlen($this->prefix())) === $this->prefix()) {
+
+				// Prefixed methods that aren't declared in base class
+				$ref = new ReflectionMethod($this, $method);
+				$class = $ref->getDeclaringClass();
+				if ($class->name !== 'Unitest') {
+					$tests[] = $method;
+				}
+
+			}
+		}
+
+		return $tests;
 	}
 
 
@@ -149,14 +208,19 @@ class Unitest {
 		$arguments = func_get_args();
 
 		$results = array(
-			'class'    => get_class($this),
-			'tests'    => array(),
 			'children' => array(),
+			'class'    => get_class($this),
+			'parents'  => $this->parents(),
+			'tests'    => array(),
+
+			'failed'   => 0,
+			'passed'   => 0,
+			'skipped'  => 0,
 		);
 
 		// Default to tests of this and children arguments
 		if (empty($arguments)) {
-			$arguments = array($this->ownTests(), $this->children());
+			$arguments = array($this->tests(), $this->children());
 		}
 
 		// Flatten arguments
@@ -167,7 +231,7 @@ class Unitest {
 
 			// Child suite
 			if ($this->isValidSuite($suiteOrTest)) {
-				$results['children'][] = $suiteOrTest->run(array_merge($suiteOrTest->ownTests(), $suiteOrTest->children()));
+				$results['children'][] = $suiteOrTest->run(array_merge($suiteOrTest->tests(), $suiteOrTest->children()));
 
 			// Test method
 			} else if (is_string($suiteOrTest)) {
@@ -183,6 +247,7 @@ class Unitest {
 	* Run an individual test method
 	*/
 	final public function runTest ($method) {
+		$injections = array();
 		$result = $this->skip();
 
 		if (method_exists($this, $method)) {
@@ -190,7 +255,6 @@ class Unitest {
 			// Contain errors/exceptions
 			set_error_handler('UnitestHandleError');
 			try {
-				$injections = array();
 				$availableInjections = $this->injections();
 
 				// Find parameters to pass to test method
@@ -212,12 +276,14 @@ class Unitest {
 
 		}
 
-		$status = $this->assess($result);
+		// Test report
 		return array(
-			'class' => ''.$this,
-			'name' => $method,
-			'status' => $status,
-			'message' => $result,
+			'class'      => ''.$this,
+			'injections' => $injections,
+			'message'    => $result,
+			'method'     => $method,
+			'parents'    => $this->parents(),
+			'status'     => $this->assess($result),
 		);
 	}
 
@@ -296,10 +362,10 @@ class Unitest {
 	/**
 	* Truey
 	*/
-	final public function should () {
-		$values = func_get_args();
-		foreach ($values as $value) {
-			if (!$value) {
+	final public function should ($value) {
+		$arguments = func_get_args();
+		foreach ($arguments as $argument) {
+			if (!$argument) {
 				return $this->fail();
 			}
 		}
@@ -309,20 +375,25 @@ class Unitest {
 	/**
 	* Falsey
 	*/
-	final public function shouldNot () {
+	final public function shouldNot ($value) {
 		$arguments = func_get_args();
-		return !call_user_func_array(array($this, 'should'), $arguments);
+		foreach ($arguments as $argument) {
+			if ($argument) {
+				return $this->fail();
+			}
+		}
+		return $this->pass();
 	}
 
 	/**
 	* Equality
 	*/
-	final public function shouldBeEqual () {
-		$values = func_get_args();
-		$count = count($values);
+	final public function shouldBeEqual ($value) {
+		$arguments = func_get_args();
+		$count = count($arguments);
 		if ($count > 1) {
 			for ($i = 1; $i < $count; $i++) { 
-				if ($values[$i-1] !== $values[$i]) {
+				if ($arguments[$i-1] !== $arguments[$i]) {
 					return $this->fail();
 				}
 			}
@@ -331,24 +402,32 @@ class Unitest {
 	}
 
 	/**
+	* Non-equality
+	*/
+	final public function shouldNotBeEqual ($value) {
+		$arguments = func_get_args();
+		return !call_user_func_array(array($this, 'shouldBeEqual'), $arguments);
+	}
+
+	/**
 	* Should be of a specific class. Fails if passed non-objects or no objects.
 	*/
-	final public function shouldBeOfClass ($className) {
-		$values = func_get_args();
-		array_shift($values);
+	final public function shouldBeOfClass ($className, $value) {
+		$arguments = func_get_args();
+		array_shift($arguments);
 
 		// No objects to test
-		if (empty($values)) {
+		if (empty($arguments)) {
 			return $this->fail();
 		} else {
-			foreach ($values as $value) {
+			foreach ($arguments as $argument) {
 
 				// Not an object
-				if (!is_object($value)) {
+				if (!is_object($argument)) {
 					return $this->fail();
 
 				// Wrong class
-				} else if (get_class($value) !== $className) {
+				} else if (get_class($argument) !== $className) {
 					return $this->fail();
 				}
 
@@ -362,25 +441,20 @@ class Unitest {
 	/**
 	* Should be of any class that extends a specific class. Fails if passed non-objects or no objects.
 	*/
-	final public function shouldExtendClass ($className) {
-		$values = func_get_args();
-		array_shift($values);
+	final public function shouldExtendClass ($className, $value) {
+		$arguments = func_get_args();
+		array_shift($arguments);
 
 		// No objects to test
-		if (empty($values)) {
-			return $this->fail();
-		} else {
-			foreach ($values as $value) {
+		foreach ($arguments as $value) {
 
-				// Not an object
-				if (!is_object($value)) {
-					return $this->fail();
+			// Not an object
+			if (!is_object($value)) {
+				return $this->fail();
 
-				// Wrong class
-				} else if (!is_subclass_of($value, $className)) {
-					return $this->fail();
-				}
-
+			// Wrong class
+			} else if (!is_subclass_of($value, $className)) {
+				return $this->fail();
 			}
 
 		}
@@ -411,64 +485,6 @@ class Unitest {
 
 	final protected function skips ($value) {
 		return $value === null;
-	}
-
-
-
-	// Setters
-
-	/**
-	* Add a suite as a child of this suite
-	*/
-	private function setChild ($child) {
-		$arguments = func_get_args();
-		foreach ($arguments as $argument) {
-			if ($this->isValidSuite($argument)) {
-
-				// Store reference to this in the child
-				$argument->parent($this, true);
-
-				// Add to own flock
-				$this->propertyChildren[] = $argument;
-
-			}
-		}
-		return $this;
-	}
-
-	/**
-	* Add an injectable value that can be passed to functions as parameter
-	*/
-	private function setInjection ($name, $value) {
-
-		if (is_string($name)) {
-
-			// Validate variable name
-			$name = str_replace('-', '', $this->trim($name));
-			if (!empty($name)) {
-				$this->propertyInjections[$name] = $value;
-			}
-		}
-
-		return $this;
-	}
-
-	/**
-	* Parent
-	*/
-	private function setParent ($parentCase, $parentKnows = false) {
-		if ($this->isValidSuite($parentCase)) {
-
-			// Parent case adds this to its flock if needed
-			if (!$parentKnows) {
-				$parentCase->child($this);
-			}
-
-			// This stores a reference to its dad
-			$this->propertyParent = $parentCase;
-
-		}
-		return $this;
 	}
 
 
@@ -715,13 +731,6 @@ class Unitest {
 		return $this;
 	}
 
-	/**
-	* Trim whitespace from string
-	*/
-	final private function trim ($string) {
-		return is_string($string) ? preg_replace('/\s+/', '', $string) : $string;
-	}
-
 
 
 	// Debugging and development
@@ -733,10 +742,11 @@ class Unitest {
 
 		$results = array(
 			'class' => ''.$this,
-			'parent' => $this->parent() ? ''.$this->parent() : null,
-			'injections' => $this->injections(),
-			'ownTests' => $this->ownTests(),
 			'children' => array(),
+			'injections' => $this->injections(),
+			'parent' => $this->parent() ? ''.$this->parent() : null,
+			'parents' => $this->parents(),
+			'tests' => $this->tests(),
 		);
 
 		foreach ($this->children() as $child) {

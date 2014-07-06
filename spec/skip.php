@@ -2,7 +2,7 @@
 
 class UnitestSkip extends Unitest {
 
-	function testSkipWhenNotReturningAnything () {
+	function testSkipsWhenNotReturningAnything () {
 	}
 
 	function testSkipsWhenHardcodingNull () {
