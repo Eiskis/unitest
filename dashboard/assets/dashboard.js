@@ -5,15 +5,19 @@
 		var self = this;
 
 		// Ko properties
+		self.title = ko.observable('Unitest Dashboard');
+
+		self.runnerAvailable = ko.observable(true);
+		self.runnerPath = ko.observable('run/');
+		self.runnerUndoPath = ko.observable('../');
+
+		self.specAvailable = ko.observable(true);
+		self.specPath = ko.observable('');
+
 		self.injections = ko.observableArray();
 		self.report = ko.observable({});
 
-		self.undoRunnerPath = ko.observable('../');
-		self.runnerPath = ko.observable('run/');
-		self.runnerStatus = ko.observable(200);
 
-		self.specPath = ko.observable('');
-		self.title = ko.observable('Unitest Dashboard');
 
 		// Injections as a hash
 		self.injectionsAsHash = ko.computed(function () {
@@ -31,7 +35,7 @@
 			// Prefix relative spec path so runner understands it
 			var specPath = self.specPath();
 			if (specPath.substr(0, 1) !== '/') {
-				specPath = self.undoRunnerPath() + specPath;
+				specPath = self.runnerUndoPath() + specPath;
 			}
 
 			return {
@@ -45,12 +49,36 @@
 		// Startup
 		self.init = function (container) {
 			ko.applyBindings(self, container);
-			self.load();
+			self.ping().always(function () {
+				self.run();
+			});
 			return self;
 		};
 
-		// Requests
-		self.load = function () {
+		// Ping for backend availability
+		self.ping = function () {
+			var dfd = $.Deferred();
+
+			$.ajax({
+				dataType: 'json',
+				type: 'GET',
+				url: self.runnerPath(),
+				success: function (data, textStatus, jqXHR) {
+					dfd.resolve();
+				},
+				error: function (jqXHR, textStatus, errorThrown) {
+					dfd.reject();
+				},
+				complete: function (jqXHR, textStatus) {
+					self.runnerAvailable(jqXHR.status === 404 ? false : true);
+				}
+			});
+
+			return dfd.promise();
+		};
+
+		// Run tests via backend
+		self.run = function () {
 			var dfd = $.Deferred();
 
 			$.ajax({
@@ -59,15 +87,16 @@
 				url: self.runnerPath(),
 				data: self.postData(),
 				success: function (data, textStatus, jqXHR) {
+					self.specAvailable(true);
 					self.report(data);
 					dfd.resolve();
 				},
 				error: function (jqXHR, textStatus, errorThrown) {
-					console.log(jqXHR.responseText);
+					self.specAvailable(false);
+					self.ping();
 					dfd.reject();
 				},
 				complete: function (jqXHR, textStatus) {
-					self.runnerStatus(jqXHR.status);
 				}
 			});
 
@@ -75,8 +104,11 @@
 		};
 
 		// Run tests when spec path changes
+		self.runnerPath.subscribe(function (newValue) {
+			self.ping();
+		});
 		self.specPath.subscribe(function (newValue) {
-			self.load();
+			self.run();
 		});
 
 	};

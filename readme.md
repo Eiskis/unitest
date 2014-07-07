@@ -23,9 +23,22 @@ Unitest is a one-class miniature unit testing framework for PHP. It's a great wa
 
 
 
+## Repo contents
+
+- `dashboard/`
+	- A full-fledged UI and radiator for running and auto-updating tests and visualizing results.
+- `demo/`
+	- Simple JSON dump of a report produced by Unitest.
+- `html`
+	- A simple example of printing results in custom HTML.
+- `Unitest.php`
+	- Unitest release, in one file.
+
+
+
 # Instructions
 
-
+Unitest is very simple to use. It's easy to get started with, but also extendable.
 
 ## Using Unitest
 
@@ -89,6 +102,18 @@ You can run only part of your tests as well:
 	$mainSuite->run('nameOfTestMethod');
 	$anySuite->run();
 	$anySuite->run('anyTestMehod');
+
+
+
+## Extend `Unitest`
+
+(Write about extended classes.)
+
+
+
+## Injections
+
+(Write about injections.)
 
 
 

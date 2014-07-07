@@ -35,35 +35,42 @@ if ((isset($_GET) and !empty($_GET)) or (isset($_POST) and !empty($_POST))) {
 
 }
 
-// Init
-$u = new Unitest();
-$u->scrape($path);
-$testCount = count($u->tests());
-$childCount = count($u->children());
-
-// No tests found
-if (!$testCount and !$childCount) {
-	header('HTTP/1.1 404 Not Found');
-	echo 'No suites available at "'.(realpath($path) ? realpath($path) : $path).'".';
-
+// No path given
+if (empty($path)) {
+	header('HTTP/1.1 400 Bad Request');
 } else {
 
-	// Injections
-	foreach ($injections as $key => $value) {
-		$u->inject($key, $value);
-	}
+	// Init
+	$u = new Unitest();
+	$u->scrape($path);
+	$testCount = count($u->tests());
+	$childCount = count($u->children());
 
-	// Run tests
-	try {
-		$report = $u->run();
+	// No tests found
+	if (!$testCount and !$childCount) {
+		header('HTTP/1.1 404 Not Found');
+		echo 'No suites available at "'.(realpath($path) ? realpath($path) : $path).'".';
 
-		// Respond
-		header('HTTP/1.1 200 OK');
-		echo json_encode($report);
+	} else {
 
-	// Unitest failed (or failed to contain errors)
-	} catch (Exception $e) {
-		header('HTTP/1.1 500 Internal Server Error');
+		// Injections
+		foreach ($injections as $key => $value) {
+			$u->inject($key, $value);
+		}
+
+		// Run tests
+		try {
+			$report = $u->run();
+
+			// Respond
+			header('HTTP/1.1 200 OK');
+			echo json_encode($report);
+
+		// Unitest failed (or failed to contain errors)
+		} catch (Exception $e) {
+			header('HTTP/1.1 500 Internal Server Error');
+		}
+
 	}
 
 }

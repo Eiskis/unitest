@@ -33,14 +33,25 @@
 		<div class="row row-intro">
 			<div class="row-content buffer">
 
+				<!-- About -->
 				<h1 data-bind="text: title"></h1>
 
-				<ul class="plain">
-					<li>Runner path: <span data-bind="text: runnerPath"></span></li>
-					<li>Runner status: <span data-bind="text: runnerStatus"></span></li>
-					<li><label>Spec path: <input type="text" data-bind="value: specPath"></input></label></li>
-				</ul>
+				<!-- Settings -->
+				<div class="canvas settings">
 
+					<label class="column half" data-bind="css: { available: specAvailable, unavailable: !specAvailable() }">
+						<h3>Test location</h3><p><input type="text" class="squeeze plain buffer text" placeholder="Path to your tests..." data-bind="value: specPath"></input></p>
+					</label>
+
+					<label class="column half last" data-bind="css: { available: runnerAvailable, unavailable: !runnerAvailable() }">
+						<h3>Unitest runner</h3><p><input type="text" class="squeeze plain buffer text" placeholder="Path to your tests..." data-bind="value: runnerPath"></input></p>
+					</label>
+
+					<div class="clear"></div>
+
+				</div>
+
+				<!-- Results -->
 				<pre><code data-bind="text: JSON.stringify(report())"></code></pre>
 
 			</div>
