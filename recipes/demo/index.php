@@ -60,25 +60,13 @@ include_once 'baseline.php';
 
 
 
-		<h1>Unitest demo</h1>
-
-		<pre><code>$u = new Unitest();
-$u->scrape('spec');
-$u->inject('foo', 1);
-$u->inject('bar', 2);
-$u->inject('string', 'Some string value');</code></pre>
-
-
-
 		<h1>Dump</h1>
 
 		<div class="canvas">
 
-			<pre><code><?php echo html_dump(array(
-					// $u->dump(),
-					$u->run($u->children()[3]->children()[0]),
-				));
-			?></code></pre>
+			<?php echo html_dump(array(
+				$u->dump(),
+			)); ?>
 
 		</div>
 
@@ -90,31 +78,9 @@ $u->inject('string', 'Some string value');</code></pre>
 
 			<p>This is the report that <code>$u->run()</code> returns:</p>
 
-			<pre><code><?php echo dump($results); ?></code></pre>
+			<?php echo '<pre><code>'.json_encode($results, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES).'</code></pre>'; ?>
 
-		</div>
-
-
-
-		<h1>Sort results</h1>
-
-		<div class="canvas">
-
-			<p>Get all test results by status with <code>$u->digest($results)</code>:</p>
-
-			<pre><code><?php echo dump($u->digest($results)); ?></code></pre>
-
-		</div>
-
-
-
-		<h1>Tally results</h1>
-
-		<div class="canvas">
-
-			<p>Get statistics (number of passed objects etc.) <code>$u->counts($results)</code>:</p>
-
-			<pre><code><?php echo dump($u->counts($results)); ?></code></pre>
+			<?php // echo html_dump($results); ?>
 
 		</div>
 

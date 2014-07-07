@@ -37,8 +37,11 @@ class Unitest {
 	*
 	* Parent suite and script variables can be passed
 	*/
-	final public function __construct ($parent = null) {
-		return $this->parent($parent);
+	final public function __construct () {
+		if (method_exists($this, 'init')) {
+			call_user_func_array(array($this, 'init'), array());
+		}
+		return $this;
 	}
 
 	/**
@@ -55,7 +58,7 @@ class Unitest {
 	/**
 	* Add a suite as a child of this suite
 	*/
-	private function child ($child) {
+	final public function child ($child) {
 		$arguments = func_get_args();
 		foreach ($arguments as $argument) {
 			if ($this->isValidSuite($argument)) {
@@ -87,6 +90,14 @@ class Unitest {
 	}
 
 	/**
+	* File where this class is defined in
+	*/
+	final public function file () {
+		$ref = new ReflectionClass($this);
+		return $ref->getFileName();
+	}
+
+	/**
 	* Add an injectable value that can be passed to functions as parameter
 	*/
 	final public function inject ($name, $value) {
@@ -103,7 +114,29 @@ class Unitest {
 	}
 
 	/**
-	* Script variables available for test methods
+	* Get or set an injectable value
+	*/
+	final public function injection ($name) {
+
+		// Set
+		$arguments = func_get_args();
+		if (func_num_args() > 1) {
+			return call_user_func_array(array($this, 'inject'), $arguments);
+		}
+
+		// Get own injections, bubble
+		$injections = $this->injections();
+		if (array_key_exists($name, $injections)) {
+			return $injections[$name];
+		}
+
+		// Missing injection
+		throw new Exception('Missing injection "'.$name.'".');
+		return $this;
+	}
+
+	/**
+	* Values available for test methods
 	*/
 	final public function injections () {
 
@@ -125,6 +158,21 @@ class Unitest {
 	}
 
 	/**
+	* Line number of the file where this class is defined in
+	*/
+	final public function lineNumber () {
+		$ref = new ReflectionClass($this);
+		return $ref->getStartLine();
+	}
+
+	/**
+	* Name of this suite (i.e. class)
+	*/
+	final public function name () {
+		return get_class($this);
+	}
+
+	/**
 	* Parent suite
 	*/
 	final public function parent ($parent = null, $parentKnows = false) {
@@ -134,7 +182,7 @@ class Unitest {
 
 			// Validate parent
 			if (!$this->isValidSuite($parent)) {
-				throw new Exception('Invalid parent suite passed to "scrapeDirectory".');
+				throw new Exception('Invalid parent suite passed as parent.');
 			} else {
 
 				// Parent case adds this to its flock if needed
@@ -160,7 +208,7 @@ class Unitest {
 	final public function parents () {
 		$parents = array();
 		if ($this->parent()) {
-			$parents = array_merge(array(''.$this->parent()), $this->parent()->parents());
+			$parents = array_merge(array($this->parent()->name()), $this->parent()->parents());
 		}
 		return $parents;
 	}
@@ -199,7 +247,7 @@ class Unitest {
 
 
 
-	// Running tests
+	// Suites and tests
 
 	/**
 	* Run tests, some or all
@@ -207,15 +255,20 @@ class Unitest {
 	final public function run () {
 		$arguments = func_get_args();
 
+		$ref = new ReflectionClass($this);
+
 		$results = array(
-			'children' => array(),
-			'class'    => get_class($this),
+			'class'    => $this->name(),
+			'file'     => $this->file(),
+			'line'     => $this->lineNumber(),
 			'parents'  => $this->parents(),
 			'tests'    => array(),
 
 			'failed'   => 0,
 			'passed'   => 0,
 			'skipped'  => 0,
+
+			'children' => array(),
 		);
 
 		// Default to tests of this and children arguments
@@ -235,7 +288,7 @@ class Unitest {
 
 			// Test method
 			} else if (is_string($suiteOrTest)) {
-				$results['tests'][''.$suiteOrTest] = $this->runTest($suiteOrTest);
+				$results['tests'][$suiteOrTest] = $this->runTest($suiteOrTest);
 			}
 
 		}
@@ -253,15 +306,12 @@ class Unitest {
 		if (method_exists($this, $method)) {
 
 			// Contain errors/exceptions
-			set_error_handler('UnitestHandleError');
+			set_error_handler('__UnitestHandleError');
 			try {
-				$availableInjections = $this->injections();
 
-				// Find parameters to pass to test method
+				// Get innjections to pass to test method
 				foreach ($this->methodParameterNames($method) as $parameterName) {
-					if (array_key_exists($parameterName, $availableInjections)) {
-						$injections[] = $availableInjections[$parameterName];
-					}
+					$injections[] = $this->injection($parameterName);
 				}
 
 				// Call test method
@@ -278,81 +328,48 @@ class Unitest {
 
 		// Test report
 		return array(
-			'class'      => ''.$this,
 			'injections' => $injections,
+			'line'       => $this->methodLineNumber($method),
 			'message'    => $result,
-			'method'     => $method,
-			'parents'    => $this->parents(),
 			'status'     => $this->assess($result),
+			'name'       => $method,
 		);
 	}
 
 	/**
-	* Find tests in locations
+	* Initialize suites in locations
 	*/
 	final public function scrape () {
 		$arguments = func_get_args();
 
-		foreach ($arguments as $argument) {
-			if (is_string($argument)) {
-				if (is_file($argument)) {
-					$this->scrapeFile($argument, $this);
-				} else if (is_dir($argument)) {
-					$this->scrapeDirectory($argument, $this);
+		// Load classes automatically (arguments passed to loadFiles)
+		$classes = call_user_func_array(array($this, 'loadFiles'), $arguments);
+
+		// Treat classes
+		foreach ($classes as $key => $values) {
+			$classes[$key] = $this->generateClassMap($values);
+		}
+		$classes = $this->mergeClassMap($classes);
+
+		if (!empty($classes)) {
+			$parents = array_reverse(class_parents($this));
+			$parents[] = $this->name();
+
+			// Find own class from class map, only generate child suites from own child classes
+			foreach ($parents as $parent) {
+				if (isset($classes[$parent])) {
+					$classes = $classes[$parent];
+				} else {
+					break;
 				}
-			} else if (is_array($argument)) {
-				call_user_func_array(array($this, 'scrape'), $argument);
 			}
+
+			// We generate a map of required test suite classes here
+			$suites = $this->generateSuites($classes);
+
 		}
 
 		return $this;
-	}
-
-
-
-	// Reports
-
-	final public function counts ($report) {
-		$counts = array(
-			'total' => 0,
-			'failed' => 0,
-			'passed' => 0,
-			'skipped' => 0,
-		);
-
-		foreach ($this->digest($report) as $suite) {
-			$counts['total'] += count($suite);
-			foreach ($suite as $test) {
-				$counts[$test['status']]++;
-			}
-		}
-
-		return $counts;
-	}
-
-	final public function digest ($report) {
-		$results = array();
-
-		// Quickly validate incoming report
-		if (is_array($report) and isset($report['children']) and isset($report['tests'])) {
-
-			// Sort test results by status
-			foreach ($report['tests'] as $testResult) {
-				$results[$testResult['class']][] = $testResult;
-			}
-
-			// Merge child suite results
-			foreach ($report['children'] as $childResults) {
-				$new = $this->digest($childResults);
-				$results = array_merge($results, $new);
-			}
-
-		// Return report as it was given
-		} else {
-			$results = $report;
-		}
-
-		return $results;
 	}
 
 
@@ -494,7 +511,7 @@ class Unitest {
 	/**
 	* Test can fail with false, or a message (any value but null or true)
 	*/
-	private function fail () {
+	final private function fail () {
 		$arguments = func_get_args();
 		$count = func_num_args();
 
@@ -514,14 +531,14 @@ class Unitest {
 	/**
 	* Test always passes with true
 	*/
-	private function pass () {
+	final private function pass () {
 		return true;
 	}
 
 	/**
 	* Test skipped with null
 	*/
-	private function skip () {
+	final private function skip () {
 		return true;
 	}
 
@@ -532,7 +549,7 @@ class Unitest {
 	/**
 	* Find out which classes will be defined in a script
 	*/
-	private function classesInScript ($code = '') {
+	final private function classesInScript ($code = '') {
 		$classes = array();
 
 		// Find tokens that are classes
@@ -565,7 +582,7 @@ class Unitest {
 	/**
 	* Flatten an array
 	*/
-	private function flattenArray ($array) {
+	final private function flattenArray ($array) {
 		$result = array();
 		foreach ($array as $key => $value) {
 			if (is_array($value)) {
@@ -580,7 +597,7 @@ class Unitest {
 	/**
 	* Validate a suite object
 	*/
-	private function isValidSuite ($case) {
+	final private function isValidSuite ($case) {
 		return isset($case) and is_object($case) and (
 			get_class($case) === 'Unitest' or
 			is_subclass_of($case, 'Unitest')
@@ -590,7 +607,7 @@ class Unitest {
 	/**
 	* Validate a suite class
 	*/
-	private function isValidSuiteClass ($class) {
+	final private function isValidSuiteClass ($class) {
 		$ref = new ReflectionClass($class);
 		if ($class === 'Unitest' or $ref->isSubclassOf('Unitest')) {
 			return true;
@@ -599,9 +616,17 @@ class Unitest {
 	}
 
 	/**
+	* Which line method is defined in within its class file
+	*/
+	final private function methodLineNumber ($method) {
+		$ref = new ReflectionMethod($this, $method);
+		return $ref->getStartLine();
+	}
+
+	/**
 	* Find out which variables a method is expecing
 	*/
-	private function methodParameterNames ($method) {
+	final private function methodParameterNames ($method) {
 		$results = array();
 		$ref = new ReflectionMethod($this, $method);
 		foreach ($ref->getParameters() as $parameter) {
@@ -617,7 +642,7 @@ class Unitest {
 	/**
 	* Find directories
 	*/
-	private function globDir ($path = '') {
+	final private function globDir ($path = '') {
 
 		// Normalize path
 		if (!empty($path)) {
@@ -642,7 +667,7 @@ class Unitest {
 	/**
 	* Find files
 	*/
-	private function globFiles ($path = '', $filetypes = array()) {
+	final private function globFiles ($path = '', $filetypes = array()) {
 		$files = array();
 
 		// Handle filetype input
@@ -674,42 +699,10 @@ class Unitest {
 	}
 
 	/**
-	* Find PHP test files in a directory
-	*/
-	final private function scrapeDirectory ($path, $parent) {
-
-		// Validate parent
-		if (!$this->isValidSuite($parent)) {
-			throw new Exception('Invalid parent suite passed to "scrapeDirectory".');
-		}
-
-		if (is_dir($path)) {
-
-			// PHP files
-			foreach ($this->globFiles($path, array('php')) as $file) {
-				$this->scrapeFile($file, $parent);
-			}
-
-			// Subdirectories
-			foreach ($this->globDir($path) as $dir) {
-				$directorySuite = new Unitest($parent);
-				call_user_func(array($this, 'scrapeDirectory'), $dir, $directorySuite);
-			}
-
-		}
-
-		return $this;
-	}
-
-	/**
 	* Include PHP tests in a file
 	*/
-	final private function scrapeFile ($path, $parent) {
-
-		// Validate parent
-		if (!$this->isValidSuite($parent)) {
-			throw new Exception('Invalid parent suite passed to "scrapeFile".');
-		}
+	final private function loadFile ($path) {
+		$suites = array();
 
 		if (is_file($path)) {
 
@@ -721,19 +714,212 @@ class Unitest {
 				include_once $path;
 			}
 
-			// Instantiate new classes as child suites under this
+			// Store class tree
 			foreach ($classes as $class) {
-				$suite = new $class($parent);
+				// $suite = new $class();
+				$suites[] = array_merge(array_reverse(array_values(class_parents($class))), array($class));
 			}
 
 		}
 
-		return $this;
+		return $suites;
+	}
+
+	/**
+	* Find test suites in locations
+	*/
+	final private function loadFiles () {
+		$suites = array();
+		$paths = func_get_args();
+		$paths = $this->flattenArray($paths);
+
+		foreach ($paths as $path) {
+
+			// Path given
+			if (is_string($path)) {
+
+				// File
+				if (is_file($path)) {
+					$suites = array_merge($suites, $this->loadFile($path));
+
+				// Directory: scrape recursively for all files
+				} else if (is_dir($path)) {
+					$suites = array_merge($suites, call_user_func_array(array($this, 'loadFiles'), $this->rglobFiles($path)));
+				}
+
+			}
+
+		}
+
+		return $suites;
+	}
+
+	/**
+	* Find files recursively
+	*/
+	final private function rglobFiles ($path = '', $filetypes = array()) {
+
+		// Accept file type restrictions as a single array or multiple independent values
+		$arguments = func_get_args();
+		array_shift($arguments);
+		$filetypes = $this->flattenArray($arguments);
+
+		// Run glob_files for this directory and its subdirectories
+		$files = $this->globFiles($path, $filetypes);
+		foreach ($this->globDir($path) as $child) {
+			$files = array_merge($files, $this->rglobFiles($child, $filetypes));
+		}
+
+		return $files;
 	}
 
 
 
-	// Debugging and development
+	// Suite management
+
+	/**
+	* Go through a list of classes, merge parent classes
+	*
+	* INPUT
+	*	 array('Unitest', 'Alpha', 'Bravo', 'Charlie')
+	*
+	* OUTPUT
+	*	 array(
+	*		'Unitest' => array(
+	*			'Alpha' => array(
+	*				'Bravo' => array(
+	*					'Charlie' => array(
+	*					),
+	*				),
+	*			),
+	*		),
+	*	 )
+	*/
+	final private function generateClassMap ($classes) {
+		$results = array();
+
+		// Go deeper if there's any children
+		if (is_array($classes) and !empty($classes)) {
+			$children = $classes;
+			$parent = array_shift($children);
+
+			// Recursion for treating children
+			$results[$parent] = $this->generateClassMap($children);
+
+		}
+
+		return $results;
+	}
+
+	/**
+	* Instantiate suite objects based on class names recursively
+	*/
+	final private function generateSuites ($classes, $parent = null) {
+		$suites = array();
+
+		// Default to self
+		if (!isset($parent)) {
+			$parent = $this;
+		}
+
+		// Validate parent
+		if (!$this->isValidSuite($parent)) {
+			throw new Exception('Invalid parent suite passed as parent.');
+		}
+
+		foreach ($classes as $class => $children) {
+			$suite = new $class();
+
+			// Recursion
+			if (!empty($children)) {
+				$this->generateSuites($children, $suite);
+			}
+
+			// Add to own flock
+			$parent->child($suite);
+
+		}
+		return $this;
+	}
+
+	/**
+	* Go through a list of classes, merge parent classes
+	*
+	* INPUT
+	*	 array(
+	*		 array(
+	*			'Unitest' => array(
+	*				'Alpha' => array(
+	*					'Bravo' => array(
+	*						'Charlie' => array(
+	*						),
+	*					),
+	*				),
+	*			),
+	*		 ),
+	*		 array(
+	*			'Unitest' => array(
+	*				'Alpha' => array(
+	*					'Uniform' => array(
+	*					),
+	*				),
+	*			),
+	*		 ),
+	*	 )
+	*
+	* OUTPUT
+	*	 array(
+	*		'Unitest' => array(
+	*			'Alpha' => array(
+	*				'Bravo' => array(
+	*					'Charlie' => array(),
+	*				),
+	*				'Uniform' => array(),
+	*			),
+	*		),
+	*	 )
+	*/
+	final private function mergeClassMap ($classTrees) {
+		$results = array();
+
+		// Array of each
+		if (!empty($classTrees)) {
+			foreach ($classTrees as $classTree) {
+				foreach ($classTree as $name => $children) {
+
+					// New set
+					if (!isset($results[$name])) {
+						$results[$name] = array();
+					}
+
+					// Collect all children here
+					$results[$name][] = $children;
+
+				}
+			}
+
+			// Organize children
+			foreach ($results as $key => $value) {
+				if (empty($value)) {
+					$results[$key] = array();
+				} else if (count($value) === 1) {
+					$results[$key] = $value[0];
+				} else {
+					$results[$key] = $this->mergeClassMap($value);
+				}
+			}
+
+		}
+
+		// Sort by key
+		ksort($results);
+
+		return $results;
+	}
+
+
+
+	// Debugging
 
 	/**
 	* Flatten an array
@@ -760,8 +946,55 @@ class Unitest {
 
 
 
-function UnitestHandleError ($errno, $errstr, $errfile, $errline, array $errcontext) {
+function __UnitestHandleError ($errno, $errstr, $errfile, $errline, array $errcontext) {
 	throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
 }
+
+
+
+// Reports
+
+// final public function counts ($report) {
+// 	$counts = array(
+// 		'total' => 0,
+// 		'failed' => 0,
+// 		'passed' => 0,
+// 		'skipped' => 0,
+// 	);
+
+// 	foreach ($this->digest($report) as $suite) {
+// 		$counts['total'] += count($suite);
+// 		foreach ($suite as $test) {
+// 			$counts[$test['status']]++;
+// 		}
+// 	}
+
+// 	return $counts;
+// }
+
+// final public function digest ($report) {
+// 	$results = array();
+
+// 	// Quickly validate incoming report
+// 	if (is_array($report) and isset($report['children']) and isset($report['tests'])) {
+
+// 		// Sort test results by status
+// 		foreach ($report['tests'] as $testResult) {
+// 			$results[$testResult['class']][] = $testResult;
+// 		}
+
+// 		// Merge child suite results
+// 		foreach ($report['children'] as $childResults) {
+// 			$new = $this->digest($childResults);
+// 			$results = array_merge($results, $new);
+// 		}
+
+// 	// Return report as it was given
+// 	} else {
+// 		$results = $report;
+// 	}
+
+// 	return $results;
+// }
 
 ?>

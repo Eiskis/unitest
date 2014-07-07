@@ -5,14 +5,6 @@
 
 - No info on file paths or line numbers is stored. Locating failing tests could be difficult.
 - Maybe it's best to create classes for a test result and/or a report.
-- Documentation
-- Report card
-	- Separate page (static HTML)
-	- Runs tests via AJAX
-	- Passes spec path with POST
-	- Auto refresh
-	- knockout.js
-	- User settings visible in UI (spec path, poll duration)
 - Suite event handlers, supported by `run()` and `runTest()`
 	- `init()`
 	- `beforeTest()`
@@ -22,7 +14,17 @@
 - `injection()`
 	- consistent with `child`
 - `eject()`
-- Template helper: `$unitest->template($data, $report, $suite, $test)`
+- Refactoring
+	- Arranging suites seems pointless, since report is or could be created on class inheritance
+
+## Report dashboard
+
+- Separate page (static HTML)
+- Runs tests via AJAX
+- Passes spec path with POST
+- Auto refresh
+- knockout.js
+- User settings visible in UI (spec path, poll duration)
 
 ## Report format
 
