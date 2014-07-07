@@ -30,87 +30,94 @@
 
 	<body>
 
-		<div class="row row-intro">
-			<div class="row-content buffer">
+		<!-- Settings -->
+		<div class="column reset small-three settings inverted">
 
-				<!-- About -->
-				<!-- <h1 data-bind="text: title"></h1> -->
+			<div class="setting open">
 
-				<!-- Settings -->
-				<div class="column right medium-three settings">
+				<h2 class="reset">Config 1</h2>
 
-					<h1 data-bind="text: title"></h1>
+				<label data-bind="css: { available: specAvailable, unavailable: !specAvailable() }">
+					<p class="reset">Test location</p>
+					<p class="reset"><input type="text" class="squeeze plain buffer text" placeholder="Path to your tests..." data-bind="value: specPath"></input></p>
+				</label>
 
-					<label data-bind="css: { available: specAvailable, unavailable: !specAvailable() }">
-						<h4>Test location</h4>
-						<p><input type="text" class="squeeze plain buffer text" placeholder="Path to your tests..." data-bind="value: specPath"></input></p>
-					</label>
-
-					<label data-bind="css: { available: runnerAvailable, unavailable: !runnerAvailable() }">
-						<h4>Unitest runner</h4>
-						<p><input type="text" class="squeeze plain buffer text" placeholder="Path to your tests..." data-bind="value: runnerPath"></input></p>
-					</label>
-
-					<div class="clear"></div>
-
-				</div>
-
-				<!-- Results -->
-				<div class="column right medium-last medium-nine results">
-
-					<!-- ko if: suite -->
-						<div data-bind="with: suite">
-							<div class="canvas" data-bind="css: { 'red-border': failed, 'green-border': !failed() }">
-
-								<ul class="plain collapse stats">
-									<li class="total">
-										<strong data-bind="text: total"></strong>
-										<em>tests</em>
-									</li>
-									<li class="grey-color skipped">
-										<strong data-bind="text: skipped"></strong>
-										<em>skipped</em>
-									</li>
-									<li class="failed" data-bind="css: { 'red-color': failed }">
-										<strong data-bind="text: failed"></strong>
-										<em>failed</em>
-									</li>
-									<li class="passed" data-bind="css: { 'green-color': !failed() }">
-										<strong data-bind="text: passed"></strong>
-										<em>passed</em>
-									</li>
-								</ul>
-
-								<!-- Each suite -->
-								<div data-bind="foreach: allChildren">
-									<div class="suite">
-
-										<p class="discreet reset" data-bind="html: parentPath"></p>
-										<h4 class="reset"><span data-bind="text: name"></span> (<span data-bind="text: total"></span>)<strong class="red-color" data-bind="css: { hidden: !failed() }"> <span data-bind="text: failed"></span> fails</strong></h4>
-
-										<ul class="reset plain" data-bind="foreach: tests">
-
-											<li data-bind="css: status"><span data-bind="text: method, css: { 'red-color': (status === 'failed'), 'grey-color': (status === 'skipped') }"></span>
-											<!-- ko if: status === 'failed' -->
-												<span data-bind="text: message"></span>
-											<!-- /ko -->
-											</li>
-
-										</ul>
-									</div>
-								</div>
-
-							</div>
-						</div>
-					<!-- /ko -->
-
-					<!-- <pre><code class="canvas closed" data-bind="text: JSON.stringify(report())"></code></pre> -->
-				</div>
+				<label data-bind="css: { available: runnerAvailable, unavailable: !runnerAvailable() }">
+					<p class="reset">Unitest runner</p>
+					<p class="reset"><input type="text" class="squeeze plain buffer text" placeholder="Path to your tests..." data-bind="value: runnerPath"></input></p>
+				</label>
 
 				<div class="clear"></div>
 
 			</div>
+
+			<div class="setting closed">
+
+				<h2 class="reset">Config 2</h2>
+
+			</div>
+
 		</div>
+
+		<!-- Results -->
+		<div class="column reset small-last small-nine results">
+
+			<!-- ko if: suite -->
+				<div data-bind="with: suite">
+					<div class="canvas" data-bind="css: { 'red-border': failed, 'green-border': !failed() }">
+
+						<div class="inverted stats" data-bind="css: {
+							'red-background': failed,
+							'green-background': !failed()
+						}">
+							<ul class="reset plain collapse">
+								<li class="total">
+									<strong data-bind="text: total"></strong>
+									<em>tests</em>
+								</li>
+								<li class="failed">
+									<strong data-bind="text: failed"></strong>
+									<em>failed</em>
+								</li>
+								<li class="green-background passed">
+									<strong data-bind="text: passed"></strong>
+									<em>passed</em>
+								</li>
+								<li class="skipped">
+									<strong data-bind="text: skipped"></strong>
+									<em>skipped</em>
+								</li>
+							</ul>
+							<div class="clear"></div>
+						</div>
+
+						<!-- Each suite -->
+						<div data-bind="foreach: allChildren">
+							<div class="suite">
+
+								<p class="discreet reset" data-bind="html: parentPath"></p>
+								<h4 class="reset"><span data-bind="text: name"></span> (<span data-bind="text: total"></span>)<strong class="red-color" data-bind="css: { hidden: !failed() }"> <span data-bind="text: failed"></span> fails</strong></h4>
+
+								<ul class="reset plain" data-bind="foreach: tests">
+
+									<li data-bind="css: status"><span data-bind="text: method, css: { 'red-color': (status === 'failed'), 'grey-color': (status === 'skipped') }"></span>
+									<!-- ko if: status === 'failed' -->
+										<span data-bind="text: message"></span>
+									<!-- /ko -->
+									</li>
+
+								</ul>
+							</div>
+						</div>
+
+					</div>
+				</div>
+			<!-- /ko -->
+
+			<!-- <pre><code class="canvas closed" data-bind="text: JSON.stringify(report())"></code></pre> -->
+		</div>
+
+		<div class="clear"></div>
 
 
 

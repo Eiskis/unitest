@@ -21,17 +21,28 @@ body {
 	line-height: 1.6;
 }
 
-.canvas {
-	margin-bottom: 6%;
-	padding: 2% 4% 4% 4%;
-	border-radius: 3px;
-	border: 1px solid #aeb2b5;
-	background-color: #fcfcfc;
-	box-shadow: 0 0.4em 2em #d2d6d9;
+@media handheld,only screen and (min-width:40em) {
+	html, body {
+		min-height: 100%;
+		height: 100%;
+	}
+	.settings, .results {
+		height: 100%;
+		overflow: auto;
+	}
+}
+
+.row-content {
+	max-width: none;
 }
 
 a, input {
 	transition: 200ms;
+}
+
+.inverted {
+	background-color: #1e2326;
+	color: #fafafa;
 }
 
 
@@ -47,17 +58,14 @@ input[type="text"], textarea {
 	border-radius: 3px;
 	border-width: 1px;
 	border-color: #aeb2b5;
-	background-color: #fcfcfc;
-	box-shadow: 0 0.1em 0.4em #d2d6d9;
+	box-shadow: 0 0.1em 0.4em rgba(0, 0, 0, 0.2);
 }
 	input[type="text"]:hover, textarea:hover {
-		background-color: #fff;
-		box-shadow: 0 0.1em 0.4em #aeb2b5;
+		box-shadow: 0 0.1em 0.4em rgba(0, 0, 0, 0.5);
 	}
 	input[type="text"]:focus, textarea:focus {
 		outline: 0;
-		background-color: #fff;
-		box-shadow: 0 0.1em 0.9em #aeb2b5;
+		box-shadow: 0 0.1em 0.9em rgba(0, 0, 0, 0.5);
 	}
 	::-webkit-input-placeholder {
 	    color: #aeb2b5;
@@ -82,11 +90,19 @@ h1 {
 	text-transform: uppercase;
 	font-weight: 900;
 	line-height: 1.2;
+	font-size: 1em;
 }
-h2, h3 {
-	font-weight: inherit;
+h2 {
+	font-size: 1.4em;
 	text-transform: uppercase;
-	color: #bbb;
+	font-weight: inherit;
+}
+h3 {
+	font-size: inherit;
+}
+h4 {
+	font-size: inherit;
+	font-weight: inherit;
 }
 .discreet {
 	color: #aeb2b5;
@@ -136,17 +152,29 @@ pre {
 .settings .unavailable input {
 	border-color: #d6203e;
 }
+.settings .setting {
+	padding: 1em 2em;
+}
+.settings .setting.closed {
+	background-color: #373f45;
+	color: #aeb2b5;
+	cursor: pointer;
+}
 
 
 
 /*Stats*/
 .stats {
-	width: 100%;
 	line-height: 1.2;
 }
+	.stats ul {
+		width: 100%;
+	}
 	.stats li {
 		width: 25%;
 		text-align: center;
+		padding: 1em 0;
+		box-shadow: inset 0 0 3em rgba(0, 0, 0, 0.25);
 	}
 	.stats strong, .stats em {
 		display: block;
@@ -160,10 +188,14 @@ pre {
 
 /*Results*/
 .results .suite {
-	border-top: 1px dashed #aeb2b5;
+	border-top-width: 1px;
+	border-color: #aeb2b5;
 	padding: 2em 2em;
-	margin: 0 -2em;
+	box-shadow: inset 0 0 3em rgba(0, 0, 0, 0.1);
 }
+	.results .suite:first-of-type {
+		border-top-width: 0;
+	}
 
 
 
