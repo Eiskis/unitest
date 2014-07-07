@@ -38,13 +38,13 @@
 				<h2 class="reset">Config 1</h2>
 
 				<label data-bind="css: { available: specAvailable, unavailable: !specAvailable() }">
-					<p class="reset">Test location</p>
-					<p class="reset"><input type="text" class="squeeze plain buffer text" placeholder="Path to your tests..." data-bind="value: specPath"></input></p>
+					<p>Test location</p>
+					<p><input type="text" class="squeeze plain buffer text" placeholder="Path to your tests..." data-bind="value: specPath"></input></p>
 				</label>
 
 				<label data-bind="css: { available: runnerAvailable, unavailable: !runnerAvailable() }">
-					<p class="reset">Unitest runner</p>
-					<p class="reset"><input type="text" class="squeeze plain buffer text" placeholder="Path to your tests..." data-bind="value: runnerPath"></input></p>
+					<p>Unitest runner</p>
+					<p><input type="text" class="squeeze plain buffer text" placeholder="Path to your tests..." data-bind="value: runnerPath"></input></p>
 				</label>
 
 				<div class="clear"></div>
@@ -55,6 +55,10 @@
 
 				<h2 class="reset">Config 2</h2>
 
+			</div>
+
+			<div class="footer">
+				<p class="reset"><a href="" class="block buffer">Unitest</a></p>
 			</div>
 
 		</div>
@@ -89,38 +93,52 @@
 						</div>
 
 						<!-- Each suite -->
-						<div class="suites" data-bind="foreach: allChildren">
-							<div class="transition suite" data-bind="css: status">
+						<div class="suites">
 
-								<!-- Right-stacking fluid column -->
-								<div class="column fluid">
-									<div class="column-content">
+							<div class="buffer-top">
 
-										<!-- Title -->
-										<p class="discreet reset" data-bind="html: parentPath"></p>
-										<h3 class="reset"><span data-bind="text: name"></span></h3>
+								<!-- ko foreach: allChildren -->
+
+									<div class="transition suite" data-bind="css: status">
+
+										<!-- Right-stacking fluid column -->
+										<div class="column fluid">
+											<div class="column-content">
+
+												<!-- Title -->
+												<p class="discreet reset" data-bind="html: parentPath"></p>
+												<h3 class="reset"><span data-bind="text: name"></span></h3>
+
+											</div>
+										</div>
+
+										<!-- Total count -->
+										<div class="column fixed">
+											<h2 class="reset" class="total" data-bind="text: total"></h2>
+										</div>
+										<div class="clear"></div>
+
+										<!-- Tests -->
+										<ul class="reset plain tests" data-bind="foreach: tests">
+
+											<li class="test" data-bind="css: status">
+												<span data-bind="text: method"></span>
+												<span data-bind="text: message"></span>
+											</li>
+
+										</ul>
+										<div class="clear"></div>
 
 									</div>
+
+								<!-- /ko -->
+
+								<div class="footer">
+									<p class="reset"><span data-bind="text: total"></span> tests run in {{duration}}</p>
 								</div>
-
-								<!-- Total count -->
-								<div class="column fixed">
-									<h2 class="reset" class="total" data-bind="text: total"></h2>
-								</div>
-								<div class="clear"></div>
-
-								<!-- Tests -->
-								<ul class="reset plain tests" data-bind="foreach: tests">
-
-									<li class="test" data-bind="css: status">
-										<span data-bind="text: method"></span>
-										<span data-bind="text: message"></span>
-									</li>
-
-								</ul>
-								<div class="clear"></div>
 
 							</div>
+
 						</div>
 
 					</div>

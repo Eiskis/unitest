@@ -96,7 +96,7 @@ h1 {
 	font-size: 1em;
 }
 h2 {
-	font-size: 1.4em;
+	font-size: 1.2em;
 	line-height: 1;
 	text-transform: uppercase;
 	font-weight: inherit;
@@ -153,14 +153,11 @@ pre {
 .settings {
 	position: relative;
 }
-	.settings .available input {
-		border-color: #6aab35;
-	}
 	.settings .unavailable input {
 		border-color: #d6203e;
 	}
-	.settings .setting {
-		padding: 1em 2em;
+	.settings .setting, .settings .footer a {
+		padding: 1.5em;
 	}
 	.settings .setting.closed {
 		background-color: #373f45;
@@ -219,15 +216,19 @@ pre {
 	position: absolute;
 	z-index: 5;
 }
+	.suites > .buffer-top {
+		padding-top: 6em;
+	}
+	.suites .footer {
+		padding: 2em;
+		color: #aeb2b5;
+		text-align: center;
+	}
 .suite {
-	border-top-width: 1px;
+	border-bottom-width: 1px;
 	border-color: #aeb2b5;
 	padding: 2em 2em;
 }
-	.suite:first-of-type {
-		border-top-width: 0;
-		margin-top: 6em;
-	}
 	.suite:hover {
 		box-shadow: inset 0 0 3em rgba(0, 0, 0, 0.1);
 	}
