@@ -44,7 +44,6 @@ pre {
 	background-color: #fff;
 	box-shadow: 0 0.1em 0.6em #eee;
 	border-radius: 2px;
-	max-height: 20em;
 	overflow: scroll;
 }
 pre code {

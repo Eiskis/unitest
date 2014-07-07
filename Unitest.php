@@ -262,12 +262,12 @@ class Unitest {
 			'file'     => $this->file(),
 			'line'     => $this->lineNumber(),
 			'parents'  => $this->parents(),
-			'tests'    => array(),
 
 			'failed'   => 0,
 			'passed'   => 0,
 			'skipped'  => 0,
 
+			'tests'    => array(),
 			'children' => array(),
 		);
 
@@ -284,11 +284,19 @@ class Unitest {
 
 			// Child suite
 			if ($this->isValidSuite($suiteOrTest)) {
-				$results['children'][] = $suiteOrTest->run(array_merge($suiteOrTest->tests(), $suiteOrTest->children()));
+				$childResults = $suiteOrTest->run(array_merge($suiteOrTest->tests(), $suiteOrTest->children()));
+				$results['children'][] = $childResults;
+
+				// Iterate counters
+				foreach (array('failed', 'passed', 'skipped') as $key) {
+					$results[$key] = $results[$key] + $childResults[$key];
+				}
 
 			// Test method
 			} else if (is_string($suiteOrTest)) {
-				$results['tests'][$suiteOrTest] = $this->runTest($suiteOrTest);
+				$testResult = $this->runTest($suiteOrTest);
+				$results['tests'][$suiteOrTest] = $testResult;
+				$results[$testResult['status']]++;
 			}
 
 		}
@@ -481,37 +489,12 @@ class Unitest {
 
 
 
-	// Assessing a test result
-
-	final protected function assess ($value) {
-		if ($this->passes($value)) {
-			return 'passed';
-		} else if ($this->skips($value)) {
-			return 'skipped';
-		}
-		return 'failed';
-	}
-
-	final protected function fails ($value) {
-		return !($this->passes($value) or $this->skips($value));
-	}
-
-	final protected function passes ($value) {
-		return $value === true;
-	}
-
-	final protected function skips ($value) {
-		return $value === null;
-	}
-
-
-
-	// Private helpers: assertions
+	// Return a test result
 
 	/**
 	* Test can fail with false, or a message (any value but null or true)
 	*/
-	final private function fail () {
+	final protected function fail () {
 		$arguments = func_get_args();
 		$count = func_num_args();
 
@@ -531,15 +514,49 @@ class Unitest {
 	/**
 	* Test always passes with true
 	*/
-	final private function pass () {
+	final protected function pass () {
 		return true;
 	}
 
 	/**
 	* Test skipped with null
 	*/
-	final private function skip () {
+	final protected function skip () {
 		return true;
+	}
+
+
+
+	// Assess a value like it was a test result
+
+	final protected function assess ($value) {
+		if ($this->passes($value)) {
+			return 'passed';
+		} else if ($this->skips($value)) {
+			return 'skipped';
+		}
+		return 'failed';
+	}
+
+	/**
+	* Assess failure
+	*/
+	final protected function fails ($value) {
+		return !($this->passes($value) or $this->skips($value));
+	}
+
+	/**
+	* Assess pass
+	*/
+	final protected function passes ($value) {
+		return $value === true;
+	}
+
+	/**
+	* Assess skip
+	*/
+	final protected function skips ($value) {
+		return $value === null;
 	}
 
 
@@ -927,11 +944,13 @@ class Unitest {
 	final public function dump () {
 
 		$results = array(
-			'class' => ''.$this,
-			'children' => array(),
+			'class' => $this->name(),
+			'file' => $this->file(),
+			'lineNumber' => $this->lineNumber(),
 			'injections' => $this->injections(),
 			'parent' => $this->parent() ? ''.$this->parent() : null,
 			'parents' => $this->parents(),
+			'children' => array(),
 			'tests' => $this->tests(),
 		);
 

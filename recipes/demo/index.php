@@ -60,31 +60,13 @@ include_once 'baseline.php';
 
 
 
-		<h1>Dump</h1>
-
-		<div class="canvas">
-
-			<?php echo html_dump(array(
-				$u->dump(),
-			)); ?>
-
-		</div>
+		<?php // echo '<h1>Dump</h1><div class="canvas">'.html_dump($u->dump()).'</div>'; ?>
 
 
 
 		<h1>Get results</h1>
 
-		<div class="canvas">
-
-			<p>This is the report that <code>$u->run()</code> returns:</p>
-
-			<?php echo '<pre><code>'.json_encode($results, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES).'</code></pre>'; ?>
-
-			<?php // echo html_dump($results); ?>
-
-		</div>
-
-
+		<?php echo '<pre><code>'.json_encode($results, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES).'</code></pre>'; ?>
 
 		<script type="application/javascript" src="prism.js"></script>
 

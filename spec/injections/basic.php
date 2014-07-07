@@ -16,8 +16,13 @@ class UnitestInjectionsBasic extends Unitest {
 		return $this->should(isset($string) and is_string($string));
 	}
 
-	function testUnavailableInjection ($someKey = null) {
-		return $this->shouldNot(isset($someKey));
+	function testUnavailableInjection () {
+		try {
+			$this->injection('someUnavailableKey');
+			return $this->fail();
+		} catch (Exception $e) {
+			return $this->pass();
+		}
 	}
 
 }
