@@ -208,7 +208,7 @@ class Unitest {
 	final public function parents () {
 		$parents = array();
 		if ($this->parent()) {
-			$parents = array_merge(array($this->parent()->name()), $this->parent()->parents());
+			$parents = array_merge($this->parent()->parents(), array($this->parent()->name()));
 		}
 		return $parents;
 	}

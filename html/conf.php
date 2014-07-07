@@ -1,5 +1,5 @@
 <?php
-$specPath = '../../tests/';
+$specPath = '../tests/';
 
 $injections = array(
 	'foo' => 1,

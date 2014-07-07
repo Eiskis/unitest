@@ -16,6 +16,7 @@
 
 		self.injections = ko.observableArray();
 		self.report = ko.observable({});
+		self.suite = ko.observable();
 
 
 
@@ -109,6 +110,13 @@
 		});
 		self.specPath.subscribe(function (newValue) {
 			self.run();
+		});
+
+		// Generate suite objects when report is updated
+		self.report.subscribe(function (newValue) {
+			var suite = new DashboardSuite();
+			suite.load(newValue);
+			self.suite(suite);
 		});
 
 	};

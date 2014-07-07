@@ -21,10 +21,10 @@
 		</style>
 
 		<!-- Stylesheets -->
-		<link rel="stylesheet" href="assets/layers-core.css">
-		<link rel="stylesheet" href="assets/layers-responsive.css">
-		<!-- <link rel="stylesheet" href="assets/prism.css"> -->
-		<link rel="stylesheet" href="assets/dashboard.css">
+		<link rel="stylesheet" href="css/layers-core.css">
+		<link rel="stylesheet" href="css/layers-responsive.css">
+		<!-- <link rel="stylesheet" href="css/prism.css"> -->
+		<link rel="stylesheet" href="css/dashboard.css">
 
 	</head>
 
@@ -57,9 +57,27 @@
 
 				<!-- Results -->
 				<div class="column right medium-last medium-nine results">
-					<h2>Test results</h2>
 
-					<h2>Raw output</h2>
+					<!-- ko if: suite -->
+						<div class="canvas" data-bind="with: suite">
+
+							<h2 data-bind="text: name"></h2>
+
+							<p data-bind="text: file"></p>
+
+							<div data-bind="foreach: allChildren">
+								<div class="child">
+									<h4 class="reset" data-bind="text: name"></h4>
+									<p class="reset" data-bind="text: parentPath"></p>
+									<ul data-bind="foreach: tests">
+										<li><em data-bind="text: method"></em>: <span data-bind="text: status"></span></li>
+									</ul>
+								</div>
+							</div>
+
+						</div>
+					<!-- /ko -->
+
 					<pre><code class="canvas" data-bind="text: JSON.stringify(report())"></code></pre>
 				</div>
 
@@ -71,10 +89,16 @@
 
 
 		<!-- JavaScript dependencies -->
-		<script type="application/javascript" src="assets/jquery.js"></script>
-		<script type="application/javascript" src="assets/knockout.js"></script>
-		<!-- <script type="application/javascript" src="assets/prism.js"></script> -->
-		<script type="application/javascript" src="assets/dashboard.js"></script>
+		<script type="application/javascript" src="js/jquery.js"></script>
+		<script type="application/javascript" src="js/knockout.js"></script>
+		<!-- <script type="application/javascript" src="js/prism.js"></script> -->
+		<script type="application/javascript" src="js/equals.js"></script>
+		<script type="application/javascript" src="js/type.js"></script>
+		<script type="application/javascript" src="js/is.js"></script>
+
+		<!-- Own scripts -->
+		<script type="application/javascript" src="dashboard/Dashboard.js"></script>
+		<script type="application/javascript" src="dashboard/DashboardSuite.js"></script>
 
 		<!-- Init -->
 		<script type="application/javascript">
