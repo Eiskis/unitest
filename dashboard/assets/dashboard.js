@@ -1,18 +1,18 @@
 
 (function (root) {
 
-	var dashboard = function () {
+	var Dashboard = function () {
 		var self = this;
 
 		// Ko properties
 		self.title = ko.observable('Unitest Dashboard');
 
 		self.runnerAvailable = ko.observable(true);
-		self.runnerPath = ko.observable('run/');
-		self.runnerUndoPath = ko.observable('../');
+		self.runnerPath = ko.observable('../runner/');
+		self.runnerUndoPath = ko.observable('');
 
 		self.specAvailable = ko.observable(true);
-		self.specPath = ko.observable('');
+		self.specPath = ko.observable('../tests/');
 
 		self.injections = ko.observableArray();
 		self.report = ko.observable({});
@@ -113,6 +113,6 @@
 
 	};
 
-	root.dashboard = dashboard;
+	root.Dashboard = Dashboard;
 
 })(window);

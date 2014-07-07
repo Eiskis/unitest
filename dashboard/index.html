@@ -34,17 +34,21 @@
 			<div class="row-content buffer">
 
 				<!-- About -->
-				<h1 data-bind="text: title"></h1>
+				<!-- <h1 data-bind="text: title"></h1> -->
 
 				<!-- Settings -->
-				<div class="canvas settings">
+				<div class="column right medium-three settings">
 
-					<label class="column half" data-bind="css: { available: specAvailable, unavailable: !specAvailable() }">
-						<h3>Test location</h3><p><input type="text" class="squeeze plain buffer text" placeholder="Path to your tests..." data-bind="value: specPath"></input></p>
+					<h1 data-bind="text: title"></h1>
+
+					<label data-bind="css: { available: specAvailable, unavailable: !specAvailable() }">
+						<h4>Test location</h4>
+						<p><input type="text" class="squeeze plain buffer text" placeholder="Path to your tests..." data-bind="value: specPath"></input></p>
 					</label>
 
-					<label class="column half last" data-bind="css: { available: runnerAvailable, unavailable: !runnerAvailable() }">
-						<h3>Unitest runner</h3><p><input type="text" class="squeeze plain buffer text" placeholder="Path to your tests..." data-bind="value: runnerPath"></input></p>
+					<label data-bind="css: { available: runnerAvailable, unavailable: !runnerAvailable() }">
+						<h4>Unitest runner</h4>
+						<p><input type="text" class="squeeze plain buffer text" placeholder="Path to your tests..." data-bind="value: runnerPath"></input></p>
 					</label>
 
 					<div class="clear"></div>
@@ -52,7 +56,14 @@
 				</div>
 
 				<!-- Results -->
-				<pre><code data-bind="text: JSON.stringify(report())"></code></pre>
+				<div class="column right medium-last medium-nine results">
+					<h2>Test results</h2>
+
+					<h2>Raw output</h2>
+					<pre><code class="canvas" data-bind="text: JSON.stringify(report())"></code></pre>
+				</div>
+
+				<div class="clear"></div>
 
 			</div>
 		</div>
@@ -67,7 +78,7 @@
 
 		<!-- Init -->
 		<script type="application/javascript">
-			var app = new dashboard();
+			var app = new Dashboard();
 			app.init(document.getElementById('app'));
 		</script>
 
