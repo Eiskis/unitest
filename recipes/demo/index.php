@@ -5,18 +5,22 @@ ini_set('error_log', 'errors.log');
 mb_internal_encoding('UTF-8');
 date_default_timezone_set('UTC');
 
-include_once '../../Unitest.php';
-include_once 'baseline.php';
+// Lib
+require_once '../../Unitest.php';
 
-?>
+// Variables
+$specPath = '';
+$injections = array();
+require_once 'conf.php';
 
-<?php
-	$u = new Unitest();
-	$u->scrape('../../spec/');
-	$u->inject('foo', 1);
-	$u->inject('bar', 2);
-	$u->inject('string', 'Some string value');
-	$results = $u->run();
+// Init
+$u = new Unitest();
+$u->scrape($specPath);
+foreach ($injections as $key => $value) {
+	$u->inject($key, $value);
+}
+
+$report = $u->run();
 ?>
 
 <!DOCTYPE html>
@@ -58,15 +62,9 @@ include_once 'baseline.php';
 
 	<body class="language-php">
 
-
-
 		<?php // echo '<h1>Dump</h1><div class="canvas">'.html_dump($u->dump()).'</div>'; ?>
 
-
-
-		<h1>Get results</h1>
-
-		<?php echo '<pre><code>'.json_encode($results, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES).'</code></pre>'; ?>
+		<?php echo '<pre><code class="language-javascript">'.json_encode($report, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES).'</code></pre>'; ?>
 
 		<script type="application/javascript" src="prism.js"></script>
 

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" id="app">
+	<head>
+		<meta charset="utf-8">
+
+		<title data-bind="text: title"></title>
+
+		<meta name="mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimal-ui">
+		<meta name="msapplication-tap-highlight" content="no">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+		<style type="text/css">
+			@-ms-viewport{width: device-width;}
+			@-o-viewport{width: device-width;}
+			@viewport{width: device-width;}
+			body{-webkit-tap-highlight-color: transparent;-webkit-text-size-adjust: none;-moz-text-size-adjust: none;-ms-text-size-adjust: none;}
+		</style>
+
+		<!-- Stylesheets -->
+		<link rel="stylesheet" href="assets/layers-core.css">
+		<link rel="stylesheet" href="assets/layers-responsive.css">
+		<!-- <link rel="stylesheet" href="assets/prism.css"> -->
+		<link rel="stylesheet" href="assets/dashboard.css">
+
+	</head>
+
+	<body>
+
+		<div class="row row-intro">
+			<div class="row-content buffer">
+
+				<h1 data-bind="text: title"></h1>
+
+				<ul class="plain">
+					<li>Runner path: <span data-bind="text: runnerPath"></span></li>
+					<li>Runner status: <span data-bind="text: runnerStatus"></span></li>
+					<li><label>Spec path: <input type="text" data-bind="value: specPath"></input></label></li>
+				</ul>
+
+				<pre><code data-bind="text: JSON.stringify(report())"></code></pre>
+
+			</div>
+		</div>
+
+
+
+		<!-- JavaScript dependencies -->
+		<script type="application/javascript" src="assets/jquery.js"></script>
+		<script type="application/javascript" src="assets/knockout.js"></script>
+		<!-- <script type="application/javascript" src="assets/prism.js"></script> -->
+		<script type="application/javascript" src="assets/dashboard.js"></script>
+
+		<!-- Init -->
+		<script type="application/javascript">
+			var app = new dashboard();
+			app.init(document.getElementById('app'));
+		</script>
+
+	</body>
+</html>

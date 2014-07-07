@@ -12,14 +12,6 @@ body {
 .hidden {
 	display: none;
 }
-.canvas {
-	margin-bottom: 6%;
-	padding: 2% 6% 4% 6%;
-	border-radius: 3px;
-	border: 1px solid #ddd;
-	background-color: #fcfcfc;
-	box-shadow: 0 0.4em 2em #ddd;
-}
 h1 {
 	margin-top: 6%;
 	text-transform: uppercase;
@@ -37,14 +29,6 @@ h4 {
 }
 h1 code, h2 code, h3 code, h4 code {
 	text-transform: none;
-}
-pre {
-	padding: 1.9em;
-	border: 1px solid #ddd;
-	background-color: #fff;
-	box-shadow: 0 0.1em 0.6em #eee;
-	border-radius: 2px;
-	overflow: scroll;
 }
 pre code {
 	display: block;

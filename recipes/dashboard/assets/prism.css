@@ -25,11 +25,11 @@ code, pre {
 
 /* Code blocks */
 pre {
-	background-image: -webkit-linear-gradient(transparent 50%, rgba(255, 255, 255, 1) 50%);
-	background-image: -moz-linear-gradient(transparent 50%, rgba(255, 255, 255, 1) 50%);
-	background-image: -ms-linear-gradient(transparent 50%, rgba(255, 255, 255, 1) 50%);
-	background-image: -o-linear-gradient(transparent 50%, rgba(255, 255, 255, 1) 50%);
-	background-image: linear-gradient(transparent 50%, rgba(255, 255, 255, 1) 50%);
+	background-image: -webkit-linear-gradient(transparent 50%, rgba(0, 0, 0, 0.03) 50%);
+	background-image: -moz-linear-gradient(transparent 50%, rgba(0, 0, 0, 0.03) 50%);
+	background-image: -ms-linear-gradient(transparent 50%, rgba(0, 0, 0, 0.03) 50%);
+	background-image: -o-linear-gradient(transparent 50%, rgba(0, 0, 0, 0.03) 50%);
+	background-image: linear-gradient(transparent 50%, rgba(0, 0, 0, 0.03) 50%);
 	background-size: 2.5em 2.5em;
 	background-origin: content-box;
 }
