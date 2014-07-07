@@ -12,6 +12,9 @@
 		self.failed = ko.observable(0);
 		self.passed = ko.observable(0);
 		self.skipped = ko.observable(0);
+		self.total = ko.computed(function () {
+			return self.failed() + self.passed() + self.skipped();
+		});
 
 		self.parents = ko.observableArray();
 		self.tests = ko.observableArray();
@@ -22,7 +25,7 @@
 			return self.class();
 		});
 		self.parentPath = ko.computed(function () {
-			return self.parents().join('/');
+			return self.parents().join(' &rsaquo; ');
 		});
 
 		// Tools

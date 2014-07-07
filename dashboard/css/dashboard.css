@@ -51,11 +51,13 @@ input[type="text"], textarea {
 	box-shadow: 0 0.1em 0.4em #d2d6d9;
 }
 	input[type="text"]:hover, textarea:hover {
+		background-color: #fff;
 		box-shadow: 0 0.1em 0.4em #aeb2b5;
 	}
 	input[type="text"]:focus, textarea:focus {
 		outline: 0;
-		box-shadow: 0 0.2em 0.9em #aeb2b5;
+		background-color: #fff;
+		box-shadow: 0 0.1em 0.9em #aeb2b5;
 	}
 	::-webkit-input-placeholder {
 	    color: #aeb2b5;
@@ -74,13 +76,6 @@ input[type="text"], textarea {
 
 
 
-/*Settings*/
-.settings .unavailable input {
-	border-color: #d6203e;
-}
-
-
-
 /*Typography*/
 h1 {
 	margin-top: 6%;
@@ -93,10 +88,9 @@ h2, h3 {
 	text-transform: uppercase;
 	color: #bbb;
 }
-h4 {
-	border-top: 1px dashed #aeb2b5;
-	margin-top: 2em;
-	padding-top: 1em;
+.discreet {
+	color: #aeb2b5;
+	font-size: small;
 }
 
 
@@ -121,8 +115,13 @@ pre {
 }
 	pre code {
 		display: block;
-		max-height: 40em;
-		overflow: scroll;
+		overflow: auto;
+	}
+	pre code.closed {
+		overflow: hidden;
+		height: 0;
+		color: rgba(0, 0, 0, 0.1);
+		cursor: pointer;
 	}
 	code {
 		font-size: 0.8em;
@@ -130,16 +129,41 @@ pre {
 
 
 
+/*Settings*/
+.settings .available input {
+	border-color: #6aab35;
+}
+.settings .unavailable input {
+	border-color: #d6203e;
+}
+
+
+
 /*Stats*/
 .stats {
-	list-style-type: none;
-	padding-left: 0;
+	width: 100%;
+	line-height: 1.2;
 }
 	.stats li {
-		float: left;
-		clear: none;
-		margin-right: 2em;
+		width: 25%;
+		text-align: center;
 	}
+	.stats strong, .stats em {
+		display: block;
+	}
+	.stats strong {
+		font-size: 2em;
+	}
+	.stats em {
+		font-style: inherit;
+	}
+
+/*Results*/
+.results .suite {
+	border-top: 1px dashed #aeb2b5;
+	padding: 2em 2em;
+	margin: 0 -2em;
+}
 
 
 

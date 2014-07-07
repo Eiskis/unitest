@@ -59,26 +59,52 @@
 				<div class="column right medium-last medium-nine results">
 
 					<!-- ko if: suite -->
-						<div class="canvas" data-bind="with: suite">
+						<div data-bind="with: suite">
+							<div class="canvas" data-bind="css: { 'red-border': failed, 'green-border': !failed() }">
 
-							<h2 data-bind="text: name"></h2>
+								<ul class="plain collapse stats">
+									<li class="total">
+										<strong data-bind="text: total"></strong>
+										<em>tests</em>
+									</li>
+									<li class="grey-color skipped">
+										<strong data-bind="text: skipped"></strong>
+										<em>skipped</em>
+									</li>
+									<li class="failed" data-bind="css: { 'red-color': failed }">
+										<strong data-bind="text: failed"></strong>
+										<em>failed</em>
+									</li>
+									<li class="passed" data-bind="css: { 'green-color': !failed() }">
+										<strong data-bind="text: passed"></strong>
+										<em>passed</em>
+									</li>
+								</ul>
 
-							<p data-bind="text: file"></p>
+								<!-- Each suite -->
+								<div data-bind="foreach: allChildren">
+									<div class="suite">
 
-							<div data-bind="foreach: allChildren">
-								<div class="child">
-									<h4 class="reset" data-bind="text: name"></h4>
-									<p class="reset" data-bind="text: parentPath"></p>
-									<ul data-bind="foreach: tests">
-										<li><em data-bind="text: method"></em>: <span data-bind="text: status"></span></li>
-									</ul>
+										<p class="discreet reset" data-bind="html: parentPath"></p>
+										<h4 class="reset"><span data-bind="text: name"></span> (<span data-bind="text: total"></span>)<strong class="red-color" data-bind="css: { hidden: !failed() }"> <span data-bind="text: failed"></span> fails</strong></h4>
+
+										<ul class="reset plain" data-bind="foreach: tests">
+
+											<li data-bind="css: status"><span data-bind="text: method, css: { 'red-color': (status === 'failed'), 'grey-color': (status === 'skipped') }"></span>
+											<!-- ko if: status === 'failed' -->
+												<span data-bind="text: message"></span>
+											<!-- /ko -->
+											</li>
+
+										</ul>
+									</div>
 								</div>
-							</div>
 
+							</div>
 						</div>
 					<!-- /ko -->
 
-					<pre><code class="canvas" data-bind="text: JSON.stringify(report())"></code></pre>
+					<!-- <pre><code class="canvas closed" data-bind="text: JSON.stringify(report())"></code></pre> -->
 				</div>
 
 				<div class="clear"></div>
