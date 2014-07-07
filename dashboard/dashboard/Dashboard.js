@@ -50,10 +50,7 @@
 		// Startup
 		self.init = function (container) {
 			ko.applyBindings(self, container);
-			self.ping().always(function () {
-				self.run();
-			});
-			return self;
+			return self.run();
 		};
 
 		// Ping for backend availability

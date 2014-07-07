@@ -16,16 +16,21 @@ body {
 		min-height: 100%;
 		height: 100%;
 	}
-	.settings, .results {
+	.settings, .results, .suites {
 		height: 100%;
-		overflow: auto;
+	}
+	.results {
+		overflow-y: hidden;
+	}
+	.settings, .suites {
+		overflow-y: auto;
 	}
 }
 
 
 
 /*Defaults*/
-a, input {
+a, input, .transition {
 	transition-property: background-color, color, box-shadow, border-color;
 	transition: 200ms;
 }
@@ -146,6 +151,7 @@ pre {
 
 /*Settings*/
 .settings {
+	position: relative;
 }
 	.settings .available input {
 		border-color: #6aab35;
@@ -164,9 +170,19 @@ pre {
 
 
 
+/*Results*/
+.results {
+	position: relative;
+}
+
+
+
 /*Stats*/
 .stats {
-	line-height: 1.2;
+	width: 100%;
+	position: absolute;
+	line-height: 1;
+	z-index: 10;
 }
 	.stats ul {
 		width: 100%;
@@ -174,7 +190,7 @@ pre {
 	.stats li {
 		width: 25%;
 		text-align: center;
-		padding: 1em 0;
+		padding: 1.5em 0;
 		box-shadow: inset 0 0 3em rgba(0, 0, 0, 0.25);
 	}
 	.stats strong, .stats em {
@@ -187,17 +203,33 @@ pre {
 		font-style: inherit;
 	}
 
+	/*States*/
+	.main.failed .stats {
+		background-color: #d6203e;
+	}
+	.main.failed .stats .passed, .main.passed .stats .passed {
+		background-color: #6aab35;
+	}
+
 
 
 /*Results*/
+.suites {
+	width: 100%;
+	position: absolute;
+	z-index: 5;
+}
 .suite {
 	border-top-width: 1px;
 	border-color: #aeb2b5;
 	padding: 2em 2em;
-	box-shadow: inset 0 0 3em rgba(0, 0, 0, 0.1);
 }
 	.suite:first-of-type {
 		border-top-width: 0;
+		margin-top: 6em;
+	}
+	.suite:hover {
+		box-shadow: inset 0 0 3em rgba(0, 0, 0, 0.1);
 	}
 	.suite .column.fixed {
 		width: 5em;
@@ -210,6 +242,7 @@ pre {
 		margin-left: 6.5em;
 	}
 	.suite h2 {
+		font-weight: 100;
 		font-size: 2.8em;
 		color: #aeb2b5;
 	}
@@ -219,33 +252,11 @@ pre {
 		.suite.failed h3 {
 			color: #d6203e;
 		}
+		.suite.skipped h3 {
+			color: #aeb2b5;
+		}
 
-
-/*Coloring*/
-.red-color, .failed-color {
-	color: #d6203e;
-}
-	.red-background, .failed-background {
-		background-color: #d6203e;
-	}
-	.red-border, .failed-border {
-		border-color: #d6203e;
-	}
-.green-color, .passed-color {
-	color: #6aab35;
-}
-	.green-background, .passed-background {
-		background-color: #6aab35;
-	}
-	.green-border, .passed-border {
-		border-color: #6aab35;
-	}
-.grey-color, .skipped-color {
+/*Tests*/
+.test.skipped {
 	color: #aeb2b5;
 }
-	.grey-background, .skipped-background {
-		background-color: #aeb2b5;
-	}
-	.grey-border, .skipped-border {
-		border-color: #aeb2b5;
-	}

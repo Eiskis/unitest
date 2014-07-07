@@ -295,7 +295,7 @@ class Unitest {
 			// Test method
 			} else if (is_string($suiteOrTest)) {
 				$testResult = $this->runTest($suiteOrTest);
-				$results['tests'][$suiteOrTest] = $testResult;
+				$results['tests'][] = $testResult;
 				$results[$testResult['status']]++;
 			}
 

@@ -64,12 +64,9 @@
 
 			<!-- ko if: suite -->
 				<div data-bind="with: suite">
-					<div class="canvas" data-bind="css: { 'red-border': failed, 'green-border': !failed() }">
+					<div class="main" data-bind="css: status">
 
-						<div class="inverted stats" data-bind="css: {
-							'red-background': failed,
-							'green-background': !failed()
-						}">
+						<div class="inverted stats">
 							<ul class="reset plain collapse">
 								<li class="total">
 									<strong data-bind="text: total"></strong>
@@ -79,7 +76,7 @@
 									<strong data-bind="text: failed"></strong>
 									<em>failed</em>
 								</li>
-								<li class="green-background passed">
+								<li class="passed">
 									<strong data-bind="text: passed"></strong>
 									<em>passed</em>
 								</li>
@@ -92,8 +89,8 @@
 						</div>
 
 						<!-- Each suite -->
-						<div data-bind="foreach: allChildren">
-							<div class="suite" data-bind="css: { failed: failed, passed: !failed() }">
+						<div class="suites" data-bind="foreach: allChildren">
+							<div class="transition suite" data-bind="css: status">
 
 								<!-- Right-stacking fluid column -->
 								<div class="column fluid">
@@ -113,12 +110,11 @@
 								<div class="clear"></div>
 
 								<!-- Tests -->
-								<ul class="reset plain" data-bind="foreach: tests">
+								<ul class="reset plain tests" data-bind="foreach: tests">
 
-									<li data-bind="css: status"><span data-bind="text: method, css: { 'red-color': (status === 'failed'), 'grey-color': (status === 'skipped') }"></span>
-									<!-- ko if: status === 'failed' -->
+									<li class="test" data-bind="css: status">
+										<span data-bind="text: method"></span>
 										<span data-bind="text: message"></span>
-									<!-- /ko -->
 									</li>
 
 								</ul>
@@ -149,6 +145,7 @@
 		<!-- Own scripts -->
 		<script type="application/javascript" src="dashboard/Dashboard.js"></script>
 		<script type="application/javascript" src="dashboard/DashboardSuite.js"></script>
+		<script type="application/javascript" src="dashboard/DashboardTest.js"></script>
 
 		<!-- Init -->
 		<script type="application/javascript">

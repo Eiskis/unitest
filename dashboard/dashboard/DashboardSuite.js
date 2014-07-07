@@ -12,18 +12,25 @@
 		self.failed = ko.observable(0);
 		self.passed = ko.observable(0);
 		self.skipped = ko.observable(0);
-		self.total = ko.computed(function () {
-			return self.failed() + self.passed() + self.skipped();
-		});
 
 		self.parents = ko.observableArray();
 		self.tests = ko.observableArray();
 		self.children = ko.observableArray();
 
-		// Shortcuts
+		// Computeds
+
 		self.name = ko.computed(function () {
 			return self.class();
 		});
+
+		self.total = ko.computed(function () {
+			return self.failed() + self.passed() + self.skipped();
+		});
+
+		self.status = ko.computed(function () {
+			return self.failed() ? 'failed' : (self.passed() ? 'passed' : 'skipped');
+		});
+
 		self.parentPath = ko.computed(function () {
 			return self.parents().join(' &rsaquo; ');
 		});
@@ -69,8 +76,10 @@
 				// Tests
 				if (is.set(data.tests)) {
 					var tests = [];
-					for (var testKey in data.tests) {
-						tests.push(data.tests[testKey]);
+					for (var k = 0; k < data.tests.length; k++) {
+						var test = new DashboardTest();
+						test.load(data.tests[k]);
+						tests.push(test);
 					}
 					self.tests(tests);
 				}
