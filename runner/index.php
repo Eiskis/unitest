@@ -9,7 +9,7 @@ date_default_timezone_set('UTC');
 header('Content-type: application/json');
 
 // Lib
-require_once 'Unitest.php';
+require_once '../Unitest.php';
 
 // Defaults
 $path = '';
