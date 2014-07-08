@@ -2,7 +2,6 @@
 # To do
 
 - Test durations
-- Non-associative array for tests report
 - `eject()`
 - Suite events, supported by `run()` and `runTest()`
 	- `init()`
@@ -10,16 +9,39 @@
 	- `afterTest()`
 	- `cleanup()`
 	- Injections work
+- Test injections with self-injecting suite (use `init()`)
+	- make sure injections are passed as clones
+	- test all types, and with a dummy class object
+- `->clone()`
+- Private constants
+	- Prefix
+	- Root class name
+	- Status names
+- shoulds
+	- types
+		- object
+		- array
+		- indexed array (queue)
+		- assoc array (hash)
+		- integer
+		- float
+		- string
+		- boolean
+	- shouldBeIncluded
+	- shouldBeAvailableClass
+	- shouldBeAvailableClassMethod
+	- shouldHave($obj, $property)
 
 ## Report dashboard
 
+- Better layout (top bar)
 - Auto refresh
 - Activity indicator
 - User settings in UI
 	- Poll duration
 	- Filters
 	- View type
-- Better look
+- Total test numbers in footer
 
 ## Report format
 

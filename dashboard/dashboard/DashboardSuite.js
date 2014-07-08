@@ -17,8 +17,9 @@
 		self.tests = ko.observableArray();
 		self.children = ko.observableArray();
 
-		// Computeds
-
+		/**
+		* Computeds parameters
+		*/
 		self.name = ko.computed(function () {
 			return self.class();
 		});
@@ -35,7 +36,7 @@
 			return self.parents().join(' &rsaquo; ');
 		});
 
-		// Tools
+		// Flat listing of all childs, grand childs etc.
 		self.allChildren = ko.computed(function () {
 			var all = [];
 			var children = self.children();
@@ -47,9 +48,13 @@
 				}
 			}
 			return all;
-		});
+		}).extend({throttle: 1});
 
-		// Load data from JSON
+
+
+		/**
+		* Load data from JSON
+		*/
 		self.load = function (data) {
 			if (is.hash(data)) {
 

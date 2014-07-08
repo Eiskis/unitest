@@ -11,26 +11,12 @@ body {
 	line-height: 1.6;
 }
 
-@media handheld,only screen and (min-width:40em) {
-	html, body {
-		min-height: 100%;
-		height: 100%;
-	}
-	.settings, .results, .suites {
-		height: 100%;
-	}
-	.results {
-		overflow-y: hidden;
-	}
-	.settings, .suites {
-		overflow-y: auto;
-	}
-}
-
 
 
 /*Defaults*/
-a, input, .transition {
+.loaded a,
+.loaded input,
+.loaded .transition {
 	transition-property: background-color, color, box-shadow, border-color;
 	transition: 200ms;
 }
@@ -117,7 +103,6 @@ h4 {
 
 /*Links*/
 a {
-	transition: color 200ms;
 	text-decoration: none;
 	color: hsl(200, 100%, 45%);
 }
@@ -149,43 +134,42 @@ pre {
 
 
 
-/*Settings*/
-.settings {
+/*Configurations*/
+.confs {
 	position: relative;
 }
-	.settings .unavailable input {
+	.confs .list {
+	}
+	.confs .list a {
+		color: #aeb2b5;
+		padding: 0.5em 1em;
+	}
+	.confs .list .selected a {
+		color: inherit;
+	}
+
+	/*Toggling*/
+	.confs .editor {
+		display: none;
+	}
+		.confs .editor.open {
+			display: block;
+		}
+
+	/*Selected conf editor*/
+	.confs .unavailable input {
 		border-color: #d6203e;
 	}
-	.settings .setting, .settings .footer a {
-		padding: 1.5em;
-	}
-	.settings .setting.closed {
-		background-color: #373f45;
-		color: #aeb2b5;
-		cursor: pointer;
-	}
-
-
-
-/*Results*/
-.results {
-	position: relative;
-}
 
 
 
 /*Stats*/
 .stats {
-	width: 100%;
-	position: absolute;
 	line-height: 1;
-	z-index: 10;
 }
 	.stats ul {
-		width: 100%;
 	}
 	.stats li {
-		width: 25%;
 		text-align: center;
 		padding: 1.5em 0;
 		box-shadow: inset 0 0 3em rgba(0, 0, 0, 0.25);
@@ -201,24 +185,27 @@ pre {
 	}
 
 	/*States*/
-	.main.failed .stats {
+	.results.failed .stats {
 		background-color: #d6203e;
 	}
-	.main.failed .stats .passed, .main.passed .stats .passed {
+	.results.failed .stats .passed, .results.passed .stats .passed {
 		background-color: #6aab35;
+	}
+
+	/*Small screen*/
+	@media handheld,only screen and (max-width: 40em){
+		.stats li {
+			clear: none;
+			float: left;
+			width: 50%;
+		}
 	}
 
 
 
 /*Results*/
 .suites {
-	width: 100%;
-	position: absolute;
-	z-index: 5;
 }
-	.suites > .buffer-top {
-		padding-top: 6em;
-	}
 	.suites .footer {
 		padding: 2em;
 		color: #aeb2b5;
