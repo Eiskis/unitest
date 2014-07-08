@@ -1,4 +1,40 @@
 
+/*Rotate animations*/
+@-webkit-keyframes rotate {
+	0% { -webkit-transform(rotate(0deg)); }
+	100% { -webkit-transform(rotate(360deg)); }
+}
+@-moz-keyframes rotate {
+	0% { -moz-transform(rotate(0deg)); }
+	100% { -moz-transform(rotate(360deg)); }
+}
+@keyframes rotate {
+	0% { transform(rotate(0deg)); }
+	100% { transform(rotate(360deg)); }
+}
+
+/*Spinner*/
+.loading-spinner {
+	-webkit-animation: rotate 1s infinite ease-in-out;
+	-moz-animation: rotate 1s infinite ease-in-out;
+	-ms-animation: rotate 1s infinite ease-in-out;
+	animation: rotate 1s infinite ease-in-out;
+
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	display: inline-block;
+	width: 1em;
+	height: 1em;
+	border: 2px solid #fff;
+	border-right-color: transparent;
+	border-radius: 50%;
+}
+
+
+
+
+
 /*Layout*/
 body {
 	margin-left: auto;
@@ -18,7 +54,7 @@ body {
 .loaded input,
 .loaded .transition {
 	transition-property: background-color, color, box-shadow, border-color;
-	transition: 200ms;
+	transition: 150ms;
 }
 
 .hidden {
@@ -46,7 +82,7 @@ input, textarea {
 input[type="text"], textarea {
 	border-radius: 3px;
 	border-width: 1px;
-	border-color: #aeb2b5;
+	border-color: #919699;
 	box-shadow: 0 0.1em 0.4em rgba(0, 0, 0, 0.2);
 }
 	input[type="text"]:hover, textarea:hover {
@@ -57,18 +93,18 @@ input[type="text"], textarea {
 		box-shadow: 0 0.1em 0.9em rgba(0, 0, 0, 0.5);
 	}
 	::-webkit-input-placeholder {
-	    color: #aeb2b5;
+	    color: #919699;
 	}
 	:-moz-placeholder {
-	    color: #aeb2b5;
+	    color: #919699;
 	    opacity: 1;
 	}
 	::-moz-placeholder {
-	    color: #aeb2b5;
+	    color: #919699;
 	    opacity: 1;
 	}
 	:-ms-input-placeholder {
-	    color: #aeb2b5;
+	    color: #919699;
 	}
 
 
@@ -95,8 +131,7 @@ h4 {
 	font-weight: inherit;
 }
 .discreet {
-	color: #aeb2b5;
-	font-size: small;
+	color: #919699;
 }
 
 
@@ -141,18 +176,27 @@ pre {
 	.confs .list {
 	}
 	.confs .list a {
-		color: #aeb2b5;
-		padding: 0.5em 1em;
+		color: #919699;
+		display: block;
+		padding: 0.6em 1em 0.5em 1em;
+		border-color: #465259;
 	}
-	.confs .list .selected a {
+		.confs .list .selected a {
+			background-color: #465259;
+		}
+	.confs .list a:hover, .confs.open .list .selected a {
 		color: inherit;
 	}
+		.confs.open .list .selected a:hover {
+		}
 
 	/*Toggling*/
 	.confs .editor {
+		border-top-width: 0.2em;
+		border-color: #465259;
 		display: none;
 	}
-		.confs .editor.open {
+		.confs.open .editor {
 			display: block;
 		}
 
@@ -163,13 +207,21 @@ pre {
 
 
 
+/*Stast + tests*/
+.results {
+}
+
+
+
 /*Stats*/
 .stats {
 	line-height: 1;
 }
 	.stats ul {
+		width: 100%;
 	}
 	.stats li {
+		height: 25%;
 		text-align: center;
 		padding: 1.5em 0;
 		box-shadow: inset 0 0 3em rgba(0, 0, 0, 0.25);
@@ -192,13 +244,18 @@ pre {
 		background-color: #6aab35;
 	}
 
-	/*Small screen*/
+	/*2x2 grid*/
 	@media handheld,only screen and (max-width: 40em){
 		.stats li {
 			clear: none;
 			float: left;
 			width: 50%;
 		}
+	}
+
+	/*Side panel*/
+	@media handheld, only screen and (min-width: 40em) {
+
 	}
 
 
@@ -208,12 +265,12 @@ pre {
 }
 	.suites .footer {
 		padding: 2em;
-		color: #aeb2b5;
+		color: #919699;
 		text-align: center;
 	}
 .suite {
 	border-bottom-width: 1px;
-	border-color: #aeb2b5;
+	border-color: #919699;
 	padding: 2em 2em;
 }
 	.suite:hover {
@@ -232,7 +289,7 @@ pre {
 	.suite h2 {
 		font-weight: 100;
 		font-size: 2.8em;
-		color: #aeb2b5;
+		color: #919699;
 	}
 		.suite.passed h3 {
 			color: #6aab35;
@@ -241,10 +298,10 @@ pre {
 			color: #d6203e;
 		}
 		.suite.skipped h3 {
-			color: #aeb2b5;
+			color: #919699;
 		}
 
 /*Tests*/
 .test.skipped {
-	color: #aeb2b5;
+	color: #919699;
 }

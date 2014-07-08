@@ -9,11 +9,14 @@ date_default_timezone_set('UTC');
 header('Content-type: application/json');
 
 // Lib
+require_once 'baseline.php';
 require_once '../Unitest.php';
 
 // Defaults
+$lib = '';
 $path = '';
 $injections = array();
+$input = array();
 
 // Take input
 if ((isset($_GET) and !empty($_GET)) or (isset($_POST) and !empty($_POST))) {
@@ -22,6 +25,11 @@ if ((isset($_GET) and !empty($_GET)) or (isset($_POST) and !empty($_POST))) {
 	// Spec path(s)
 	if (isset($input['path']) and (is_string($input['path']) or is_array($input['path']))) {
 		$path = $input['path'];
+	}
+
+	// Lib path(s)
+	if (isset($input['lib']) and (is_string($input['lib']) or is_array($input['lib']))) {
+		$lib = $input['lib'];
 	}
 
 	// Injections
@@ -47,30 +55,21 @@ if (empty($path)) {
 	$childCount = count($u->children());
 
 	// No tests found
-	if (!$testCount and !$childCount) {
-		header('HTTP/1.1 404 Not Found');
-		echo 'No suites available at "'.(realpath($path) ? realpath($path) : $path).'".';
+	foreach ($injections as $key => $value) {
+		$u->inject($key, $value);
+	}
 
-	} else {
+	// Run tests
+	try {
+		$report = $u->run();
 
-		// Injections
-		foreach ($injections as $key => $value) {
-			$u->inject($key, $value);
-		}
+		// Respond
+		header('HTTP/1.1 200 OK');
+		echo json_encode($report);
 
-		// Run tests
-		try {
-			$report = $u->run();
-
-			// Respond
-			header('HTTP/1.1 200 OK');
-			echo json_encode($report);
-
-		// Unitest failed (or failed to contain errors)
-		} catch (Exception $e) {
-			header('HTTP/1.1 500 Internal Server Error');
-		}
-
+	// Unitest failed (or failed to contain errors)
+	} catch (Exception $e) {
+		header('HTTP/1.1 500 Internal Server Error');
 	}
 
 }

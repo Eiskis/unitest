@@ -7,18 +7,18 @@
 		/**
 		* Ko properties
 		*/
+		self.autoUpdate = ko.observable(true);
 		self.name = ko.observable('');
-		self.runnerPath = ko.observable('../runner/');
-		self.libPath = ko.observable('../lib/');
-		self.testsPath = ko.observable('../tests/');
+		self.libPath = ko.observable('');
+		self.runnerPath = ko.observable('');
+		self.testsPath = ko.observable('');
 		self.injections = ko.observableArray();
 
 		self.report = ko.observable({});
 		self.suite = ko.observable();
 
 		self.runnerAvailable = ko.observable(true);
-		self.libAvailable = ko.observable(true);
-		self.testsAvailable = ko.observable(true);
+		self.updating = ko.observable(false);
 
 
 
@@ -40,10 +40,14 @@
 		* Data to send to test runner
 		*/
 		self.postData = ko.computed(function () {
-			return {
+			var data = {
 				path: self.testsPath(),
 				injections: self.injectionsAsHash()
 			};
+			if (self.libPath()) {
+				data.lib = self.libPath();
+			}
+			return data;
 		}).extend({throttle: 1});
 
 
@@ -55,7 +59,7 @@
 			if (is.hash(data)) {
 
 				// Properties
-				var properties = ['name', 'runnerPath', 'libPath', 'testsPath', 'injections'];
+				var properties = ['autoUpdate', 'name', 'runnerPath', 'libPath', 'testsPath', 'injections'];
 				for (var i = 0; i < properties.length; i++) {
 					var property = properties[i];
 					if (is.set(data[property])) {
@@ -71,46 +75,12 @@
 
 
 		/**
-		* Ping for backend availability
-		*/
-		self.ping = function () {
-
-			$.ajax({
-				dataType: 'json',
-				type: 'GET',
-				url: self.runnerPath(),
-				success: function (data, textStatus, jqXHR) {
-				},
-				error: function (jqXHR, textStatus, errorThrown) {
-				},
-				complete: function (jqXHR, textStatus) {
-					self.runnerAvailable(jqXHR.status === 404 ? false : true);
-				}
-			});
-
-			$.ajax({
-				dataType: 'json',
-				type: 'GET',
-				url: self.libPath(),
-				success: function (data, textStatus, jqXHR) {
-				},
-				error: function (jqXHR, textStatus, errorThrown) {
-				},
-				complete: function (jqXHR, textStatus) {
-					self.libAvailable(jqXHR.status === 404 ? false : true);
-				}
-			});
-
-			return self;
-		};
-
-
-
-		/**
 		* Run tests via backend
 		*/
 		self.run = function () {
 			var dfd = $.Deferred();
+
+			self.updating(true);
 
 			$.ajax({
 				dataType: 'json',
@@ -118,16 +88,16 @@
 				url: self.runnerPath(),
 				data: self.postData(),
 				success: function (data, textStatus, jqXHR) {
-					self.testsAvailable(true);
+					self.runnerAvailable(true);
 					self.report(data);
 					dfd.resolve();
 				},
 				error: function (jqXHR, textStatus, errorThrown) {
-					self.testsAvailable(false);
-					self.ping();
+					self.runnerAvailable(jqXHR.status === 400 ? true : false);
 					dfd.reject();
 				},
 				complete: function (jqXHR, textStatus) {
+					self.updating(false);
 				}
 			});
 
@@ -135,16 +105,9 @@
 		};
 
 		/**
-		* Ping backend availability when runner path changes
-		*/
-		self.subPingOnRunnerPath = self.runnerPath.subscribe(function (newValue) {
-			self.ping();
-		});
-
-		/**
 		* Run tests when path to tests changes
 		*/
-		self.subROnonPostData = self.postData.subscribe(function (newValue) {
+		self.subRunOnonPostData = self.postData.subscribe(function (newValue) {
 			self.run();
 		});
 
