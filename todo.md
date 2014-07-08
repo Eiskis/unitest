@@ -2,6 +2,7 @@
 # To do
 
 - Test durations
+- xUnit-compliance
 - `eject()`
 - Suite events, supported by `run()` and `runTest()`
 	- `init()`

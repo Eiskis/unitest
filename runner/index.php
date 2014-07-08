@@ -48,6 +48,22 @@ if (empty($path)) {
 	header('HTTP/1.1 400 Bad Request');
 } else {
 
+	// Load lib
+	if (!empty($input['lib'])) {
+		$input['lib'] = array_flatten(to_array($input['lib']));
+		foreach ($input['lib'] as $value) {
+			if (is_string($value)) {
+				if (is_file($value)) {
+					include_once $value;
+				} else if (is_dir($value)) {
+					foreach (rglob_files($value) as $file) {
+						include_once $value;
+					}
+				}
+			}
+		}
+	}
+
 	// Init
 	$u = new Unitest();
 	$u->scrape($path);

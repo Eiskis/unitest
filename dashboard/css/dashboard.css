@@ -1,37 +1,53 @@
 
 /*Rotate animations*/
 @-webkit-keyframes rotate {
-	0% { -webkit-transform(rotate(0deg)); }
-	100% { -webkit-transform(rotate(360deg)); }
+	0% { -webkit-transform: rotate(0deg); }
+	100% { -webkit-transform: rotate(360deg); }
 }
 @-moz-keyframes rotate {
-	0% { -moz-transform(rotate(0deg)); }
-	100% { -moz-transform(rotate(360deg)); }
+	0% { -moz-transform: rotate(0deg); }
+	100% { -moz-transform: rotate(360deg); }
 }
 @keyframes rotate {
-	0% { transform(rotate(0deg)); }
-	100% { transform(rotate(360deg)); }
+	0% { transform: rotate(0deg); }
+	100% { transform: rotate(360deg); }
+}
+@-webkit-keyframes blink {
+	50% { border-top-color: #465259; }
+}
+@-moz-keyframes blink {
+	50% { border-top-color: #465259; }
+}
+@keyframes blink {
+	50% { border-top-color: #465259; }
 }
 
 /*Spinner*/
 .loading-spinner {
-	-webkit-animation: rotate 1s infinite ease-in-out;
-	-moz-animation: rotate 1s infinite ease-in-out;
-	-ms-animation: rotate 1s infinite ease-in-out;
-	animation: rotate 1s infinite ease-in-out;
-
 	-webkit-box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
 	display: inline-block;
 	width: 1em;
 	height: 1em;
-	border: 2px solid #fff;
-	border-right-color: transparent;
+	border-width: 2px;
 	border-radius: 50%;
 }
-
-
+	.confs .active .loading-spinner {
+		border-top-color: #fff;
+		-webkit-animation:
+			rotate 1.5s infinite cubic-bezier(0.455, 0.030, 0.515, 0.955),
+			blink 4s infinite cubic-bezier(0.455, 0.030, 0.515, 0.955);
+		-moz-animation:
+			rotate 1.5s infinite cubic-bezier(0.455, 0.030, 0.515, 0.955),
+			blink 4s infinite cubic-bezier(0.455, 0.030, 0.515, 0.955);
+		-ms-animation:
+			rotate 1.5s infinite cubic-bezier(0.455, 0.030, 0.515, 0.955),
+			blink 4s infinite cubic-bezier(0.455, 0.030, 0.515, 0.955);
+		animation:
+			rotate 1.5s infinite cubic-bezier(0.455, 0.030, 0.515, 0.955),
+			blink 4s infinite cubic-bezier(0.455, 0.030, 0.515, 0.955);
+	}
 
 
 
