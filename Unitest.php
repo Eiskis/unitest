@@ -312,6 +312,8 @@ class Unitest {
 			'line'     => $this->lineNumber(),
 			'parents'  => $this->parents(),
 
+			'duration' => 0,
+
 			'failed'   => 0,
 			'passed'   => 0,
 			'skipped'  => 0,
@@ -342,13 +344,18 @@ class Unitest {
 				// Iterate counters
 				foreach (array('failed', 'passed', 'skipped') as $key) {
 					$results[$key] = $results[$key] + $childResults[$key];
+					$results['duration'] += $childResults['duration'];
 				}
 
 			// Test method
 			} else if (is_string($suiteOrTest)) {
 				$testResult = $this->runTest($suiteOrTest);
 				$results['tests'][] = $testResult;
+
+				// Iterate counters
 				$results[$testResult['status']]++;
+				$results['duration'] += $testResult['duration'];
+
 			}
 
 		}
@@ -365,8 +372,10 @@ class Unitest {
 	final public function runTest ($method) {
 		$injections = array();
 		$result = $this->skip();
+		$duration = 0;
 
 		if (method_exists($this, $method)) {
+			$startTime = microtime(true);
 
 			// Contain exceptions of test method
 			try {
@@ -394,13 +403,15 @@ class Unitest {
 				$result = $this->fail($this->stringifyException($e));
 			}
 
+			$duration = microtime(true) - $startTime;
 		}
 
 		// Test report
 		return array(
-			'class'    => $this->name(),
+			'class'      => $this->name(),
+			'duration'   => $this->roundExecutionTime($duration),
 			'method'     => $method,
-			'file'     => $this->file(),
+			'file'       => $this->file(),
 			'line'       => $this->methodLineNumber($method),
 			'status'     => $this->assess($result),
 			'message'    => $result,
@@ -1069,6 +1080,18 @@ class Unitest {
 			}
 		}
 		return $result;
+	}
+
+	/**
+	* Round and format time script execution time
+	*
+	* @param float $microseconds
+	*
+	* @return float Time in milliseconds, rounded to nine decimal places
+	*
+	*/
+	final private function roundExecutionTime ($microseconds) {
+		return $microseconds;
 	}
 
 	/**

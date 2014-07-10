@@ -1,18 +1,15 @@
 
 # To do
 
-- Test durations
 - xUnit-compliance
 - Maybe use helpers as static methods
-- Suite events, supported by `run()` and `runTest()`
-	- `init()`
-	- `beforeTest()`
-	- `afterTest()`
-	- `cleanup()`
-	- Injections work
 - `->clone()`
 - Test coverage
+	- Event hook methods
+		- Test that they're run at the right time
+		- Test that test-specific methods fail all tests
 	- Injections
+		- Test that injecting works in event hooks
 		- Make sure injections are passed as clones (when self-injecting in suite `init()`)
 		- Test all types, and with a dummy class object
 		- Make sure all injection methods work
@@ -34,9 +31,8 @@
 
 ## Report dashboard
 
-- Better layout (top bar)
+- Fix layout
 - Auto refresh
-- Activity indicator
 - User settings in UI
 	- Poll duration
 	- Filters

@@ -9,6 +9,7 @@
 		self.file = ko.observable('');
 		self.line = ko.observable(0);
 
+		self.duration = ko.observable(0);
 		self.failed = ko.observable(0);
 		self.passed = ko.observable(0);
 		self.skipped = ko.observable(0);
@@ -20,21 +21,26 @@
 		/**
 		* Computeds parameters
 		*/
+		self.roundedDuration = ko.computed(function () {
+			var threshold = 1000*1000;
+			return (Math.round(self.duration() * threshold) / threshold);
+		}).extend({throttle: 1});
+
 		self.name = ko.computed(function () {
 			return self.class();
-		});
+		}).extend({throttle: 1});
 
 		self.total = ko.computed(function () {
 			return self.failed() + self.passed() + self.skipped();
-		});
+		}).extend({throttle: 1});
 
 		self.status = ko.computed(function () {
 			return self.failed() ? 'failed' : (self.passed() ? 'passed' : 'skipped');
-		});
+		}).extend({throttle: 1});
 
 		self.parentPath = ko.computed(function () {
 			return self.parents().join(' &rsaquo; ');
-		});
+		}).extend({throttle: 1});
 
 		// Flat listing of all childs, grand childs etc.
 		self.allChildren = ko.computed(function () {
@@ -59,7 +65,7 @@
 			if (is.hash(data)) {
 
 				// Properties
-				var properties = ['class', 'file', 'line', 'failed', 'passed', 'skipped', 'parents'];
+				var properties = ['class', 'file', 'line', 'duration', 'failed', 'passed', 'skipped', 'parents'];
 				for (var i = 0; i < properties.length; i++) {
 					var property = properties[i];
 					if (is.set(data[property])) {
