@@ -62,8 +62,6 @@ $report = $u->run();
 
 	<body class="language-php">
 
-		<?php // echo '<h1>Dump</h1><div class="canvas">'.html_dump($u->dump()).'</div>'; ?>
-
 		<?php echo '<pre><code class="language-javascript">'.json_encode($report, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES).'</code></pre>'; ?>
 
 		<script type="application/javascript" src="prism.js"></script>

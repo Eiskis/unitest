@@ -22,15 +22,19 @@ class Unitest {
 
 
 
-	// Basics
-
 	/**
 	* Properties
 	*/
-	private $propertyChildren   = array();
-	private $propertyInjections = array();
-	private $propertyParent     = null;
-	private $propertyPrefix     = 'test';
+	private $propertyBaseClass     = 'Unitest';
+	private $propertyPrefix        = 'test';
+
+	private $propertyChildren      = array();
+	private $propertyInjections    = array();
+	private $propertyParent        = null;
+
+
+	
+	// Magic methods
 
 	/**
 	* Initialization
@@ -38,9 +42,7 @@ class Unitest {
 	* Parent suite and script variables can be passed
 	*/
 	final public function __construct () {
-		if (method_exists($this, 'init')) {
-			call_user_func_array(array($this, 'init'), array());
-		}
+		$this->runInit();
 		return $this;
 	}
 
@@ -54,6 +56,13 @@ class Unitest {
 
 
 	// Public getters
+
+	/**
+	* Add a suite as a child of this suite
+	*/
+	final public function baseClass () {
+		return $this->propertyBaseClass;
+	}
 
 	/**
 	* Add a suite as a child of this suite
@@ -82,7 +91,7 @@ class Unitest {
 		// Set
 		$arguments = func_get_args();
 		if (!empty($arguments)) {
-			return call_user_func_array(array($this, 'child'), $arguments);
+			return $this->execute('child', $arguments);
 		}
 
 		// Get
@@ -267,7 +276,7 @@ class Unitest {
 				// Prefixed methods that aren't declared in base class
 				$ref = new ReflectionMethod($this, $method);
 				$class = $ref->getDeclaringClass();
-				if ($class->name !== 'Unitest') {
+				if ($class->name !== $this->baseClass()) {
 					$tests[] = $method;
 				}
 
@@ -416,6 +425,55 @@ class Unitest {
 
 
 
+	// Event handler methods
+
+	/**
+	* When instance is created
+	*/
+	final private function runInit () {
+		$arguments = func_get_args();
+		$this->execute('init', $arguments);
+		return $this;
+	}
+
+	/**
+	* When a suite is about to run
+	*/
+	final private function runBeforeTests () {
+		$arguments = func_get_args();
+		$this->execute('beforeTests', $arguments);
+		return $this;
+	}
+
+	/**
+	* When a suite has run tests
+	*/
+	final private function runAfterTests () {
+		$arguments = func_get_args();
+		$this->execute('afterTests', $arguments);
+		return $this;
+	}
+
+	/**
+	* When a singe test is about to run
+	*/
+	final private function runBeforeTest () {
+		$arguments = func_get_args();
+		$this->execute('beforeTest', $arguments);
+		return $this;
+	}
+
+	/**
+	* When a singe test has been run
+	*/
+	final private function runAfterTest () {
+		$arguments = func_get_args();
+		$this->execute('afterTest', $arguments);
+		return $this;
+	}
+
+
+
 	// Assertions
 
 	/**
@@ -465,7 +523,7 @@ class Unitest {
 	*/
 	final public function shouldNotBeEqual ($value) {
 		$arguments = func_get_args();
-		return !call_user_func_array(array($this, 'shouldBeEqual'), $arguments);
+		return !$this->execute('shouldBeEqual', $arguments);
 	}
 
 	/**
@@ -595,7 +653,7 @@ class Unitest {
 
 
 
-	// Private helpers: miscellaneous
+	// Private helpers: class management
 
 	/**
 	* Find out which classes will be defined in a script
@@ -629,204 +687,6 @@ class Unitest {
 
 		return $classes;
 	}
-
-	/**
-	* Flatten an array
-	*/
-	final private function flattenArray ($array) {
-		$result = array();
-		foreach ($array as $key => $value) {
-			if (is_array($value)) {
-				$result = array_merge($result, $this->flattenArray($value));
-			} else {
-				$result[] = $value;
-			}
-		}
-		return $result;
-	}
-
-	/**
-	* Validate a suite object
-	*/
-	final private function isValidSuite ($case) {
-		return isset($case) and is_object($case) and (
-			get_class($case) === 'Unitest' or
-			is_subclass_of($case, 'Unitest')
-		);
-	}
-
-	/**
-	* Validate a suite class
-	*/
-	final private function isValidSuiteClass ($class) {
-		$ref = new ReflectionClass($class);
-		if ($class === 'Unitest' or $ref->isSubclassOf('Unitest')) {
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	* Which line method is defined in within its class file
-	*/
-	final private function methodLineNumber ($method) {
-		$ref = new ReflectionMethod($this, $method);
-		return $ref->getStartLine();
-	}
-
-	/**
-	* Find out which variables a method is expecing
-	*/
-	final private function methodParameterNames ($method) {
-		$results = array();
-		$ref = new ReflectionMethod($this, $method);
-		foreach ($ref->getParameters() as $parameter) {
-			$results[] = $parameter->name;
-		}
-		return $results;
-	}
-
-
-
-	// Private helpers: file system
-
-	/**
-	* Find directories
-	*/
-	final private function globDir ($path = '') {
-
-		// Normalize path
-		if (!empty($path)) {
-			$path = preg_replace('/(\*|\?|\[)/', '[$1]', $path);
-			if (substr($path, -1) !== '/') {
-				$path .= '/';
-			}
-		}
-
-		// Find directories in the path
-		$directories = glob($path.'*', GLOB_MARK | GLOB_ONLYDIR);
-		foreach ($directories as $key => $value) {
-			$directories[$key] = str_replace('\\', '/', $value);
-		}
-		
-		// Sort results
-		usort($directories, 'strcasecmp');
-
-		return $directories;
-	}
-
-	/**
-	* Find files
-	*/
-	final private function globFiles ($path = '', $filetypes = array()) {
-		$files = array();
-
-		// Handle filetype input
-		if (empty($filetypes)) {
-			$brace = '';
-		} else {
-			$brace = '.{'.implode(',', $filetypes).'}';
-		}
-
-		// Handle path input
-		if (!empty($path)) {
-			$path = preg_replace('/(\*|\?|\[)/', '[$1]', $path);
-			if (substr($path, -1) !== '/') {
-				$path .= '/';
-			}
-		}
-
-		// Do the glob()
-		foreach (glob($path.'*'.$brace, GLOB_BRACE) as $value) {
-			if (is_file($value)) {
-				$files[] = $value;
-			}
-		}
-
-		// Sort results
-		usort($files, 'strcasecmp');
-
-		return $files;
-	}
-
-	/**
-	* Include PHP tests in a file
-	*/
-	final private function loadFile ($path) {
-		$suites = array();
-
-		if (is_file($path)) {
-
-			// Look for any Unitest classes
-			$classes = $this->classesInScript(file_get_contents($path));
-
-			// Include if found
-			if (!empty($classes)) {
-				include_once $path;
-			}
-
-			// Store class tree
-			foreach ($classes as $class) {
-				// $suite = new $class();
-				$suites[] = array_merge(array_reverse(array_values(class_parents($class))), array($class));
-			}
-
-		}
-
-		return $suites;
-	}
-
-	/**
-	* Find test suites in locations
-	*/
-	final private function loadFiles () {
-		$suites = array();
-		$paths = func_get_args();
-		$paths = $this->flattenArray($paths);
-
-		foreach ($paths as $path) {
-
-			// Path given
-			if (is_string($path)) {
-
-				// File
-				if (is_file($path)) {
-					$suites = array_merge($suites, $this->loadFile($path));
-
-				// Directory: scrape recursively for all files
-				} else if (is_dir($path)) {
-					$suites = array_merge($suites, call_user_func_array(array($this, 'loadFiles'), $this->rglobFiles($path)));
-				}
-
-			}
-
-		}
-
-		return $suites;
-	}
-
-	/**
-	* Find files recursively
-	*/
-	final private function rglobFiles ($path = '', $filetypes = array()) {
-
-		// Accept file type restrictions as a single array or multiple independent values
-		$arguments = func_get_args();
-		array_shift($arguments);
-		$filetypes = $this->flattenArray($arguments);
-
-		// Run glob_files for this directory and its subdirectories
-		$files = $this->globFiles($path, $filetypes);
-		foreach ($this->globDir($path) as $child) {
-			$files = array_merge($files, $this->rglobFiles($child, $filetypes));
-		}
-
-		return $files;
-	}
-
-
-
-	// Suite management
 
 	/**
 	* Go through a list of classes, merge parent classes
@@ -970,30 +830,217 @@ class Unitest {
 
 
 
-	// Debugging
+	// Private helpers: specialized tools
+
+	/**
+	* Validate a suite object
+	*/
+	final private function isValidSuite ($case) {
+		return isset($case) and is_object($case) and (
+			get_class($case) === $this->baseClass() or
+			is_subclass_of($case, $this->baseClass())
+		);
+	}
+
+	/**
+	* Validate a suite class
+	*/
+	final private function isValidSuiteClass ($class) {
+		$ref = new ReflectionClass($class);
+		if ($class === $this->baseClass() or $ref->isSubclassOf($this->baseClass())) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	* Which line method is defined in within its class file
+	*/
+	final private function methodLineNumber ($method) {
+		$ref = new ReflectionMethod($this, $method);
+		return $ref->getStartLine();
+	}
+
+	/**
+	* Find out which variables a method is expecing
+	*/
+	final private function methodParameterNames ($method) {
+		$results = array();
+		$ref = new ReflectionMethod($this, $method);
+		foreach ($ref->getParameters() as $parameter) {
+			$results[] = $parameter->name;
+		}
+		return $results;
+	}
+
+
+
+	// Private helpers: file system
+
+	/**
+	* Find directories
+	*/
+	final private function globDir ($path = '') {
+
+		// Normalize path
+		if (!empty($path)) {
+			$path = preg_replace('/(\*|\?|\[)/', '[$1]', $path);
+			if (substr($path, -1) !== '/') {
+				$path .= '/';
+			}
+		}
+
+		// Find directories in the path
+		$directories = glob($path.'*', GLOB_MARK | GLOB_ONLYDIR);
+		foreach ($directories as $key => $value) {
+			$directories[$key] = str_replace('\\', '/', $value);
+		}
+		
+		// Sort results
+		usort($directories, 'strcasecmp');
+
+		return $directories;
+	}
+
+	/**
+	* Find files
+	*/
+	final private function globFiles ($path = '', $filetypes = array()) {
+		$files = array();
+
+		// Handle filetype input
+		if (empty($filetypes)) {
+			$brace = '';
+		} else {
+			$brace = '.{'.implode(',', $filetypes).'}';
+		}
+
+		// Handle path input
+		if (!empty($path)) {
+			$path = preg_replace('/(\*|\?|\[)/', '[$1]', $path);
+			if (substr($path, -1) !== '/') {
+				$path .= '/';
+			}
+		}
+
+		// Do the glob()
+		foreach (glob($path.'*'.$brace, GLOB_BRACE) as $value) {
+			if (is_file($value)) {
+				$files[] = $value;
+			}
+		}
+
+		// Sort results
+		usort($files, 'strcasecmp');
+
+		return $files;
+	}
+
+	/**
+	* Include PHP tests in a file
+	*/
+	final private function loadFile ($path) {
+		$suites = array();
+
+		if (is_file($path)) {
+
+			// Look for any Unitest classes
+			$classes = $this->classesInScript(file_get_contents($path));
+
+			// Include if found
+			if (!empty($classes)) {
+				include_once $path;
+			}
+
+			// Store class tree
+			foreach ($classes as $class) {
+				// $suite = new $class();
+				$suites[] = array_merge(array_reverse(array_values(class_parents($class))), array($class));
+			}
+
+		}
+
+		return $suites;
+	}
+
+	/**
+	* Find test suites in locations
+	*/
+	final private function loadFiles () {
+		$suites = array();
+		$paths = func_get_args();
+		$paths = $this->flattenArray($paths);
+
+		foreach ($paths as $path) {
+
+			// Path given
+			if (is_string($path)) {
+
+				// File
+				if (is_file($path)) {
+					$suites = array_merge($suites, $this->loadFile($path));
+
+				// Directory: scrape recursively for all files
+				} else if (is_dir($path)) {
+					$suites = array_merge($suites, $this->execute('loadFiles', $this->rglobFiles($path)));
+				}
+
+			}
+
+		}
+
+		return $suites;
+	}
+
+	/**
+	* Find files recursively
+	*/
+	final private function rglobFiles ($path = '', $filetypes = array()) {
+
+		// Accept file type restrictions as a single array or multiple independent values
+		$arguments = func_get_args();
+		array_shift($arguments);
+		$filetypes = $this->flattenArray($arguments);
+
+		// Run glob_files for this directory and its subdirectories
+		$files = $this->globFiles($path, $filetypes);
+		foreach ($this->globDir($path) as $child) {
+			$files = array_merge($files, $this->rglobFiles($child, $filetypes));
+		}
+
+		return $files;
+	}
+
+
+
+	// Private helpers: generic
+
+	/**
+	* Run own method with arguments
+	*/
+	final private function execute ($method, $arguments) {
+		if (method_exists($this, $method)) {
+			return call_user_func_array(array($this, $method), (is_array($arguments) ? $arguments : array($arguments)));
+		}
+		// return null;
+	}
 
 	/**
 	* Flatten an array
 	*/
-	final public function dump () {
-
-		$results = array(
-			'class' => $this->name(),
-			'file' => $this->file(),
-			'lineNumber' => $this->lineNumber(),
-			'injections' => $this->injections(),
-			'parent' => $this->parent() ? ''.$this->parent() : null,
-			'parents' => $this->parents(),
-			'children' => array(),
-			'tests' => $this->tests(),
-		);
-
-		foreach ($this->children() as $child) {
-			$results['children'][] = $child->dump();
+	final private function flattenArray ($array) {
+		$result = array();
+		foreach ($array as $key => $value) {
+			if (is_array($value)) {
+				$result = array_merge($result, $this->flattenArray($value));
+			} else {
+				$result[] = $value;
+			}
 		}
-
-		return $results;
+		return $result;
 	}
+
+
 
 }
 
