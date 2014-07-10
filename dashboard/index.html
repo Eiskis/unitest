@@ -131,14 +131,24 @@
 									<div class="clear"></div>
 
 									<!-- Tests -->
-									<ul class="reset plain tests" data-bind="foreach: tests">
+									<div class="reset plain tests" data-bind="foreach: tests">
 
-										<li class="test" data-bind="css: status">
-											<span data-bind="text: method"></span>
-											<span data-bind="text: message"></span>
-										</li>
+										<div class="test" data-bind="
+											css: {
+												failed: failed,
+												passed: passed,
+												skipped: skipped,
+												open: failed,
+												closed: !failed(),
+											}
+										">
+											<h4 class="reset" data-bind="text: method"></h4>
+											<div class="details">
+												<p class="reset" data-bind="text: message"></p>
+											</div>
+										</div>
 
-									</ul>
+									</div>
 									<div class="clear"></div>
 
 								</div>

@@ -324,6 +324,39 @@ pre {
 		}
 
 /*Tests*/
-.test.skipped {
-	color: #919699;
+.test {
+	padding: 0.2em 1.5em;
+	transition: padding 200ms;
 }
+	.test .details {
+		margin-left: 1em;
+		padding-left: 2em;
+		border-left-width: 0.1em;
+	}
+	.test.open .details {
+		padding-left: 0.5em;
+		padding-right: 0.5em;
+	}
+	.test.closed .details {
+		display: none;
+	}
+
+	/*Test statuses*/
+	.test.skipped {
+		color: #919699;
+	}
+		.test.skipped .details {
+			border-color: #919699;
+		}
+	.test.failed {
+		color: #d6203e;
+	}
+		.test.failed .details {
+			border-color: #d6203e;
+		}
+	.test.skipped {
+		color: #919699;
+	}
+		.test.skipped .details {
+			border-color: #919699;
+		}
