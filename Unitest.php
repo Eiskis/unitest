@@ -20,6 +20,14 @@
 */
 class Unitest {
 
+	final public function dump () {
+		$arguments = func_get_args();
+		$displayErrors = ini_get('display_errors');
+		ini_set('display_errors', '0');
+		error_log("\n\n\n".var_export(count($arguments) < 2 ? $arguments[0] : $arguments, true), 0)."\n\n";
+		ini_set('display_errors', $displayErrors);
+	}
+
 
 
 	/**
@@ -320,6 +328,9 @@ class Unitest {
 		// Flatten arguments
 		$suitesOrTests = $this->flattenArray($arguments);
 
+		// Preparation before suite runs anything (possible exceptions are left uncaught)
+		$this->runBeforeTests();
+
 		// Run tests
 		foreach ($suitesOrTests as $suiteOrTest) {
 
@@ -342,6 +353,9 @@ class Unitest {
 
 		}
 
+		// Clean-up after suite has run everything (exceptions are left uncaught)
+		$this->runAfterTests();
+
 		return $results;
 	}
 
@@ -354,8 +368,7 @@ class Unitest {
 
 		if (method_exists($this, $method)) {
 
-			// Contain errors/exceptions
-			set_error_handler('__UnitestHandleError');
+			// Contain exceptions of test method
 			try {
 
 				// Preparation method
@@ -369,15 +382,17 @@ class Unitest {
 				// Call test method
 				$result = $this->execute($method, $injections);
 
-				// Clean-up method
-				$this->runAfterTest($method);
-
-			// Fail test if there are errors/exceptions
+			// Fail test if there are exceptions
 			} catch (Exception $e) {
-				$result = $this->fail($e->getMessage().' ('.$e->getFile().' line '.$e->getLine().')');
+				$result = $this->fail($this->stringifyException($e));
 			}
 
-			restore_error_handler();
+			// Contain exceptions of clean-up
+			try {
+				$this->runAfterTest($method);
+			} catch (Exception $e) {
+				$result = $this->fail($this->stringifyException($e));
+			}
 
 		}
 
@@ -463,7 +478,7 @@ class Unitest {
 	/**
 	* When a singe test is about to run
 	*/
-	final private function runBeforeTest () {
+	final private function runBeforeTest ($method) {
 		$arguments = func_get_args();
 		$this->execute('beforeTest', $arguments);
 		return $this;
@@ -472,7 +487,7 @@ class Unitest {
 	/**
 	* When a singe test has been run
 	*/
-	final private function runAfterTest () {
+	final private function runAfterTest ($method) {
 		$arguments = func_get_args();
 		$this->execute('afterTest', $arguments);
 		return $this;
@@ -1026,7 +1041,17 @@ class Unitest {
 	*/
 	final private function execute ($method, $arguments) {
 		if (method_exists($this, $method)) {
-			return call_user_func_array(array($this, $method), (is_array($arguments) ? $arguments : array($arguments)));
+
+			// Get errors as exceptions
+			set_error_handler('__UnitestHandleError');
+
+			// Run method
+			$result = call_user_func_array(array($this, $method), (is_array($arguments) ? $arguments : array($arguments)));
+
+			// Restore previous error handler
+			restore_error_handler();
+
+			return $result;
 		}
 		// return null;
 	}
@@ -1044,6 +1069,13 @@ class Unitest {
 			}
 		}
 		return $result;
+	}
+
+	/**
+	* Represent exception as string
+	*/
+	final private function stringifyException ($e) {
+		return ''.$e->getMessage().' ('.$e->getFile().' line '.$e->getLine().', error code '.$e->getCode().')';
 	}
 
 

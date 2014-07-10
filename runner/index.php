@@ -1,16 +1,16 @@
 <?php
 error_reporting(E_ALL);
-ini_set('display_errors', '1');
-ini_set('error_log', 'errors.log');
+ini_set('log_errors', '1');
+// ini_set('error_log', 'errors.log');
 mb_internal_encoding('UTF-8');
 date_default_timezone_set('UTC');
 
 // Always JSON
 header('Content-type: application/json');
 
-// Lib
-require_once 'baseline.php';
+// Baseline is not needed by Unitest
 require_once '../Unitest.php';
+require_once 'baseline.php';
 
 // Defaults
 $lib = '';
