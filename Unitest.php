@@ -144,7 +144,7 @@ class Unitest {
 		// Set
 		$arguments = func_get_args();
 		if (func_num_args() > 1) {
-			return call_user_func_array(array($this, 'inject'), $arguments);
+			return $this->execute('inject', $arguments);
 		}
 
 		// Get own injections, bubble
@@ -184,7 +184,7 @@ class Unitest {
 		// Set
 		$arguments = func_get_args();
 		if (!empty($arguments)) {
-			return call_user_func_array(array($this, 'inject'), $arguments);
+			return $this->execute('inject', $arguments);
 		}
 
 		// Get own injections, bubble
@@ -358,13 +358,19 @@ class Unitest {
 			set_error_handler('__UnitestHandleError');
 			try {
 
+				// Preparation method
+				$this->runBeforeTest($method);
+
 				// Get innjections to pass to test method
 				foreach ($this->methodParameterNames($method) as $parameterName) {
 					$injections[] = $this->injection($parameterName);
 				}
 
 				// Call test method
-				$result = call_user_func_array(array($this, $method), $injections);
+				$result = $this->execute($method, $injections);
+
+				// Clean-up method
+				$this->runAfterTest($method);
 
 			// Fail test if there are errors/exceptions
 			} catch (Exception $e) {
@@ -394,7 +400,7 @@ class Unitest {
 		$arguments = func_get_args();
 
 		// Load classes automatically (arguments passed to loadFiles)
-		$classes = call_user_func_array(array($this, 'loadFiles'), $arguments);
+		$classes = $this->execute('loadFiles', $arguments);
 
 		// Treat classes
 		foreach ($classes as $key => $values) {
