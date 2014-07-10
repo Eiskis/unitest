@@ -194,22 +194,21 @@ pre {
 	.confs .list a {
 		color: #919699;
 		display: block;
-		padding: 0.6em 1em 0.5em 1em;
-		border-color: #465259;
+		padding: 0.7em 1em 0.3em 1em;
+		border-bottom-width: 0.4em;
 	}
 		.confs .list .selected a {
 			background-color: #465259;
+			color: inherit;
 		}
 	.confs .list a:hover, .confs.open .list .selected a {
-		color: inherit;
 	}
 		.confs.open .list .selected a:hover {
 		}
 
 	/*Toggling*/
 	.confs .editor {
-		border-top-width: 0.2em;
-		border-color: #465259;
+		background-color: #465259;
 		display: none;
 	}
 		.confs.open .editor {

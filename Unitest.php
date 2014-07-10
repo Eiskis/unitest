@@ -98,6 +98,20 @@ class Unitest {
 	}
 
 	/**
+	* Remove an injectable value
+	*/
+	final public function eject ($name) {
+		$arguments = func_get_args();
+		$arguments = $this->flattenArray($arguments);
+		foreach ($arguments as $argument) {
+			if ($this->isInjection($argument)) {
+				unset($this->propertyInjections[$argument]);
+			}
+		}
+		return $this;
+	}
+
+	/**
 	* Add an injectable value that can be passed to functions as parameter
 	*/
 	final public function inject ($name, $value) {
@@ -133,6 +147,24 @@ class Unitest {
 		// Missing injection
 		throw new Exception('Missing injection "'.$name.'".');
 		return $this;
+	}
+
+	/**
+	* Find out if injection is available
+	*/
+	final public function isInjection ($name) {
+		$arguments = func_get_args();
+		$arguments = $this->flattenArray($arguments);
+		$injections = $this->injections();
+
+		// Fail if one of the equested injections is not available
+		foreach ($arguments as $argument) {
+			if (!array_key_exists($argument, $injections)) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**

@@ -3,17 +3,20 @@
 
 - Test durations
 - xUnit-compliance
-- `eject()`
+- Maybe use helpers as static methods
 - Suite events, supported by `run()` and `runTest()`
 	- `init()`
 	- `beforeTest()`
 	- `afterTest()`
 	- `cleanup()`
 	- Injections work
-- Test injections with self-injecting suite (use `init()`)
-	- make sure injections are passed as clones
-	- test all types, and with a dummy class object
 - `->clone()`
+- Test coverage
+	- Injections
+		- Make sure injections are passed as clones (when self-injecting in suite `init()`)
+		- Test all types, and with a dummy class object
+		- Make sure all injection methods work
+		- Make sure eject works
 - Private constants
 	- Prefix
 	- Root class name
