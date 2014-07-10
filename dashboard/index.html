@@ -111,22 +111,30 @@
 
 							<!-- ko foreach: allChildren -->
 
-								<div class="transition suite" data-bind="css: status">
+								<div class="transition suite" data-bind="
+									css: {
+										failed: status() === 'failed',
+										passed: status() === 'passed',
+										skipped: status() === 'skipped',
+										open: failed,
+										closed: !failed(),
+									}
+								">
 
 									<!-- Right-stacking fluid column -->
 									<div class="column fluid">
 										<div class="column-content">
 
 											<!-- Title -->
-											<p class="discreet reset" data-bind="html: parentPath"></p>
-											<h3 class="reset"><span data-bind="text: name"></span></h3>
+											<p class="discreet reset suite-inheritance" data-bind="html: parentPath"></p>
+											<h3 class="reset suite-title"><span data-bind="text: name"></span></h3>
 
 										</div>
 									</div>
 
 									<!-- Total count -->
 									<div class="column fixed">
-										<h2 class="reset" class="total" data-bind="text: total"></h2>
+										<h2 class="reset suite-count" class="total" data-bind="text: total"></h2>
 									</div>
 									<div class="clear"></div>
 
@@ -142,9 +150,9 @@
 												closed: !failed(),
 											}
 										">
-											<h4 class="reset" data-bind="text: method"></h4>
-											<div class="details">
-												<p class="reset" data-bind="text: message"></p>
+											<h4 class="reset test-title" data-bind="text: method"></h4>
+											<div class="test-details">
+												<p class="reset test-message" data-bind="text: message"></p>
 											</div>
 										</div>
 

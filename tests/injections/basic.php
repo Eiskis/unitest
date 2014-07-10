@@ -6,25 +6,28 @@ class UnitestInjectionsBasic extends Unitest {
 		$this->inject('foo', 1)->inject('bar', 2)->inject('string', 'Some string value');
 	}
 
-	// FLAG injecting in test methods leaves injections for other injections
 	function testLocalInjection () {
 		$this->inject('testInjection', 3);
-		return $this->should($this->injection('testInjection') === 3);
+		return $this->should($this->isInjection('testInjection'), $this->injection('testInjection') === 3);
 	}
 
+	/**
+	* FAIL: injecting in test methods leaves injections for other injections
+	*/
 	function testInjectionOfAnotherMethodIsNotAvailable () {
-		try {
-			$this->injection('testInjection');
-			return $this->fail();
-		} catch (Exception $e) {
-			return $this->pass();
-		}
+		return $this->shouldNot($this->isInjection('testInjection'));
 	}
 
-	function testOverWrittenLocalInjection () {
+	function testLocalInjectionIsOverrided () {
 		$this->inject('anotherTestInjection', 1);
 		$this->inject('anotherTestInjection', 2);
 		return $this->should($this->injection('anotherTestInjection') === 2);
+	}
+
+	function testLocalInjectionEjects () {
+		$this->inject('yetAnotherTestInjection', 1);
+		$this->eject('yetAnotherTestInjection');
+		return $this->shouldNot($this->isInjection('yetAnotherTestInjection'));
 	}
 
 	function testClassInitInjectionCount ($foo) {
@@ -46,12 +49,7 @@ class UnitestInjectionsBasic extends Unitest {
 	}
 
 	function testUnavailableInjection () {
-		try {
-			$this->injection('someUnavailableKey');
-			return $this->fail();
-		} catch (Exception $e) {
-			return $this->pass();
-		}
+		return $this->shouldNot($this->isInjection('someUnavailableKey'));
 	}
 
 }

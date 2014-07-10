@@ -10,11 +10,9 @@
 		- Test that they're run at the right time
 		- Test that test-specific methods fail all tests
 	- Injections
-		- Test that injecting works in event hooks
 		- Make sure injections are passed as clones (when self-injecting in suite `init()`)
 		- Test all types, and with a dummy class object
-		- Make sure all injection methods work
-		- Make sure eject works
+		- Test inherited injections
 - shoulds
 	- types
 		- object
@@ -25,10 +23,16 @@
 		- float
 		- string
 		- boolean
-	- shouldBeIncluded
+
+	- shouldBeFile($file)
+	- shouldBeDirectory($file)
+
+	- shouldBeIncluded($file)
+
 	- shouldBeAvailableClass
-	- shouldBeAvailableClassMethod
-	- shouldHave($obj, $property)
+
+	- shouldHaveMethod($property, $objOrClass)
+	- shouldHaveProperty($property, $objOrClass)
 
 ## Report dashboard
 
