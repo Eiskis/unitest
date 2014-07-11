@@ -308,6 +308,15 @@ pre {
 
 
 
+/*No results*/
+.blank {
+	text-align: center;
+	font-size: 2em;
+	color: #919699;
+}
+
+
+
 /*Results*/
 .suites {
 }

@@ -13,12 +13,19 @@
 		self.selectedConf = ko.observable(0);
 
 		/**
-		* Computed
+		* Selected conf object
 		*/
 		self.conf = ko.computed(function () {
 			var confs = self.confs();
 			var conf = confs[self.selectedConf()];
 			return conf ? conf : null;
+		}).extend({throttle: 1});
+
+		/**
+		* Editor visible
+		*/
+		self.showConfEditor = ko.computed(function () {
+			return self.confEditor() || !self.conf() || !self.conf().suite();
 		}).extend({throttle: 1});
 
 		/**
@@ -106,7 +113,7 @@
 						self.selectedConf(i);
 
 					// Already selected, toggle visibility
-					} else {
+					} else if (self.conf() && self.conf().suite()) {
 						self.confEditor((self.confEditor() ? false : true));
 					}
 
@@ -127,7 +134,6 @@
 
 			// Add conf to app, select it for editing
 			self.confs.push(conf);
-			self.confEditor(true);
 			self.toggleConf(conf);
 
 			return self;

@@ -31,7 +31,7 @@
 	<body class="loading">
 
 		<!-- Settings -->
-		<div class="inverted confs" data-bind="css: { open: confEditor }">
+		<div class="inverted confs" data-bind="css: { open: showConfEditor }">
 
 			<ul class="reset plain collapse list">
 				<!-- ko foreach: confs -->
@@ -40,7 +40,11 @@
 				<li><a data-bind="click: addConf">+</a></li>
 			</ul>
 			<ul class="reset plain collapse right list">
-				<li class="loader" data-bind="with: conf"><label data-bind="css: { active: updating }"><input type="checkbox" data-bind="checked: autoUpdate"> Auto update<span class="loading-spinner"></span></label></li>
+				<li class="loader" data-bind="with: conf">
+					<label data-bind="css: { active: updating }">
+						<input type="checkbox" data-bind="checked: autoUpdate"> Auto update<span class="loading-spinner"></span>
+					</label>
+				</li>
 			</ul>
 			<div class="clear"></div>
 
@@ -173,6 +177,13 @@
 
 						</div>
 
+					</div>
+				</div>
+			<!-- /ko -->
+			<!-- ko ifnot: suite -->
+				<div class="row">
+					<div class="row-content buffer blank">
+						<p>No test suites found.</p>
 					</div>
 				</div>
 			<!-- /ko -->
