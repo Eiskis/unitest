@@ -13,13 +13,13 @@
 	100% { transform: rotate(360deg); }
 }
 @-webkit-keyframes blink {
-	50% { border-top-color: #465259; }
+	50% { border-top-color: #465259; border-bottom-color: #465259; }
 }
 @-moz-keyframes blink {
-	50% { border-top-color: #465259; }
+	50% { border-top-color: #465259; border-bottom-color: #465259; }
 }
 @keyframes blink {
-	50% { border-top-color: #465259; }
+	50% { border-top-color: #465259; border-bottom-color: #465259; }
 }
 
 /*Spinner*/
@@ -36,12 +36,16 @@
 	display: inline-block;
 	width: 1em;
 	height: 1em;
+	margin-left: 1em;
 	border-width: 2px;
 	border-radius: 50%;
 	border-color: transparent;
+	border-top-color: #465259;
+	border-bottom-color: #465259;
 }
 	.confs .active .loading-spinner {
 		border-top-color: #fff;
+		border-bottom-color: #fff;
 		-webkit-animation:
 			rotate 1.5s infinite cubic-bezier(0.455, 0.030, 0.515, 0.955),
 			blink 4s infinite cubic-bezier(0.455, 0.030, 0.515, 0.955);
@@ -75,6 +79,7 @@ body {
 /*Defaults*/
 .loaded a,
 .loaded input,
+.loaded label,
 .loaded .transition {
 	transition-property: background-color, color, box-shadow, border-color;
 	transition: 150ms;
@@ -113,7 +118,7 @@ input[type="text"], textarea {
 	}
 	input[type="text"]:focus, textarea:focus {
 		outline: 0;
-		box-shadow: 0 0.1em 0.9em rgba(0, 0, 0, 0.5);
+		box-shadow: 0 0.1em 0.85em rgba(0, 0, 0, 0.5);
 	}
 	::-webkit-input-placeholder {
 	    color: #919699;
@@ -197,21 +202,42 @@ pre {
 	position: relative;
 }
 	.confs .list {
+		text-transform: uppercase;
+		font-size: 0.85em;
 	}
-	.confs .list a {
-		color: #919699;
+	.confs .list a, .confs .list label {
 		display: block;
 		padding: 0.7em 1em 0.3em 1em;
 		border-bottom-width: 0.4em;
+		color: #919699;
 	}
+		.confs .list a:hover,
+		.confs .list label:hover,
 		.confs .list .selected a {
-			background-color: #465259;
 			color: inherit;
+			background-color: #363f45;
 		}
-	.confs .list a:hover, .confs.open .list .selected a {
+			.confs .list .selected a:hover {
+				background-color: #465259;
+			}
+			.confs.open .list .selected a {
+				background-color: #465259;
+			}
+	.confs .list em {
+		display: block;
+		font-style: inherit;
 	}
-		.confs.open .list .selected a:hover {
+	.confs .list .index {
+		display: none;
+	}
+	@media handheld,only screen and (max-width: 40em){
+		.confs .list .index {
+			display: block;
 		}
+		.confs .list .name {
+			display: none;
+		}
+	}
 
 	/*Toggling*/
 	.confs .editor {
@@ -316,7 +342,7 @@ pre {
 
 	/*Elements*/
 	.suite .suite-inheritance {
-		font-size: 0.9em;
+		font-size: 0.85em;
 	}
 	.suite .suite-count {
 		font-weight: 100;

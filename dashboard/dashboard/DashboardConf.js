@@ -4,11 +4,15 @@
 	var DashboardConf = function () {
 		var self = this;
 
+		self.defaults = {
+			name: 'My config'
+		};
+
 		/**
 		* Ko properties
 		*/
 		self.autoUpdate = ko.observable(true);
-		self.name = ko.observable('');
+		self.name = ko.observable(self.defaults.name);
 		self.libPath = ko.observable('');
 		self.runnerPath = ko.observable('');
 		self.testsPath = ko.observable('');
@@ -119,6 +123,17 @@
 			suite.load(newValue);
 			self.suite(suite);
 		});
+
+		/**
+		* Name validation
+		*/
+		self.validateName = function (newValue) {
+			if (is.empty(newValue) || !is.string(newValue)) {
+				self.name(self.defaults.name);
+			}
+			
+		};
+		self.subValidateName = self.name.subscribe(self.validateName);
 
 	};
 

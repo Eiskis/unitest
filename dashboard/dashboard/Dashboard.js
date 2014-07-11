@@ -13,27 +13,6 @@
 		self.selectedConf = ko.observable(0);
 
 		/**
-		* Toggle configs
-		*/
-		self.toggleConf = function (conf) {
-			var current = self.conf();
-			var confs = self.confs();
-
-			for (var i = 0; i < confs.length; i++) {
-				if (conf === confs[i]) {
-					if (current !== conf) {
-						self.selectedConf(i);
-					} else if (self.confEditor()) {
-						self.confEditor(false);
-					} else {
-						self.confEditor(true);
-					}
-				}
-			}
-
-		};
-
-		/**
 		* Computed
 		*/
 		self.conf = ko.computed(function () {
@@ -66,7 +45,7 @@
 				autoUpdate: true,
 				name: 'Test config',
 				libPath: '',
-				runnerPath: '../runner/',
+				runnerPath: '../json/',
 				testsPath: '../tests/',
 				injections: []
 			});
@@ -74,7 +53,7 @@
 				autoUpdate: false,
 				name: 'Another config',
 				libPath: '',
-				runnerPath: '../runner/',
+				runnerPath: '../json/',
 				testsPath: '../tests/',
 				injections: [
 					{
@@ -109,6 +88,48 @@
 					confs[i].suite().run();
 				}
 			}
+			return self;
+		};
+
+		/**
+		* Toggle configs
+		*/
+		self.toggleConf = function (conf) {
+			var current = self.conf();
+			var confs = self.confs();
+
+			for (var i = 0; i < confs.length; i++) {
+				if (conf === confs[i]) {
+
+					// Changing
+					if (current !== conf) {
+						self.selectedConf(i);
+
+					// Already selected, toggle visibility
+					} else {
+						self.confEditor((self.confEditor() ? false : true));
+					}
+
+					break;
+				}
+			}
+			return self;
+		};
+
+		/**
+		* New conf
+		*/
+		self.addConf = function (data) {
+
+			// Create new conf object
+			var conf = new DashboardConf();
+			conf.load(data);
+
+			// Add conf to app, select it for editing
+			self.confs.push(conf);
+			self.confEditor(true);
+			self.toggleConf(conf);
+
 			return self;
 		};
 

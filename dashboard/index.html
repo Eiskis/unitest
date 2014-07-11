@@ -33,11 +33,14 @@
 		<!-- Settings -->
 		<div class="inverted confs" data-bind="css: { open: confEditor }">
 
-			<ul class="reset plain collapse list" data-bind="foreach: confs">
-				<li data-bind="css: {selected: $root.conf() === $data}"><a class="block" href="" data-bind="text: name, click: $root.toggleConf"></a></li>
+			<ul class="reset plain collapse list">
+				<!-- ko foreach: confs -->
+					<li data-bind="css: {selected: $root.conf() === $data}"><a class="block" data-bind="click: $root.toggleConf"><em class="index" data-bind="text: ($index() + 1)"></em><em class="name" data-bind="text: name"></em></a></li>
+				<!-- /ko -->
+				<li><a data-bind="click: addConf">+</a></li>
 			</ul>
 			<ul class="reset plain collapse right list">
-				<li class="loader" data-bind="with: conf"><a href="" data-bind="css: { active: updating } "><span class="loading-spinner"></span></a></li>
+				<li class="loader" data-bind="with: conf"><label data-bind="css: { active: updating }"><input type="checkbox" data-bind="checked: autoUpdate"> Auto update<span class="loading-spinner"></span></label></li>
 			</ul>
 			<div class="clear"></div>
 
@@ -46,28 +49,28 @@
 				<div class="column reset small-half">
 
 					<div class="column reset medium-half">
-						<h4 class="discreet">Test location</h4>
-						<p><input type="text" class="squeeze plain buffer text" placeholder="Path to your tests..." data-bind="value: testsPath"></input></p>
+						<h4 class="discreet">Config name</h4>
+						<p><input type="text" class="squeeze plain buffer text" placeholder="My conf..." data-bind="value: name"></input></p>
 					</div>
 
-					<div class="column reset medium-half medium-last">
-						<h4 class="discreet">Your lib</h4>
-						<p><input type="text" class="squeeze plain buffer text" placeholder="Path to your library..." data-bind="value: libPath"></input></p>
+					<div class="column reset medium-half">
+						<h4 class="discreet">Test location</h4>
+						<p><input type="text" class="squeeze plain buffer text" placeholder="Path to your tests..." data-bind="value: testsPath"></input></p>
 					</div>
 					<div class="clear"></div>
 
 				</div>
 				<div class="column reset small-half small-last">
 
+					<div class="column reset medium-half medium-last">
+						<h4 class="discreet">Your lib</h4>
+						<p><input type="text" class="squeeze plain buffer text" placeholder="Path to your library..." data-bind="value: libPath"></input></p>
+					</div>
+
 					<div class="column reset medium-half">
 						<h4 class="discreet">Unitest runner</h4>
 						<p><input type="text" class="squeeze plain buffer text" placeholder="Path to your tests..." data-bind="value: runnerPath"></input></p>
 					</div>
-
-					<div class="column reset medium-half huge-last">
-						<h4 class="discreet"><label><input type="checkbox" data-bind="checked: autoUpdate"> Auto update</label></h4>
-					</div>
-
 					<div class="clear"></div>
 
 				</div>
@@ -184,8 +187,8 @@
 		<script type="application/javascript" src="js/jquery.js"></script>
 		<script type="application/javascript" src="js/knockout.js"></script>
 		<!-- <script type="application/javascript" src="js/prism.js"></script> -->
-		<script type="application/javascript" src="js/equals.js"></script>
-		<script type="application/javascript" src="js/type.js"></script>
+		<!-- <script type="application/javascript" src="js/equals.js"></script> -->
+		<!-- <script type="application/javascript" src="js/type.js"></script> -->
 		<script type="application/javascript" src="js/is.js"></script>
 
 		<!-- Own scripts -->
