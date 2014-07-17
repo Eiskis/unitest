@@ -11,9 +11,6 @@ class UnitestInjectionsBasic extends Unitest {
 		return $this->should($this->isInjection('testInjection'), $this->injection('testInjection') === 3);
 	}
 
-	/**
-	* FAIL: injecting in test methods leaves injections for other injections
-	*/
 	function testInjectionOfAnotherMethodIsNotAvailable () {
 		return $this->shouldNot($this->isInjection('testInjection'));
 	}

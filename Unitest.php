@@ -380,6 +380,9 @@ class Unitest {
 			// Contain exceptions of test method
 			try {
 
+				// Take a snapshot of current injections
+				$allInjectionsCopy = $this->injections();
+
 				// Preparation method
 				$this->runBeforeTest($method);
 
@@ -402,6 +405,9 @@ class Unitest {
 			} catch (Exception $e) {
 				$result = $this->fail($this->stringifyException($e));
 			}
+
+			// Restore injections as they were before the test
+			$this->propertyInjections = $allInjectionsCopy;
 
 			$duration = microtime(true) - $startTime;
 		}
@@ -594,15 +600,55 @@ class Unitest {
 		$arguments = func_get_args();
 		array_shift($arguments);
 
-		// No objects to test
-		foreach ($arguments as $value) {
+		// Test all values
+		foreach ($arguments as $argument) {
 
 			// Not an object
-			if (!is_object($value)) {
+			if (!is_object($argument)) {
 				return $this->fail();
 
 			// Wrong class
-			} else if (!is_subclass_of($value, $className)) {
+			} else if (!is_subclass_of($argument, $className)) {
+				return $this->fail();
+			}
+
+		}
+
+		return $this->pass();
+	}
+
+	/**
+	* A property should exist in class or object.
+	*/
+	final public function shouldHaveProperty ($subject, $property) {
+		$arguments = func_get_args();
+		array_shift($arguments);
+
+		// Test all given properties
+		foreach ($arguments as $argument) {
+
+			// Not an object
+			if (!property_exists($subject, $argument)) {
+				return $this->fail();
+			}
+
+		}
+
+		return $this->pass();
+	}
+
+	/**
+	* A method should exist in class or object.
+	*/
+	final public function shouldHaveMethod ($subject, $method) {
+		$arguments = func_get_args();
+		array_shift($arguments);
+
+		// Test all given properties
+		foreach ($arguments as $argument) {
+
+			// Not an object
+			if (!method_exists($subject, $argument)) {
 				return $this->fail();
 			}
 

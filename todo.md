@@ -4,7 +4,6 @@
 - xUnit-compliance
 - Maybe use helpers as static methods
 - `->clone()`
-- Clean up injections that are created in test methods
 - Test coverage
 	- Event hook methods
 		- Test that they're run at the right time
@@ -23,16 +22,18 @@
 		- float
 		- string
 		- boolean
-
-	- shouldBeFile($file)
-	- shouldBeDirectory($file)
-
-	- shouldBeIncluded($file)
-
-	- shouldBeAvailableClass
-
-	- shouldHaveMethod($property, $objOrClass)
-	- shouldHaveProperty($property, $objOrClass)
+	- `shouldBeFile($file)`
+	- `shouldBeDirectory($file)`
+	- `shouldBeIncluded($file)`
+	- `shouldBeAvailableClass`
+	- `shouldHaveMethod($subject, $method)`
+		- `shouldHavePrivateMethod($subject, $method)`
+		- `shouldHaveProtectedMethod($subject, $method)`
+		- `shouldHavePublicMethod($subject, $method)`
+	- `shouldHaveProperty($subject, $property)`
+		- `shouldHavePrivateProperty($subject, $property)`
+		- `shouldHaveProtectedProperty($subject, $property)`
+		- `shouldHavePublicProperty($subject, $property)`
 
 ## Report dashboard
 
