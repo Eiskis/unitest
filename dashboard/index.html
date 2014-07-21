@@ -35,7 +35,7 @@
 
 			<ul class="reset plain collapse list">
 				<!-- ko foreach: confs -->
-					<li data-bind="css: {selected: $root.conf() === $data}"><a class="block" data-bind="click: $root.toggleConf"><em class="index" data-bind="text: ($index() + 1)"></em><em class="name" data-bind="text: name"></em></a></li>
+					<li data-bind="css: {selected: $root.conf() === $data, failed: (suite() && suite().failed())}"><a class="block" data-bind="click: $root.toggleConf"><em class="index"><span class="marker">&bullet;</span><span data-bind="text: ($index() + 1)"></span></em><em class="name"><span class="marker">&bullet;</span><span data-bind="text: name"></span></em></a></li>
 				<!-- /ko -->
 				<li><a data-bind="click: addConf">+</a></li>
 			</ul>

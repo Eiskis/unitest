@@ -194,6 +194,10 @@ pre {
 	code {
 		font-size: 0.8em;
 	}
+	.marker {
+		position: relative;
+		color: transparent;
+	}
 
 
 
@@ -237,6 +241,15 @@ pre {
 		.confs .list .name {
 			display: none;
 		}
+	}
+
+	/*Marker*/
+	.confs .list .marker {
+		margin-right: 0.5em;
+		color: #6aab35;
+	}
+	.confs .list .failed .marker {
+		color: #d6203e;
 	}
 
 	/*Toggling*/

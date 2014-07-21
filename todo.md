@@ -26,14 +26,41 @@
 	- `shouldBeDirectory($file)`
 	- `shouldBeIncluded($file)`
 	- `shouldBeAvailableClass`
-	- `shouldHaveMethod($subject, $method)`
-		- `shouldHavePrivateMethod($subject, $method)`
-		- `shouldHaveProtectedMethod($subject, $method)`
-		- `shouldHavePublicMethod($subject, $method)`
-	- `shouldHaveProperty($subject, $property)`
-		- `shouldHavePrivateProperty($subject, $property)`
-		- `shouldHaveProtectedProperty($subject, $property)`
-		- `shouldHavePublicProperty($subject, $property)`
+	- `shouldHaveMethod($subjectClassOrObject, $method)`
+		- `shouldHavePrivateMethod($subjectClassOrObject, $method)`
+		- `shouldHaveProtectedMethod($subjectClassOrObject, $method)`
+		- `shouldHavePublicMethod($subjectClassOrObject, $method)`
+		- `shouldBeFinalMethod($subjectClassOrObject, $method)`
+		- `shouldBeStaticMethod($subjectClassOrObject, $method)`
+	- `shouldHaveProperty($subjectClassOrObject, $property)`
+		- `shouldHavePrivateProperty($subjectClassOrObject, $property)`
+		- `shouldHaveProtectedProperty($subjectClassOrObject, $property)`
+		- `shouldHavePublicProperty($subjectClassOrObject, $property)`
+		- `shouldBeFinalProperty($subjectClassOrObject, $property)`
+		- `shouldBeStaticProperty($subjectClassOrObject, $property)`
+
+
+
+## Testing protected/private methods and properties
+
+- [http://php.net/manual/en/reflectionmethod.setaccessible.php]()
+- [http://php.net/manual/en/reflectionproperty.setaccessible.php]()
+
+> If you're using PHP5 (>= 5.3.2) with PHPUnit, you can test your private and protected methods by using reflection to set them to be public prior to running your tests:
+
+	protected static function getMethod($name) {
+	  $class = new ReflectionClass('MyClass');
+	  $method = $class->getMethod($name);
+	  $method->setAccessible(true);
+	  return $method;
+	}
+
+	public function testFoo() {
+	  $foo = self::getMethod('foo');
+	  $obj = new MyClass();
+	  $foo->invokeArgs($obj, array(...));
+	  ...
+	}
 
 ## Report dashboard
 

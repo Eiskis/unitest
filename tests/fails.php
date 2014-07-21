@@ -4,7 +4,6 @@
 
 // 	function testFailsOnException () {
 // 		throw new Exception('Custom error message.', 123);
-		
 // 	}
 
 // 	function testFailsOnWarning () {
