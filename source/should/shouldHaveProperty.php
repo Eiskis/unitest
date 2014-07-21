@@ -5,21 +5,15 @@ class Unitest {
 	/**
 	* A property should exist in class or object.
 	*/
-	final public function shouldHaveProperty ($testableObject, $property) {
+	final public function shouldHaveProperty ($testableObjectOrClass, $property) {
 		$arguments = func_get_args();
 		array_shift($arguments);
 
-		// Not an object
-		if (!is_object($testableObject)) {
-			return $this->fail();
-
 		// Test all given properties
-		} else {
-			foreach ($arguments as $argument) {
-				if (!property_exists($testableObject, $argument)) {
-					return $this->fail();
-				}
-			}	
+		foreach ($arguments as $argument) {
+			if (!property_exists($testableObjectOrClass, $argument)) {
+				return $this->fail();
+			}
 		}
 
 		return $this->pass();

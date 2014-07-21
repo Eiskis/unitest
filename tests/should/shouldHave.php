@@ -2,37 +2,52 @@
 
 class UnitestShouldHave extends Unitest {
 
-	private $propertyFoo = 'foo';
-	private function foo () { return 'foo'; }
+	private $propertyFoo = true;
+	private function methodFoo () { return true; }
 
-	protected $propertyBar = 'bar';
-	protected function bar () { return 'bar'; }
+	protected $propertyBar = true;
+	protected function methodBar () { return true; }
 
-	public $propertyBlah = 'blah';
-	public function blah () { return 'blah'; }
+	public $propertyBlah = true;
+	public function methodBlah () { return true; }
+
+	final public function methodFinal () { return true; }
+	static public function methodStatic () { return true; }
 
 
+
+	/**
+	* Successful methods
+	*/
 
 	function testThisShouldHaveMethod () {
-		return $this->shouldHaveMethod($this, 'foo', 'bar', 'blah');
+		return $this->shouldHaveMethod($this, 'methodFoo', 'methodBar', 'methodBlah');
 	}
 
 	function testThisShouldHavePrivateMethod () {
-		return $this->shouldHavePrivateMethod($this, 'foo');
+		return $this->shouldHavePrivateMethod($this, 'methodFoo');
 	}
 
 	function testThisShouldHaveProtectedMethod () {
-		return $this->shouldHaveProtectedMethod($this, 'bar');
+		return $this->shouldHaveProtectedMethod($this, 'methodBar');
 	}
 
 	function testThisShouldHavePublicMethod () {
-		return $this->shouldHavePublicMethod($this, 'blah');
+		return $this->shouldHavePublicMethod($this, 'methodBlah');
+	}
+
+	function testThisShouldHaveFinalMethod () {
+		return $this->shouldHaveFinalMethod($this, 'methodFinal');
+	}
+
+	function testThisShouldHaveStaticMethod () {
+		return $this->shouldHaveStaticMethod($this, 'methodStatic');
 	}
 
 
 
 	/**
-	* Successes
+	* Successful properties
 	*/
 
 	function testThisShouldHaveProperty () {
@@ -54,7 +69,45 @@ class UnitestShouldHave extends Unitest {
 
 
 	/**
-	* Fails
+	* Failing methods
+	*/
+
+	function testThisShouldHavePrivateMethodFailsOnPublic () {
+		return $this->fails($this->shouldHavePrivateMethod($this, 'methodBlah'));
+	}
+
+	function testThisShouldHaveProtectedMethodFailsOnPublic () {
+		return $this->fails($this->shouldHaveProtectedMethod($this, 'methodBlah'));
+	}
+
+	function testThisShouldHavePrivateMethodFailsOnProtected () {
+		return $this->fails($this->shouldHavePrivateMethod($this, 'methodBar'));
+	}
+
+	function testThisShouldHavePublicMethodFailsOnProtected () {
+		return $this->fails($this->shouldHavePublicMethod($this, 'methodBar'));
+	}
+
+	function testThisShouldHaveProtectedMethodFailsOnPrivate () {
+		return $this->fails($this->shouldHaveProtectedMethod($this, 'methodFoo'));
+	}
+
+	function testThisShouldHavePublicMethodFailsOnPrivate () {
+		return $this->fails($this->shouldHavePublicMethod($this, 'methodFoo'));
+	}
+
+	function testThisShouldHaveFinalMethodFailsOnNonFinal () {
+		return $this->fails($this->shouldHaveFinalMethod($this, 'methodFoo'));
+	}
+
+	function testThisShouldHaveStaticMethodFailsOnNonStatic () {
+		return $this->fails($this->shouldHaveStaticMethod($this, 'methodFoo'));
+	}
+
+
+
+	/**
+	* Failing properties
 	*/
 
 	function testThisShouldHavePrivatePropertyFailsOnPublic () {

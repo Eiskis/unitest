@@ -1,6 +1,8 @@
 
 # To do
 
+- Clear duplication in method/property assertions
+- method tests fail on object
 - xUnit-compliance
 - Maybe use helpers as static methods
 - `->clone()`
@@ -25,19 +27,10 @@
 	- `shouldBeFile($file)`
 	- `shouldBeDirectory($file)`
 	- `shouldBeIncluded($file)`
-	- `shouldBeAvailableClass`
 	- `shouldHaveMethod($subjectClassOrObject, $method)`
-		- `shouldHavePrivateMethod($subjectClassOrObject, $method)`
-		- `shouldHaveProtectedMethod($subjectClassOrObject, $method)`
-		- `shouldHavePublicMethod($subjectClassOrObject, $method)`
-		- `shouldBeFinalMethod($subjectClassOrObject, $method)`
-		- `shouldBeStaticMethod($subjectClassOrObject, $method)`
+		- `shouldHaveStaticMethod($subjectClassOrObject, $method)`
 	- `shouldHaveProperty($subjectClassOrObject, $property)`
-		- `shouldHavePrivateProperty($subjectClassOrObject, $property)`
-		- `shouldHaveProtectedProperty($subjectClassOrObject, $property)`
-		- `shouldHavePublicProperty($subjectClassOrObject, $property)`
-		- `shouldBeFinalProperty($subjectClassOrObject, $property)`
-		- `shouldBeStaticProperty($subjectClassOrObject, $property)`
+		- `shouldHaveStaticProperty($subjectClassOrObject, $property)`
 
 
 
