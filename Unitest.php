@@ -813,7 +813,7 @@ class Unitest {
 	*/
 	final private function propertyVisibility ($subject, $propertyName) {
 		if (property_exists($subject, $propertyName)) {
-			$ref = new ReflectionMethod($subject, $propertyName);
+			$ref = new ReflectionProperty($subject, $propertyName);
 			if ($ref->isPrivate()) {
 				return 'private';
 			} else if ($ref->isProtected()) {
@@ -1229,6 +1229,33 @@ class Unitest {
 
 
 	/**
+	* A property with the visibility "private" should exist in class or object.
+	*/
+	final public function shouldHavePrivateProperty ($testableObject, $property) {
+		$arguments = func_get_args();
+		array_shift($arguments);
+
+		// Not an object
+		if (!is_object($testableObject)) {
+			return $this->fail();
+
+		// Test all given properties
+		} else {
+			foreach ($arguments as $argument) {
+				if (!property_exists($testableObject, $argument)) {
+					return $this->fail();
+				} else if ($this->propertyVisibility($testableObject, $argument) !== 'private') {
+					return $this->fail();
+				}
+			}	
+		}
+
+		return $this->pass();
+	}
+
+
+
+	/**
 	* A property should exist in class or object.
 	*/
 	final public function shouldHaveProperty ($testableObject, $property) {
@@ -1281,6 +1308,33 @@ class Unitest {
 
 
 	/**
+	* A property with the visibility "protected" should exist in class or object.
+	*/
+	final public function shouldHaveProtectedProperty ($testableObject, $property) {
+		$arguments = func_get_args();
+		array_shift($arguments);
+
+		// Not an object
+		if (!is_object($testableObject)) {
+			return $this->fail();
+
+		// Test all given properties
+		} else {
+			foreach ($arguments as $argument) {
+				if (!property_exists($testableObject, $argument)) {
+					return $this->fail();
+				} else if ($this->propertyVisibility($testableObject, $argument) !== 'protected') {
+					return $this->fail();
+				}
+			}	
+		}
+
+		return $this->pass();
+	}
+
+
+
+	/**
 	* A method with the visibility "public" should exist in class or object.
 	*/
 	final public function shouldHavePublicMethod ($testableObject, $method) {
@@ -1297,6 +1351,33 @@ class Unitest {
 				if (!method_exists($testableObject, $argument)) {
 					return $this->fail();
 				} else if ($this->methodVisibility($testableObject, $argument) !== 'public') {
+					return $this->fail();
+				}
+			}	
+		}
+
+		return $this->pass();
+	}
+
+
+
+	/**
+	* A property with the visibility "public" should exist in class or object.
+	*/
+	final public function shouldHavePublicProperty ($testableObject, $property) {
+		$arguments = func_get_args();
+		array_shift($arguments);
+
+		// Not an object
+		if (!is_object($testableObject)) {
+			return $this->fail();
+
+		// Test all given properties
+		} else {
+			foreach ($arguments as $argument) {
+				if (!property_exists($testableObject, $argument)) {
+					return $this->fail();
+				} else if ($this->propertyVisibility($testableObject, $argument) !== 'public') {
 					return $this->fail();
 				}
 			}	

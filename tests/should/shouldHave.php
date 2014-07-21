@@ -31,21 +31,55 @@ class UnitestShouldHave extends Unitest {
 
 
 
+	/**
+	* Successes
+	*/
+
 	function testThisShouldHaveProperty () {
 		return $this->shouldHaveProperty($this, 'propertyFoo', 'propertyBar', 'propertyBlah');
 	}
 
-	// function testThisShouldHavePrivateProperty () {
-	// 	return $this->shouldHavePrivateProperty($this, 'propertyFoo');
-	// }
+	function testThisShouldHavePrivateProperty () {
+		return $this->shouldHavePrivateProperty($this, 'propertyFoo');
+	}
 
-	// function testThisShouldHaveProtectedProperty () {
-	// 	return $this->shouldHaveProtectedProperty($this, 'propertyBar');
-	// }
+	function testThisShouldHaveProtectedProperty () {
+		return $this->shouldHaveProtectedProperty($this, 'propertyBar');
+	}
 
-	// function testThisShouldHavePublicProperty () {
-	// 	return $this->shouldHavePublicProperty($this, 'propertyBlah');
-	// }
+	function testThisShouldHavePublicProperty () {
+		return $this->shouldHavePublicProperty($this, 'propertyBlah');
+	}
+
+
+
+	/**
+	* Fails
+	*/
+
+	function testThisShouldHavePrivatePropertyFailsOnPublic () {
+		return $this->fails($this->shouldHavePrivateProperty($this, 'propertyBlah'));
+	}
+
+	function testThisShouldHaveProtectedPropertyFailsOnPublic () {
+		return $this->fails($this->shouldHaveProtectedProperty($this, 'propertyBlah'));
+	}
+
+	function testThisShouldHavePrivatePropertyFailsOnProtected () {
+		return $this->fails($this->shouldHavePrivateProperty($this, 'propertyBar'));
+	}
+
+	function testThisShouldHavePublicPropertyFailsOnProtected () {
+		return $this->fails($this->shouldHavePublicProperty($this, 'propertyBar'));
+	}
+
+	function testThisShouldHaveProtectedPropertyFailsOnPrivate () {
+		return $this->fails($this->shouldHaveProtectedProperty($this, 'propertyFoo'));
+	}
+
+	function testThisShouldHavePublicPropertyFailsOnPrivate () {
+		return $this->fails($this->shouldHavePublicProperty($this, 'propertyFoo'));
+	}
 
 
 
