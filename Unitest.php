@@ -1109,18 +1109,6 @@ class Unitest {
 
 
 	/**
-	* Class exists
-	*/
-	final public function shouldBeAvailableClass ($value) {
-		if (!class_exists($value)) {
-			$this->fail();
-		}
-		return $this->pass();
-	}
-
-
-
-	/**
 	* Equality
 	*/
 	final public function shouldBeEqual ($value) {
@@ -1132,6 +1120,43 @@ class Unitest {
 					return $this->fail();
 				}
 			}
+		}
+		return $this->pass();
+	}
+
+
+
+	/**
+	* Falsey
+	*/
+	final public function shouldNot ($value) {
+		$arguments = func_get_args();
+		foreach ($arguments as $argument) {
+			if ($argument) {
+				return $this->fail();
+			}
+		}
+		return $this->pass();
+	}
+
+
+
+	/**
+	* Non-equality
+	*/
+	final public function shouldNotBeEqual ($value) {
+		$arguments = func_get_args();
+		return !$this->execute('shouldBeEqual', $arguments);
+	}
+
+
+
+	/**
+	* Class exists
+	*/
+	final public function shouldBeAvailableClass ($value) {
+		if (!class_exists($value)) {
+			$this->fail();
 		}
 		return $this->pass();
 	}
@@ -1175,6 +1200,51 @@ class Unitest {
 			}
 		}
 
+		return $this->pass();
+	}
+
+
+
+	/**
+	* A directory should exist in given location(s)
+	*/
+	final public function shouldBeDirectory ($path) {
+		$arguments = func_get_args();
+		foreach ($arguments as $argument) {
+			if (!is_dir($argument)) {
+				return $this->fail();
+			}
+		}
+		return $this->pass();
+	}
+
+
+
+	/**
+	* A file should exist in given location(s)
+	*/
+	final public function shouldBeFile ($path) {
+		$arguments = func_get_args();
+		foreach ($arguments as $argument) {
+			if (!is_file($argument)) {
+				return $this->fail();
+			}
+		}
+		return $this->pass();
+	}
+
+
+
+	/**
+	* A file or directory should exist in given location(s)
+	*/
+	final public function shouldBeFileOrDirectory ($path) {
+		$arguments = func_get_args();
+		foreach ($arguments as $argument) {
+			if (!is_file($argument) and !is_dir($argument)) {
+				return $this->fail();
+			}
+		}
 		return $this->pass();
 	}
 
@@ -1275,6 +1345,75 @@ class Unitest {
 
 
 	/**
+	* A method with the visibility "protected" should exist in class or object.
+	*/
+	final public function shouldHaveProtectedMethod ($testableObjectOrClass, $method) {
+		$arguments = func_get_args();
+		array_shift($arguments);
+
+		// Test all given methods
+		foreach ($arguments as $argument) {
+			if (!method_exists($testableObjectOrClass, $argument)) {
+				return $this->fail();
+			} else if ($this->methodVisibility($testableObjectOrClass, $argument) !== 'protected') {
+				return $this->fail();
+			}
+		}
+
+		return $this->pass();
+	}
+
+
+
+	/**
+	* A method with the visibility "public" should exist in class or object.
+	*/
+	final public function shouldHavePublicMethod ($testableObjectOrClass, $method) {
+		$arguments = func_get_args();
+		array_shift($arguments);
+
+		// Test all given methods
+		foreach ($arguments as $argument) {
+			if (!method_exists($testableObjectOrClass, $argument)) {
+				return $this->fail();
+			} else if ($this->methodVisibility($testableObjectOrClass, $argument) !== 'public') {
+				return $this->fail();
+			}
+		}
+
+		return $this->pass();
+	}
+
+
+
+	/**
+	* A static method should exist in class.
+	*/
+	final public function shouldHaveStaticMethod ($testableClass, $method) {
+		$arguments = func_get_args();
+		array_shift($arguments);
+
+		// Test all given methods
+		foreach ($arguments as $argument) {
+			if (!method_exists($testableClass, $argument)) {
+				return $this->fail();
+			} else {
+
+				// Use reflection to check method
+				$ref = new ReflectionMethod($testableClass, $argument);
+				if (!$ref->isStatic()) {
+					return $this->fail();
+				}
+
+			}
+		}
+
+		return $this->pass();
+	}
+
+
+
+	/**
 	* A property with the visibility "private" should exist in class or object.
 	*/
 	final public function shouldHavePrivateProperty ($testableObjectOrClass, $property) {
@@ -1315,27 +1454,6 @@ class Unitest {
 
 
 	/**
-	* A method with the visibility "protected" should exist in class or object.
-	*/
-	final public function shouldHaveProtectedMethod ($testableObjectOrClass, $method) {
-		$arguments = func_get_args();
-		array_shift($arguments);
-
-		// Test all given methods
-		foreach ($arguments as $argument) {
-			if (!method_exists($testableObjectOrClass, $argument)) {
-				return $this->fail();
-			} else if ($this->methodVisibility($testableObjectOrClass, $argument) !== 'protected') {
-				return $this->fail();
-			}
-		}
-
-		return $this->pass();
-	}
-
-
-
-	/**
 	* A property with the visibility "protected" should exist in class or object.
 	*/
 	final public function shouldHaveProtectedProperty ($testableObjectOrClass, $property) {
@@ -1347,27 +1465,6 @@ class Unitest {
 			if (!property_exists($testableObjectOrClass, $argument)) {
 				return $this->fail();
 			} else if ($this->propertyVisibility($testableObjectOrClass, $argument) !== 'protected') {
-				return $this->fail();
-			}
-		}
-
-		return $this->pass();
-	}
-
-
-
-	/**
-	* A method with the visibility "public" should exist in class or object.
-	*/
-	final public function shouldHavePublicMethod ($testableObjectOrClass, $method) {
-		$arguments = func_get_args();
-		array_shift($arguments);
-
-		// Test all given methods
-		foreach ($arguments as $argument) {
-			if (!method_exists($testableObjectOrClass, $argument)) {
-				return $this->fail();
-			} else if ($this->methodVisibility($testableObjectOrClass, $argument) !== 'public') {
 				return $this->fail();
 			}
 		}
@@ -1394,58 +1491,6 @@ class Unitest {
 		}
 
 		return $this->pass();
-	}
-
-
-
-	/**
-	* A static method should exist in class.
-	*/
-	final public function shouldHaveStaticMethod ($testableClass, $method) {
-		$arguments = func_get_args();
-		array_shift($arguments);
-
-		// Test all given methods
-		foreach ($arguments as $argument) {
-			if (!method_exists($testableClass, $argument)) {
-				return $this->fail();
-			} else {
-
-				// Use reflection to check method
-				$ref = new ReflectionMethod($testableClass, $argument);
-				if (!$ref->isStatic()) {
-					return $this->fail();
-				}
-
-			}
-		}
-
-		return $this->pass();
-	}
-
-
-
-	/**
-	* Falsey
-	*/
-	final public function shouldNot ($value) {
-		$arguments = func_get_args();
-		foreach ($arguments as $argument) {
-			if ($argument) {
-				return $this->fail();
-			}
-		}
-		return $this->pass();
-	}
-
-
-
-	/**
-	* Non-equality
-	*/
-	final public function shouldNotBeEqual ($value) {
-		$arguments = func_get_args();
-		return !$this->execute('shouldBeEqual', $arguments);
 	}
 
 
