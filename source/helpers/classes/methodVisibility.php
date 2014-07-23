@@ -5,7 +5,7 @@ class Unitest {
 	/**
 	* Get the visibility of a method of any object or class
 	*/
-	final private function methodVisibility ($classOrObject, $method) {
+	final private function _methodVisibility ($classOrObject, $method) {
 		if (method_exists($classOrObject, $method)) {
 			$ref = new ReflectionMethod($classOrObject, $method);
 			if ($ref->isPrivate()) {

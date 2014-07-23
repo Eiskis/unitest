@@ -5,7 +5,7 @@ class Unitest {
 	/**
 	* Instantiate suite objects based on class names recursively
 	*/
-	final private function generateSuites ($classes, $parent = null) {
+	final private function _generateSuites ($classes, $parent = null) {
 		$suites = array();
 
 		// Default to self
@@ -14,7 +14,7 @@ class Unitest {
 		}
 
 		// Validate parent
-		if (!$this->isValidSuite($parent)) {
+		if (!$this->_isValidSuite($parent)) {
 			throw new Exception('Invalid parent suite passed as parent.');
 		}
 
@@ -23,7 +23,7 @@ class Unitest {
 
 			// Recursion
 			if (!empty($children)) {
-				$this->generateSuites($children, $suite);
+				$this->_generateSuites($children, $suite);
 			}
 
 			// Add to own flock

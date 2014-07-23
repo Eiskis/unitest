@@ -5,9 +5,9 @@ class Unitest {
 	/**
 	* When instance is created
 	*/
-	final private function runInit () {
+	final private function _runInit () {
 		$arguments = func_get_args();
-		$this->execute('init', $arguments);
+		$this->_execute('init', $arguments);
 		return $this;
 	}
 

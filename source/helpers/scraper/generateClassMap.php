@@ -20,7 +20,7 @@ class Unitest {
 	*		),
 	*	 )
 	*/
-	final private function generateClassMap ($classes) {
+	final private function _generateClassMap ($classes) {
 		$results = array();
 
 		// Go deeper if there's any children
@@ -29,7 +29,7 @@ class Unitest {
 			$parent = array_shift($children);
 
 			// Recursion for treating children
-			$results[$parent] = $this->generateClassMap($children);
+			$results[$parent] = $this->_generateClassMap($children);
 
 		}
 

@@ -7,7 +7,7 @@ class Unitest {
 	*/
 	final protected function shouldNotBeEqual ($value) {
 		$arguments = func_get_args();
-		return !$this->execute('shouldBeEqual', $arguments);
+		return !$this->_execute('shouldBeEqual', $arguments);
 	}
 
 }

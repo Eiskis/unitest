@@ -7,7 +7,7 @@ class Unitest {
 	*/
 	final public function isInjection ($name) {
 		$arguments = func_get_args();
-		$arguments = $this->flattenArray($arguments);
+		$arguments = $this->_flattenArray($arguments);
 		$injections = $this->injections();
 
 		// Fail if one of the equested injections is not available

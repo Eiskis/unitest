@@ -11,9 +11,9 @@ class Unitest {
 		$ref = new ReflectionClass($this);
 
 		$results = array(
-			'class'    => $this->className($this),
-			'file'     => $this->classFile($this),
-			'line'     => $this->classLineNumber($this),
+			'class'    => $this->_className($this),
+			'file'     => $this->_classFile($this),
+			'line'     => $this->_classLineNumber($this),
 			'parents'  => $this->parents(),
 
 			'duration' => 0,
@@ -32,7 +32,7 @@ class Unitest {
 		}
 
 		// Flatten arguments
-		$suitesOrTests = $this->flattenArray($arguments);
+		$suitesOrTests = $this->_flattenArray($arguments);
 
 		// Preparation before suite runs anything (possible exceptions are left uncaught)
 		$this->_runBeforeTests();
@@ -41,7 +41,7 @@ class Unitest {
 		foreach ($suitesOrTests as $suiteOrTest) {
 
 			// Child suite
-			if ($this->isValidSuite($suiteOrTest)) {
+			if ($this->_isValidSuite($suiteOrTest)) {
 				$childResults = $suiteOrTest->run(array_merge($suiteOrTest->tests(), $suiteOrTest->children()));
 				$results['children'][] = $childResults;
 

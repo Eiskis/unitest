@@ -5,7 +5,7 @@ class Unitest {
 	/**
 	* Find directories
 	*/
-	final private function globDir ($path = '') {
+	final private function _globDir ($path = '') {
 
 		// Normalize path
 		if (!empty($path)) {

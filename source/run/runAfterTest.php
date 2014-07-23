@@ -7,7 +7,7 @@ class Unitest {
 	*/
 	final private function _runAfterTest ($method) {
 		$arguments = func_get_args();
-		$this->execute('afterTest', $arguments);
+		$this->_execute('afterTest', $arguments);
 		return $this;
 	}
 

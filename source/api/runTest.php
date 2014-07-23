@@ -23,23 +23,23 @@ class Unitest {
 				$this->_runBeforeTest($method);
 
 				// Get innjections to pass to test method
-				foreach ($this->methodParameterNames($this, $method) as $parameterName) {
+				foreach ($this->_methodParameterNames($this, $method) as $parameterName) {
 					$injections[] = $this->injection($parameterName);
 				}
 
 				// Call test method
-				$result = $this->execute($method, $injections);
+				$result = $this->_execute($method, $injections);
 
 			// Fail test if there are exceptions
 			} catch (Exception $e) {
-				$result = $this->fail($this->stringifyException($e));
+				$result = $this->fail($this->_stringifyException($e));
 			}
 
 			// Contain exceptions of clean-up
 			try {
 				$this->_runAfterTest($method);
 			} catch (Exception $e) {
-				$result = $this->fail($this->stringifyException($e));
+				$result = $this->fail($this->_stringifyException($e));
 			}
 
 			// Restore injections as they were before the test
@@ -50,11 +50,11 @@ class Unitest {
 
 		// Test report
 		return array(
-			'class'      => $this->className($this),
-			'duration'   => $this->roundExecutionTime($duration),
+			'class'      => $this->_className($this),
+			'duration'   => $duration,
 			'method'     => $method,
-			'file'       => $this->classFile($this),
-			'line'       => $this->methodLineNumber($this, $method),
+			'file'       => $this->_classFile($this),
+			'line'       => $this->_methodLineNumber($this, $method),
 			'status'     => $this->assess($result),
 			'message'    => $result,
 			'injections' => $injections,

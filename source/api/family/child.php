@@ -8,7 +8,7 @@ class Unitest {
 	final public function child ($child) {
 		$arguments = func_get_args();
 		foreach ($arguments as $argument) {
-			if ($this->isValidSuite($argument)) {
+			if ($this->_isValidSuite($argument)) {
 
 				// Store reference to this in the child
 				$argument->parent($this, true);

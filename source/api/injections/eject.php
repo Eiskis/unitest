@@ -7,7 +7,7 @@ class Unitest {
 	*/
 	final public function eject ($name) {
 		$arguments = func_get_args();
-		$arguments = $this->flattenArray($arguments);
+		$arguments = $this->_flattenArray($arguments);
 		foreach ($arguments as $argument) {
 			if ($this->isInjection($argument)) {
 				unset($this->_propertyInjections[$argument]);

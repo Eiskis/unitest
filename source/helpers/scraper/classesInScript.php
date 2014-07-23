@@ -5,7 +5,7 @@ class Unitest {
 	/**
 	* Find out which classes will be defined in a script
 	*/
-	final private function classesInScript ($code = '') {
+	final private function _classesInScript ($code = '') {
 		$classes = array();
 
 		// Find tokens that are classes
@@ -25,7 +25,7 @@ class Unitest {
 				$inheritedFrom = $tokens[$i+4][1];
 
 				// See if class extends Unitest
-				if ($this->isValidSuiteClass($inheritedFrom)) {
+				if ($this->_isValidSuiteClass($inheritedFrom)) {
 					$classes[] = $tokens[$i][1];
 				}
 

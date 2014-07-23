@@ -11,7 +11,7 @@ class Unitest {
 		if (isset($parent)) {
 
 			// Validate parent
-			if (!$this->isValidSuite($parent)) {
+			if (!$this->_isValidSuite($parent)) {
 				throw new Exception('Invalid parent suite passed as parent.');
 			} else {
 

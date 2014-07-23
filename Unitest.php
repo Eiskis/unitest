@@ -32,6 +32,9 @@ class Unitest {
 	private $_propertyInjections = array();
 	private $_propertyParent = null;
 
+	private $_baseClass = 'Unitest';
+	private $_testMethodPrefix = 'test';
+
 
 
 	/**
@@ -40,7 +43,7 @@ class Unitest {
 	* Parent suite and script variables can be passed
 	*/
 	final public function __construct () {
-		$this->runInit();
+		$this->_runInit();
 		return $this;
 	}
 
@@ -64,9 +67,9 @@ class Unitest {
 		$ref = new ReflectionClass($this);
 
 		$results = array(
-			'class'    => $this->className($this),
-			'file'     => $this->classFile($this),
-			'line'     => $this->classLineNumber($this),
+			'class'    => $this->_className($this),
+			'file'     => $this->_classFile($this),
+			'line'     => $this->_classLineNumber($this),
 			'parents'  => $this->parents(),
 
 			'duration' => 0,
@@ -85,7 +88,7 @@ class Unitest {
 		}
 
 		// Flatten arguments
-		$suitesOrTests = $this->flattenArray($arguments);
+		$suitesOrTests = $this->_flattenArray($arguments);
 
 		// Preparation before suite runs anything (possible exceptions are left uncaught)
 		$this->_runBeforeTests();
@@ -94,7 +97,7 @@ class Unitest {
 		foreach ($suitesOrTests as $suiteOrTest) {
 
 			// Child suite
-			if ($this->isValidSuite($suiteOrTest)) {
+			if ($this->_isValidSuite($suiteOrTest)) {
 				$childResults = $suiteOrTest->run(array_merge($suiteOrTest->tests(), $suiteOrTest->children()));
 				$results['children'][] = $childResults;
 
@@ -146,23 +149,23 @@ class Unitest {
 				$this->_runBeforeTest($method);
 
 				// Get innjections to pass to test method
-				foreach ($this->methodParameterNames($this, $method) as $parameterName) {
+				foreach ($this->_methodParameterNames($this, $method) as $parameterName) {
 					$injections[] = $this->injection($parameterName);
 				}
 
 				// Call test method
-				$result = $this->execute($method, $injections);
+				$result = $this->_execute($method, $injections);
 
 			// Fail test if there are exceptions
 			} catch (Exception $e) {
-				$result = $this->fail($this->stringifyException($e));
+				$result = $this->fail($this->_stringifyException($e));
 			}
 
 			// Contain exceptions of clean-up
 			try {
 				$this->_runAfterTest($method);
 			} catch (Exception $e) {
-				$result = $this->fail($this->stringifyException($e));
+				$result = $this->fail($this->_stringifyException($e));
 			}
 
 			// Restore injections as they were before the test
@@ -173,11 +176,11 @@ class Unitest {
 
 		// Test report
 		return array(
-			'class'      => $this->className($this),
-			'duration'   => $this->roundExecutionTime($duration),
+			'class'      => $this->_className($this),
+			'duration'   => $duration,
 			'method'     => $method,
-			'file'       => $this->classFile($this),
-			'line'       => $this->methodLineNumber($this, $method),
+			'file'       => $this->_classFile($this),
+			'line'       => $this->_methodLineNumber($this, $method),
 			'status'     => $this->assess($result),
 			'message'    => $result,
 			'injections' => $injections,
@@ -193,17 +196,17 @@ class Unitest {
 		$arguments = func_get_args();
 
 		// Load classes automatically (arguments passed to loadFiles)
-		$classes = $this->execute('loadFiles', $arguments);
+		$classes = $this->_execute('_loadFiles', $arguments);
 
 		// Treat classes
 		foreach ($classes as $key => $values) {
-			$classes[$key] = $this->generateClassMap($values);
+			$classes[$key] = $this->_generateClassMap($values);
 		}
-		$classes = $this->mergeClassMap($classes);
+		$classes = $this->_mergeClassMap($classes);
 
 		if (!empty($classes)) {
 			$parents = array_reverse(class_parents($this));
-			$parents[] = $this->className($this);
+			$parents[] = $this->_className($this);
 
 			// Find own class from class map, only generate child suites from own child classes
 			foreach ($parents as $parent) {
@@ -215,7 +218,7 @@ class Unitest {
 			}
 
 			// We generate a map of required test suite classes here
-			$suites = $this->generateSuites($classes);
+			$suites = $this->_generateSuites($classes);
 
 		}
 
@@ -234,12 +237,12 @@ class Unitest {
 		foreach (get_class_methods($this) as $method) {
 
 			// Class methods with the correct prefix
-			if (substr($method, 0, strlen($this->prefix())) === $this->prefix()) {
+			if (substr($method, 0, strlen($this->_testMethodPrefix)) === $this->_testMethodPrefix) {
 
 				// Prefixed methods that aren't declared in base class
 				$ref = new ReflectionMethod($this, $method);
 				$class = $ref->getDeclaringClass();
-				if ($class->name !== $this->baseClass()) {
+				if ($class->name !== $this->_baseClass) {
 					$tests[] = $method;
 				}
 
@@ -257,7 +260,7 @@ class Unitest {
 	final public function child ($child) {
 		$arguments = func_get_args();
 		foreach ($arguments as $argument) {
-			if ($this->isValidSuite($argument)) {
+			if ($this->_isValidSuite($argument)) {
 
 				// Store reference to this in the child
 				$argument->parent($this, true);
@@ -280,7 +283,7 @@ class Unitest {
 		// Set
 		$arguments = func_get_args();
 		if (!empty($arguments)) {
-			return $this->execute('child', $arguments);
+			return $this->_execute('child', $arguments);
 		}
 
 		// Get
@@ -298,7 +301,7 @@ class Unitest {
 		if (isset($parent)) {
 
 			// Validate parent
-			if (!$this->isValidSuite($parent)) {
+			if (!$this->_isValidSuite($parent)) {
 				throw new Exception('Invalid parent suite passed as parent.');
 			} else {
 
@@ -327,7 +330,7 @@ class Unitest {
 	final public function parents () {
 		$parents = array();
 		if ($this->parent()) {
-			$parents = array_merge($this->parent()->parents(), array($this->className($this->parent())));
+			$parents = array_merge($this->parent()->parents(), array($this->_className($this->parent())));
 		}
 		return $parents;
 	}
@@ -339,7 +342,7 @@ class Unitest {
 	*/
 	final public function eject ($name) {
 		$arguments = func_get_args();
-		$arguments = $this->flattenArray($arguments);
+		$arguments = $this->_flattenArray($arguments);
 		foreach ($arguments as $argument) {
 			if ($this->isInjection($argument)) {
 				unset($this->_propertyInjections[$argument]);
@@ -376,7 +379,7 @@ class Unitest {
 		// Set
 		$arguments = func_get_args();
 		if (func_num_args() > 1) {
-			return $this->execute('inject', $arguments);
+			return $this->_execute('inject', $arguments);
 		}
 
 		// Get own injections, bubble
@@ -400,7 +403,7 @@ class Unitest {
 		// Set
 		$arguments = func_get_args();
 		if (!empty($arguments)) {
-			return $this->execute('inject', $arguments);
+			return $this->_execute('inject', $arguments);
 		}
 
 		// Get own injections, bubble
@@ -421,7 +424,7 @@ class Unitest {
 	*/
 	final public function isInjection ($name) {
 		$arguments = func_get_args();
-		$arguments = $this->flattenArray($arguments);
+		$arguments = $this->_flattenArray($arguments);
 		$injections = $this->injections();
 
 		// Fail if one of the equested injections is not available
@@ -489,7 +492,7 @@ class Unitest {
 	*/
 	final protected function shouldNotBeEqual ($value) {
 		$arguments = func_get_args();
-		return !$this->execute('shouldBeEqual', $arguments);
+		return !$this->_execute('shouldBeEqual', $arguments);
 	}
 
 
@@ -692,7 +695,7 @@ class Unitest {
 		foreach ($arguments as $argument) {
 			if (!method_exists($testableObjectOrClass, $argument)) {
 				return $this->fail();
-			} else if ($this->methodVisibility($testableObjectOrClass, $argument) !== 'private') {
+			} else if ($this->_methodVisibility($testableObjectOrClass, $argument) !== 'private') {
 				return $this->fail();
 			}
 		}
@@ -713,7 +716,7 @@ class Unitest {
 		foreach ($arguments as $argument) {
 			if (!method_exists($testableObjectOrClass, $argument)) {
 				return $this->fail();
-			} else if ($this->methodVisibility($testableObjectOrClass, $argument) !== 'protected') {
+			} else if ($this->_methodVisibility($testableObjectOrClass, $argument) !== 'protected') {
 				return $this->fail();
 			}
 		}
@@ -734,7 +737,7 @@ class Unitest {
 		foreach ($arguments as $argument) {
 			if (!method_exists($testableObjectOrClass, $argument)) {
 				return $this->fail();
-			} else if ($this->methodVisibility($testableObjectOrClass, $argument) !== 'public') {
+			} else if ($this->_methodVisibility($testableObjectOrClass, $argument) !== 'public') {
 				return $this->fail();
 			}
 		}
@@ -782,7 +785,7 @@ class Unitest {
 		foreach ($arguments as $argument) {
 			if (!property_exists($testableObjectOrClass, $argument)) {
 				return $this->fail();
-			} else if ($this->propertyVisibility($testableObjectOrClass, $argument) !== 'private') {
+			} else if ($this->_propertyVisibility($testableObjectOrClass, $argument) !== 'private') {
 				return $this->fail();
 			}
 		}
@@ -822,7 +825,7 @@ class Unitest {
 		foreach ($arguments as $argument) {
 			if (!property_exists($testableObjectOrClass, $argument)) {
 				return $this->fail();
-			} else if ($this->propertyVisibility($testableObjectOrClass, $argument) !== 'protected') {
+			} else if ($this->_propertyVisibility($testableObjectOrClass, $argument) !== 'protected') {
 				return $this->fail();
 			}
 		}
@@ -843,7 +846,7 @@ class Unitest {
 		foreach ($arguments as $argument) {
 			if (!property_exists($testableObjectOrClass, $argument)) {
 				return $this->fail();
-			} else if ($this->propertyVisibility($testableObjectOrClass, $argument) !== 'public') {
+			} else if ($this->_propertyVisibility($testableObjectOrClass, $argument) !== 'public') {
 				return $this->fail();
 			}
 		}
@@ -937,7 +940,7 @@ class Unitest {
 	/**
 	* File where this class or object is defined in
 	*/
-	final private function classFile ($classOrObject) {
+	final private function _classFile ($classOrObject) {
 		$ref = new ReflectionClass($classOrObject);
 		return $ref->getFileName();
 	}
@@ -947,7 +950,7 @@ class Unitest {
 	/**
 	* Line number of the file where this class or object is defined in
 	*/
-	final private function classLineNumber ($classOrObject) {
+	final private function _classLineNumber ($classOrObject) {
 		$ref = new ReflectionClass($classOrObject);
 		return $ref->getStartLine();
 	}
@@ -957,7 +960,7 @@ class Unitest {
 	/**
 	* Name of this class or object
 	*/
-	final private function className ($classOrObject) {
+	final private function _className ($classOrObject) {
 		return get_class($classOrObject);
 	}
 
@@ -966,10 +969,10 @@ class Unitest {
 	/**
 	* Validate a suite object
 	*/
-	final private function isValidSuite ($case) {
+	final private function _isValidSuite ($case) {
 		return isset($case) and is_object($case) and (
-			get_class($case) === $this->baseClass() or
-			is_subclass_of($case, $this->baseClass())
+			get_class($case) === $this->_baseClass or
+			is_subclass_of($case, $this->_baseClass)
 		);
 	}
 
@@ -978,9 +981,9 @@ class Unitest {
 	/**
 	* Validate a suite class
 	*/
-	final private function isValidSuiteClass ($class) {
+	final private function _isValidSuiteClass ($class) {
 		$ref = new ReflectionClass($class);
-		if ($class === $this->baseClass() or $ref->isSubclassOf($this->baseClass())) {
+		if ($class === $this->_baseClass or $ref->isSubclassOf($this->_baseClass)) {
 			return true;
 		}
 		return false;
@@ -991,7 +994,7 @@ class Unitest {
 	/**
 	* Get the line number where method is defined in within its class file
 	*/
-	final private function methodLineNumber ($classOrObject, $method) {
+	final private function _methodLineNumber ($classOrObject, $method) {
 		$ref = new ReflectionMethod($classOrObject, $method);
 		return $ref->getStartLine();
 	}
@@ -1001,7 +1004,7 @@ class Unitest {
 	/**
 	* List the names of the function parameters a method is expecing
 	*/
-	final private function methodParameterNames ($classOrObject, $method) {
+	final private function _methodParameterNames ($classOrObject, $method) {
 		if (method_exists($classOrObject, $method)) {
 			$results = array();
 			$ref = new ReflectionMethod($classOrObject, $method);
@@ -1018,7 +1021,7 @@ class Unitest {
 	/**
 	* Get the visibility of a method of any object or class
 	*/
-	final private function methodVisibility ($classOrObject, $method) {
+	final private function _methodVisibility ($classOrObject, $method) {
 		if (method_exists($classOrObject, $method)) {
 			$ref = new ReflectionMethod($classOrObject, $method);
 			if ($ref->isPrivate()) {
@@ -1036,7 +1039,7 @@ class Unitest {
 	/**
 	* Get the visibility of a property of any object or class
 	*/
-	final private function propertyVisibility ($classOrObject, $propertyName) {
+	final private function _propertyVisibility ($classOrObject, $propertyName) {
 		if (property_exists($classOrObject, $propertyName)) {
 			$ref = new ReflectionProperty($classOrObject, $propertyName);
 			if ($ref->isPrivate()) {
@@ -1052,9 +1055,48 @@ class Unitest {
 
 
 	/**
+	* Run own method with arguments
+	*/
+	final private function _execute ($method, $arguments) {
+		if (method_exists($this, $method)) {
+
+			// Get errors as exceptions
+			set_error_handler('__UnitestHandleError');
+
+			// Run method
+			$result = call_user_func_array(array($this, $method), (is_array($arguments) ? $arguments : array($arguments)));
+
+			// Restore previous error handler
+			restore_error_handler();
+
+			return $result;
+		}
+		// return null;
+	}
+
+
+
+	/**
+	* Flatten an array
+	*/
+	final private function _flattenArray ($array) {
+		$result = array();
+		foreach ($array as $key => $value) {
+			if (is_array($value)) {
+				$result = array_merge($result, $this->_flattenArray($value));
+			} else {
+				$result[] = $value;
+			}
+		}
+		return $result;
+	}
+
+
+
+	/**
 	* Find directories
 	*/
-	final private function globDir ($path = '') {
+	final private function _globDir ($path = '') {
 
 		// Normalize path
 		if (!empty($path)) {
@@ -1081,7 +1123,7 @@ class Unitest {
 	/**
 	* Find files
 	*/
-	final private function globFiles ($path = '', $filetypes = array()) {
+	final private function _globFiles ($path = '', $filetypes = array()) {
 		$files = array();
 
 		// Handle filetype input
@@ -1115,79 +1157,19 @@ class Unitest {
 
 
 	/**
-	* Include PHP tests in a file
-	*/
-	final private function loadFile ($path) {
-		$suites = array();
-
-		if (is_file($path)) {
-
-			// Look for any Unitest classes
-			$classes = $this->classesInScript(file_get_contents($path));
-
-			// Include if found
-			if (!empty($classes)) {
-				include_once $path;
-			}
-
-			// Store class tree
-			foreach ($classes as $class) {
-				// $suite = new $class();
-				$suites[] = array_merge(array_reverse(array_values(class_parents($class))), array($class));
-			}
-
-		}
-
-		return $suites;
-	}
-
-
-
-	/**
-	* Find test suites in locations
-	*/
-	final private function loadFiles () {
-		$suites = array();
-		$paths = func_get_args();
-		$paths = $this->flattenArray($paths);
-
-		foreach ($paths as $path) {
-
-			// Path given
-			if (is_string($path)) {
-
-				// File
-				if (is_file($path)) {
-					$suites = array_merge($suites, $this->loadFile($path));
-
-				// Directory: scrape recursively for all files
-				} else if (is_dir($path)) {
-					$suites = array_merge($suites, $this->execute('loadFiles', $this->rglobFiles($path)));
-				}
-
-			}
-
-		}
-
-		return $suites;
-	}
-
-
-
-	/**
 	* Find files recursively
 	*/
-	final private function rglobFiles ($path = '', $filetypes = array()) {
+	final private function _rglobFiles ($path = '', $filetypes = array()) {
 
 		// Accept file type restrictions as a single array or multiple independent values
 		$arguments = func_get_args();
 		array_shift($arguments);
-		$filetypes = $this->flattenArray($arguments);
+		$filetypes = $this->_flattenArray($arguments);
 
 		// Run glob_files for this directory and its subdirectories
-		$files = $this->globFiles($path, $filetypes);
-		foreach ($this->globDir($path) as $child) {
-			$files = array_merge($files, $this->rglobFiles($child, $filetypes));
+		$files = $this->_globFiles($path, $filetypes);
+		foreach ($this->_globDir($path) as $child) {
+			$files = array_merge($files, $this->_rglobFiles($child, $filetypes));
 		}
 
 		return $files;
@@ -1196,80 +1178,9 @@ class Unitest {
 
 
 	/**
-	* Unitest's class name
-	*/
-	final private function baseClass () {
-		return 'Unitest';
-	}
-
-
-
-	/**
-	* Test method prefix
-	*/
-	final private function prefix () {
-		return 'test';
-	}
-
-
-
-	/**
-	* Run own method with arguments
-	*/
-	final private function execute ($method, $arguments) {
-		if (method_exists($this, $method)) {
-
-			// Get errors as exceptions
-			set_error_handler('__UnitestHandleError');
-
-			// Run method
-			$result = call_user_func_array(array($this, $method), (is_array($arguments) ? $arguments : array($arguments)));
-
-			// Restore previous error handler
-			restore_error_handler();
-
-			return $result;
-		}
-		// return null;
-	}
-
-
-
-	/**
-	* Flatten an array
-	*/
-	final private function flattenArray ($array) {
-		$result = array();
-		foreach ($array as $key => $value) {
-			if (is_array($value)) {
-				$result = array_merge($result, $this->flattenArray($value));
-			} else {
-				$result[] = $value;
-			}
-		}
-		return $result;
-	}
-
-
-
-	/**
-	* Round and format time script execution time
-	*
-	* @param float $microseconds
-	*
-	* @return float Time in milliseconds, rounded to nine decimal places
-	*
-	*/
-	final private function roundExecutionTime ($microseconds) {
-		return $microseconds;
-	}
-
-
-
-	/**
 	* Represent exception as string
 	*/
-	final private function stringifyException ($e) {
+	final private function _stringifyException ($e) {
 		return ''.$e->getMessage().' ('.$e->getFile().' line '.$e->getLine().', error code '.$e->getCode().')';
 	}
 
@@ -1278,7 +1189,7 @@ class Unitest {
 	/**
 	* Find out which classes will be defined in a script
 	*/
-	final private function classesInScript ($code = '') {
+	final private function _classesInScript ($code = '') {
 		$classes = array();
 
 		// Find tokens that are classes
@@ -1298,7 +1209,7 @@ class Unitest {
 				$inheritedFrom = $tokens[$i+4][1];
 
 				// See if class extends Unitest
-				if ($this->isValidSuiteClass($inheritedFrom)) {
+				if ($this->_isValidSuiteClass($inheritedFrom)) {
 					$classes[] = $tokens[$i][1];
 				}
 
@@ -1328,7 +1239,7 @@ class Unitest {
 	*		),
 	*	 )
 	*/
-	final private function generateClassMap ($classes) {
+	final private function _generateClassMap ($classes) {
 		$results = array();
 
 		// Go deeper if there's any children
@@ -1337,7 +1248,7 @@ class Unitest {
 			$parent = array_shift($children);
 
 			// Recursion for treating children
-			$results[$parent] = $this->generateClassMap($children);
+			$results[$parent] = $this->_generateClassMap($children);
 
 		}
 
@@ -1349,7 +1260,7 @@ class Unitest {
 	/**
 	* Instantiate suite objects based on class names recursively
 	*/
-	final private function generateSuites ($classes, $parent = null) {
+	final private function _generateSuites ($classes, $parent = null) {
 		$suites = array();
 
 		// Default to self
@@ -1358,7 +1269,7 @@ class Unitest {
 		}
 
 		// Validate parent
-		if (!$this->isValidSuite($parent)) {
+		if (!$this->_isValidSuite($parent)) {
 			throw new Exception('Invalid parent suite passed as parent.');
 		}
 
@@ -1367,7 +1278,7 @@ class Unitest {
 
 			// Recursion
 			if (!empty($children)) {
-				$this->generateSuites($children, $suite);
+				$this->_generateSuites($children, $suite);
 			}
 
 			// Add to own flock
@@ -1375,6 +1286,66 @@ class Unitest {
 
 		}
 		return $this;
+	}
+
+
+
+	/**
+	* Include PHP tests in a file
+	*/
+	final private function _loadFile ($path) {
+		$suites = array();
+
+		if (is_file($path)) {
+
+			// Look for any Unitest classes
+			$classes = $this->_classesInScript(file_get_contents($path));
+
+			// Include if found
+			if (!empty($classes)) {
+				include_once $path;
+			}
+
+			// Store class tree
+			foreach ($classes as $class) {
+				// $suite = new $class();
+				$suites[] = array_merge(array_reverse(array_values(class_parents($class))), array($class));
+			}
+
+		}
+
+		return $suites;
+	}
+
+
+
+	/**
+	* Find test suites in locations
+	*/
+	final private function _loadFiles () {
+		$suites = array();
+		$paths = func_get_args();
+		$paths = $this->_flattenArray($paths);
+
+		foreach ($paths as $path) {
+
+			// Path given
+			if (is_string($path)) {
+
+				// File
+				if (is_file($path)) {
+					$suites = array_merge($suites, $this->_loadFile($path));
+
+				// Directory: scrape recursively for all files
+				} else if (is_dir($path)) {
+					$suites = array_merge($suites, $this->_execute('_loadFiles', $this->_rglobFiles($path)));
+				}
+
+			}
+
+		}
+
+		return $suites;
 	}
 
 
@@ -1416,7 +1387,7 @@ class Unitest {
 	*		),
 	*	 )
 	*/
-	final private function mergeClassMap ($classTrees) {
+	final private function _mergeClassMap ($classTrees) {
 		$results = array();
 
 		// Array of each
@@ -1442,7 +1413,7 @@ class Unitest {
 				} else if (count($value) === 1) {
 					$results[$key] = $value[0];
 				} else {
-					$results[$key] = $this->mergeClassMap($value);
+					$results[$key] = $this->_mergeClassMap($value);
 				}
 			}
 
@@ -1461,7 +1432,7 @@ class Unitest {
 	*/
 	final private function _runAfterTest ($method) {
 		$arguments = func_get_args();
-		$this->execute('afterTest', $arguments);
+		$this->_execute('afterTest', $arguments);
 		return $this;
 	}
 
@@ -1472,7 +1443,7 @@ class Unitest {
 	*/
 	final private function _runAfterTests () {
 		$arguments = func_get_args();
-		$this->execute('afterTests', $arguments);
+		$this->_execute('afterTests', $arguments);
 		return $this;
 	}
 
@@ -1483,7 +1454,7 @@ class Unitest {
 	*/
 	final private function _runBeforeTest ($method) {
 		$arguments = func_get_args();
-		$this->execute('beforeTest', $arguments);
+		$this->_execute('beforeTest', $arguments);
 		return $this;
 	}
 
@@ -1494,7 +1465,7 @@ class Unitest {
 	*/
 	final private function _runBeforeTests () {
 		$arguments = func_get_args();
-		$this->execute('beforeTests', $arguments);
+		$this->_execute('beforeTests', $arguments);
 		return $this;
 	}
 
@@ -1503,9 +1474,9 @@ class Unitest {
 	/**
 	* When instance is created
 	*/
-	final private function runInit () {
+	final private function _runInit () {
 		$arguments = func_get_args();
-		$this->execute('init', $arguments);
+		$this->_execute('init', $arguments);
 		return $this;
 	}
 

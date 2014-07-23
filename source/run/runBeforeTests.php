@@ -7,7 +7,7 @@ class Unitest {
 	*/
 	final private function _runBeforeTests () {
 		$arguments = func_get_args();
-		$this->execute('beforeTests', $arguments);
+		$this->_execute('beforeTests', $arguments);
 		return $this;
 	}
 

@@ -39,7 +39,7 @@ class Unitest {
 	*		),
 	*	 )
 	*/
-	final private function mergeClassMap ($classTrees) {
+	final private function _mergeClassMap ($classTrees) {
 		$results = array();
 
 		// Array of each
@@ -65,7 +65,7 @@ class Unitest {
 				} else if (count($value) === 1) {
 					$results[$key] = $value[0];
 				} else {
-					$results[$key] = $this->mergeClassMap($value);
+					$results[$key] = $this->_mergeClassMap($value);
 				}
 			}
 

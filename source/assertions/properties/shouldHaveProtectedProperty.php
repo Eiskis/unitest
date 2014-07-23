@@ -13,7 +13,7 @@ class Unitest {
 		foreach ($arguments as $argument) {
 			if (!property_exists($testableObjectOrClass, $argument)) {
 				return $this->fail();
-			} else if ($this->propertyVisibility($testableObjectOrClass, $argument) !== 'protected') {
+			} else if ($this->_propertyVisibility($testableObjectOrClass, $argument) !== 'protected') {
 				return $this->fail();
 			}
 		}

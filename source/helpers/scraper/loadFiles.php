@@ -5,10 +5,10 @@ class Unitest {
 	/**
 	* Find test suites in locations
 	*/
-	final private function loadFiles () {
+	final private function _loadFiles () {
 		$suites = array();
 		$paths = func_get_args();
-		$paths = $this->flattenArray($paths);
+		$paths = $this->_flattenArray($paths);
 
 		foreach ($paths as $path) {
 
@@ -17,11 +17,11 @@ class Unitest {
 
 				// File
 				if (is_file($path)) {
-					$suites = array_merge($suites, $this->loadFile($path));
+					$suites = array_merge($suites, $this->_loadFile($path));
 
 				// Directory: scrape recursively for all files
 				} else if (is_dir($path)) {
-					$suites = array_merge($suites, $this->execute('loadFiles', $this->rglobFiles($path)));
+					$suites = array_merge($suites, $this->_execute('_loadFiles', $this->_rglobFiles($path)));
 				}
 
 			}

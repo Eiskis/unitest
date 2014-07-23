@@ -10,7 +10,7 @@ class Unitest {
 		// Set
 		$arguments = func_get_args();
 		if (func_num_args() > 1) {
-			return $this->execute('inject', $arguments);
+			return $this->_execute('inject', $arguments);
 		}
 
 		// Get own injections, bubble

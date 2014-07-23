@@ -11,6 +11,9 @@ class Unitest {
 	private $_propertyInjections = array();
 	private $_propertyParent = null;
 
+	private $_baseClass = 'Unitest';
+	private $_testMethodPrefix = 'test';
+
 
 
 	/**
@@ -19,7 +22,7 @@ class Unitest {
 	* Parent suite and script variables can be passed
 	*/
 	final public function __construct () {
-		$this->runInit();
+		$this->_runInit();
 		return $this;
 	}
 

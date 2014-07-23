@@ -13,7 +13,7 @@ class Unitest {
 		foreach ($arguments as $argument) {
 			if (!method_exists($testableObjectOrClass, $argument)) {
 				return $this->fail();
-			} else if ($this->methodVisibility($testableObjectOrClass, $argument) !== 'public') {
+			} else if ($this->_methodVisibility($testableObjectOrClass, $argument) !== 'public') {
 				return $this->fail();
 			}
 		}

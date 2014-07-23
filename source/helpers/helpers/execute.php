@@ -5,7 +5,7 @@ class Unitest {
 	/**
 	* Run own method with arguments
 	*/
-	final private function execute ($method, $arguments) {
+	final private function _execute ($method, $arguments) {
 		if (method_exists($this, $method)) {
 
 			// Get errors as exceptions

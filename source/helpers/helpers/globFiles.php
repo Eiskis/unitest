@@ -5,7 +5,7 @@ class Unitest {
 	/**
 	* Find files
 	*/
-	final private function globFiles ($path = '', $filetypes = array()) {
+	final private function _globFiles ($path = '', $filetypes = array()) {
 		$files = array();
 
 		// Handle filetype input

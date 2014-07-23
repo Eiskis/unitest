@@ -5,13 +5,13 @@ class Unitest {
 	/**
 	* Include PHP tests in a file
 	*/
-	final private function loadFile ($path) {
+	final private function _loadFile ($path) {
 		$suites = array();
 
 		if (is_file($path)) {
 
 			// Look for any Unitest classes
-			$classes = $this->classesInScript(file_get_contents($path));
+			$classes = $this->_classesInScript(file_get_contents($path));
 
 			// Include if found
 			if (!empty($classes)) {

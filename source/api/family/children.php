@@ -10,7 +10,7 @@ class Unitest {
 		// Set
 		$arguments = func_get_args();
 		if (!empty($arguments)) {
-			return $this->execute('child', $arguments);
+			return $this->_execute('child', $arguments);
 		}
 
 		// Get
