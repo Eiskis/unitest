@@ -22,6 +22,10 @@ class UnitestShouldBeFile extends Unitest {
 		return $this->shouldBeDirectory(__DIR__);
 	}
 
+	function testShouldNotBeFileOrDirectory () {
+		return $this->shouldNotBeFileOrDirectory(__FILE__.'__');
+	}
+
 
 
 	function testShouldBeFileFailsOnDirectory () {
@@ -30,6 +34,10 @@ class UnitestShouldBeFile extends Unitest {
 
 	function testShouldBeDirectoryFailsOnFile () {
 		return $this->fails($this->shouldBeDirectory(__FILE__));
+	}
+
+	function testShouldNotBeFileOrDirectoryFailsOnFile () {
+		return $this->fails($this->shouldNotBeFileOrDirectory(__FILE__));
 	}
 
 }

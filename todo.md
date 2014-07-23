@@ -5,6 +5,7 @@
 - method tests fail on object
 - xUnit-compliance
 - Maybe use helpers as static methods
+- Maybe prefix all internal private methods with underscores? The `Unitest` class is designed to be extended.
 - `->clone()`
 - Test coverage
 	- Event hook methods
@@ -24,8 +25,6 @@
 		- float
 		- string
 		- boolean
-	- `shouldBeFile($file)`
-	- `shouldBeDirectory($file)`
 	- `shouldBeIncluded($file)`
 	- `shouldHaveMethod($subjectClassOrObject, $method)`
 		- `shouldHaveStaticMethod($subjectClassOrObject, $method)`
