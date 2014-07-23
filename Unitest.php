@@ -96,15 +96,6 @@ class Unitest {
 	/**
 	* Add a suite as a child of this suite
 	*/
-	final public function baseClass () {
-		return 'Unitest';
-	}
-
-
-
-	/**
-	* Add a suite as a child of this suite
-	*/
 	final public function child ($child) {
 		$arguments = func_get_args();
 		foreach ($arguments as $argument) {
@@ -136,137 +127,6 @@ class Unitest {
 
 		// Get
 		return $this->_propertyChildren;
-	}
-
-
-
-	/**
-	* Remove an injectable value
-	*/
-	final public function eject ($name) {
-		$arguments = func_get_args();
-		$arguments = $this->flattenArray($arguments);
-		foreach ($arguments as $argument) {
-			if ($this->isInjection($argument)) {
-				unset($this->_propertyInjections[$argument]);
-			}
-		}
-		return $this;
-	}
-
-
-
-	/**
-	* File where this class is defined in
-	*/
-	final public function file () {
-		$ref = new ReflectionClass($this);
-		return $ref->getFileName();
-	}
-
-
-
-	/**
-	* Add an injectable value that can be passed to functions as parameter
-	*/
-	final public function inject ($name, $value) {
-		if (is_string($name)) {
-
-			// Sanitize variable name
-			$name = str_replace('-', '', preg_replace('/\s+/', '', $name));
-			if (!empty($name)) {
-				$this->_propertyInjections[$name] = $value;
-			}
-
-		}
-		return $this;
-	}
-
-
-
-	/**
-	* Get or set an injectable value
-	*/
-	final public function injection ($name) {
-
-		// Set
-		$arguments = func_get_args();
-		if (func_num_args() > 1) {
-			return $this->execute('inject', $arguments);
-		}
-
-		// Get own injections, bubble
-		$injections = $this->injections();
-		if (array_key_exists($name, $injections)) {
-			return $injections[$name];
-		}
-
-		// Missing injection
-		throw new Exception('Missing injection "'.$name.'".');
-		return $this;
-	}
-
-
-
-	/**
-	* Values available for test methods
-	*/
-	final public function injections () {
-
-		// Set
-		$arguments = func_get_args();
-		if (!empty($arguments)) {
-			return $this->execute('inject', $arguments);
-		}
-
-		// Get own injections, bubble
-		$results = array();
-		if ($this->parent()) {
-			$results = array_merge($results, $this->parent()->injections());
-		}
-		$results = array_merge($results, $this->_propertyInjections);	
-
-
-		return $results;
-	}
-
-
-
-	/**
-	* Find out if injection is available
-	*/
-	final public function isInjection ($name) {
-		$arguments = func_get_args();
-		$arguments = $this->flattenArray($arguments);
-		$injections = $this->injections();
-
-		// Fail if one of the equested injections is not available
-		foreach ($arguments as $argument) {
-			if (!array_key_exists($argument, $injections)) {
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-
-
-	/**
-	* Line number of the file where this class is defined in
-	*/
-	final public function lineNumber () {
-		$ref = new ReflectionClass($this);
-		return $ref->getStartLine();
-	}
-
-
-
-	/**
-	* Name of this suite (i.e. class)
-	*/
-	final public function name () {
-		return get_class($this);
 	}
 
 
@@ -312,6 +172,44 @@ class Unitest {
 			$parents = array_merge($this->parent()->parents(), array($this->parent()->name()));
 		}
 		return $parents;
+	}
+
+
+
+	/**
+	* Add a suite as a child of this suite
+	*/
+	final public function baseClass () {
+		return 'Unitest';
+	}
+
+
+
+	/**
+	* File where this class is defined in
+	*/
+	final public function file () {
+		$ref = new ReflectionClass($this);
+		return $ref->getFileName();
+	}
+
+
+
+	/**
+	* Line number of the file where this class is defined in
+	*/
+	final public function lineNumber () {
+		$ref = new ReflectionClass($this);
+		return $ref->getStartLine();
+	}
+
+
+
+	/**
+	* Name of this suite (i.e. class)
+	*/
+	final public function name () {
+		return get_class($this);
 	}
 
 
@@ -820,6 +718,108 @@ class Unitest {
 			return 'public';
 		}
 		return null;
+	}
+
+
+
+	/**
+	* Remove an injectable value
+	*/
+	final public function eject ($name) {
+		$arguments = func_get_args();
+		$arguments = $this->flattenArray($arguments);
+		foreach ($arguments as $argument) {
+			if ($this->isInjection($argument)) {
+				unset($this->_propertyInjections[$argument]);
+			}
+		}
+		return $this;
+	}
+
+
+
+	/**
+	* Add an injectable value that can be passed to functions as parameter
+	*/
+	final public function inject ($name, $value) {
+		if (is_string($name)) {
+
+			// Sanitize variable name
+			$name = str_replace('-', '', preg_replace('/\s+/', '', $name));
+			if (!empty($name)) {
+				$this->_propertyInjections[$name] = $value;
+			}
+
+		}
+		return $this;
+	}
+
+
+
+	/**
+	* Get or set an injectable value
+	*/
+	final public function injection ($name) {
+
+		// Set
+		$arguments = func_get_args();
+		if (func_num_args() > 1) {
+			return $this->execute('inject', $arguments);
+		}
+
+		// Get own injections, bubble
+		$injections = $this->injections();
+		if (array_key_exists($name, $injections)) {
+			return $injections[$name];
+		}
+
+		// Missing injection
+		throw new Exception('Missing injection "'.$name.'".');
+		return $this;
+	}
+
+
+
+	/**
+	* Values available for test methods
+	*/
+	final public function injections () {
+
+		// Set
+		$arguments = func_get_args();
+		if (!empty($arguments)) {
+			return $this->execute('inject', $arguments);
+		}
+
+		// Get own injections, bubble
+		$results = array();
+		if ($this->parent()) {
+			$results = array_merge($results, $this->parent()->injections());
+		}
+		$results = array_merge($results, $this->_propertyInjections);	
+
+
+		return $results;
+	}
+
+
+
+	/**
+	* Find out if injection is available
+	*/
+	final public function isInjection ($name) {
+		$arguments = func_get_args();
+		$arguments = $this->flattenArray($arguments);
+		$injections = $this->injections();
+
+		// Fail if one of the equested injections is not available
+		foreach ($arguments as $argument) {
+			if (!array_key_exists($argument, $injections)) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 
