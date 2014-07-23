@@ -40,8 +40,6 @@ class Unitest {
 	/**
 	* Properties
 	*/
-	private $_propertyBaseClass = 'Unitest';
-	private $_propertyPrefix = 'test';
 	private $_propertyChildren = array();
 	private $_propertyInjections = array();
 	private $_propertyParent = null;
@@ -99,7 +97,7 @@ class Unitest {
 	* Add a suite as a child of this suite
 	*/
 	final public function baseClass () {
-		return $this->_propertyBaseClass;
+		return 'Unitest';
 	}
 
 
@@ -322,7 +320,7 @@ class Unitest {
 	* Test method prefix
 	*/
 	final public function prefix () {
-		return $this->_propertyPrefix;
+		return 'test';
 	}
 
 
