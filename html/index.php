@@ -58,8 +58,6 @@ $stats = array(
 
 	<body>
 
-		<h1><?php $stats['total'] ?> suites</h1>
-
 		<ul class="stats">
 			<?php
 				foreach ($stats as $key => $value) {
