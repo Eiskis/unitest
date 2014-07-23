@@ -23,8 +23,9 @@
 		- float
 		- string
 		- boolean
-	- `shouldBeIncluded($file)`
-	- `shouldHaveStaticProperty($subjectClassOrObject, $property)`
+	- aliases
+		- `...Directory` -> `...Dir`
+		- `ShouldBeFile` -> `should_be_file`
 
 
 
