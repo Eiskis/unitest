@@ -73,7 +73,7 @@ $stats = array(
 
 			// Each suite
 			foreach ($report['children'] as $suite) {
-				echo '<dt>'.implode(' > ', $suite['parents']).' > '.$suite['class'].'</dt>';
+				echo '<dt>'.implode(' / ', $suite['parents']).' / '.$suite['class'].'</dt>';
 				foreach ($suite['tests'] as $test) {
 
 					// Each test
