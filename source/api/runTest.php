@@ -23,7 +23,7 @@ class Unitest {
 				$this->_runBeforeTest($method);
 
 				// Get innjections to pass to test method
-				foreach ($this->methodParameterNames($method) as $parameterName) {
+				foreach ($this->methodParameterNames($this, $method) as $parameterName) {
 					$injections[] = $this->injection($parameterName);
 				}
 
@@ -50,11 +50,11 @@ class Unitest {
 
 		// Test report
 		return array(
-			'class'      => $this->name(),
+			'class'      => $this->className($this),
 			'duration'   => $this->roundExecutionTime($duration),
 			'method'     => $method,
-			'file'       => $this->file(),
-			'line'       => $this->methodLineNumber($method),
+			'file'       => $this->classFile($this),
+			'line'       => $this->methodLineNumber($this, $method),
 			'status'     => $this->assess($result),
 			'message'    => $result,
 			'injections' => $injections,

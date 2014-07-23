@@ -11,9 +11,9 @@ class Unitest {
 		$ref = new ReflectionClass($this);
 
 		$results = array(
-			'class'    => $this->name(),
-			'file'     => $this->file(),
-			'line'     => $this->lineNumber(),
+			'class'    => $this->className($this),
+			'file'     => $this->classFile($this),
+			'line'     => $this->classLineNumber($this),
 			'parents'  => $this->parents(),
 
 			'duration' => 0,

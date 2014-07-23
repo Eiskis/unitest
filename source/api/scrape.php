@@ -19,7 +19,7 @@ class Unitest {
 
 		if (!empty($classes)) {
 			$parents = array_reverse(class_parents($this));
-			$parents[] = $this->name();
+			$parents[] = $this->className($this);
 
 			// Find own class from class map, only generate child suites from own child classes
 			foreach ($parents as $parent) {

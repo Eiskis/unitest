@@ -26,6 +26,15 @@ class Unitest {
 
 
 	/**
+	* Properties
+	*/
+	private $_propertyChildren = array();
+	private $_propertyInjections = array();
+	private $_propertyParent = null;
+
+
+
+	/**
 	* Initialization
 	*
 	* Parent suite and script variables can be passed
@@ -34,15 +43,6 @@ class Unitest {
 		$this->runInit();
 		return $this;
 	}
-
-
-
-	/**
-	* Properties
-	*/
-	private $_propertyChildren = array();
-	private $_propertyInjections = array();
-	private $_propertyParent = null;
 
 
 
@@ -64,9 +64,9 @@ class Unitest {
 		$ref = new ReflectionClass($this);
 
 		$results = array(
-			'class'    => $this->name(),
-			'file'     => $this->file(),
-			'line'     => $this->lineNumber(),
+			'class'    => $this->className($this),
+			'file'     => $this->classFile($this),
+			'line'     => $this->classLineNumber($this),
 			'parents'  => $this->parents(),
 
 			'duration' => 0,
@@ -146,7 +146,7 @@ class Unitest {
 				$this->_runBeforeTest($method);
 
 				// Get innjections to pass to test method
-				foreach ($this->methodParameterNames($method) as $parameterName) {
+				foreach ($this->methodParameterNames($this, $method) as $parameterName) {
 					$injections[] = $this->injection($parameterName);
 				}
 
@@ -173,11 +173,11 @@ class Unitest {
 
 		// Test report
 		return array(
-			'class'      => $this->name(),
+			'class'      => $this->className($this),
 			'duration'   => $this->roundExecutionTime($duration),
 			'method'     => $method,
-			'file'       => $this->file(),
-			'line'       => $this->methodLineNumber($method),
+			'file'       => $this->classFile($this),
+			'line'       => $this->methodLineNumber($this, $method),
 			'status'     => $this->assess($result),
 			'message'    => $result,
 			'injections' => $injections,
@@ -203,7 +203,7 @@ class Unitest {
 
 		if (!empty($classes)) {
 			$parents = array_reverse(class_parents($this));
-			$parents[] = $this->name();
+			$parents[] = $this->className($this);
 
 			// Find own class from class map, only generate child suites from own child classes
 			foreach ($parents as $parent) {
@@ -220,6 +220,116 @@ class Unitest {
 		}
 
 		return $this;
+	}
+
+
+
+	/**
+	* All test methods of this suite
+	*/
+	final public function tests () {
+		$tests = array();
+
+		// All class methods
+		foreach (get_class_methods($this) as $method) {
+
+			// Class methods with the correct prefix
+			if (substr($method, 0, strlen($this->prefix())) === $this->prefix()) {
+
+				// Prefixed methods that aren't declared in base class
+				$ref = new ReflectionMethod($this, $method);
+				$class = $ref->getDeclaringClass();
+				if ($class->name !== $this->baseClass()) {
+					$tests[] = $method;
+				}
+
+			}
+		}
+
+		return $tests;
+	}
+
+
+
+	/**
+	* Add a suite as a child of this suite
+	*/
+	final public function child ($child) {
+		$arguments = func_get_args();
+		foreach ($arguments as $argument) {
+			if ($this->isValidSuite($argument)) {
+
+				// Store reference to this in the child
+				$argument->parent($this, true);
+
+				// Add to own flock
+				$this->_propertyChildren[] = $argument;
+
+			}
+		}
+		return $this;
+	}
+
+
+
+	/**
+	* Child suites
+	*/
+	final public function children () {
+
+		// Set
+		$arguments = func_get_args();
+		if (!empty($arguments)) {
+			return $this->execute('child', $arguments);
+		}
+
+		// Get
+		return $this->_propertyChildren;
+	}
+
+
+
+	/**
+	* Parent suite
+	*/
+	final public function parent ($parent = null, $parentKnows = false) {
+
+		// Set
+		if (isset($parent)) {
+
+			// Validate parent
+			if (!$this->isValidSuite($parent)) {
+				throw new Exception('Invalid parent suite passed as parent.');
+			} else {
+
+				// Parent case adds this to its flock if needed
+				if (!$parentKnows) {
+					$parent->child($this);
+				}
+
+				// This stores a reference to its dad
+				$this->_propertyParent = $parent;
+
+			}
+
+			return $this;
+		}
+
+		// Get
+		return $this->_propertyParent;
+	}
+
+
+
+	/**
+	* All parents
+	*/
+	final public function parents () {
+		$parents = array();
+		if ($this->parent()) {
+			$parents = array_merge($this->parent()->parents(), array($this->className($this->parent())));
+		}
+		return $parents;
 	}
 
 
@@ -329,7 +439,7 @@ class Unitest {
 	/**
 	* Truey
 	*/
-	final public function should ($value) {
+	final protected function should ($value) {
 		$arguments = func_get_args();
 		foreach ($arguments as $argument) {
 			if (!$argument) {
@@ -344,7 +454,7 @@ class Unitest {
 	/**
 	* Equality
 	*/
-	final public function shouldBeEqual ($value) {
+	final protected function shouldBeEqual ($value) {
 		$arguments = func_get_args();
 		$count = count($arguments);
 		if ($count > 1) {
@@ -362,7 +472,7 @@ class Unitest {
 	/**
 	* Falsey
 	*/
-	final public function shouldNot ($value) {
+	final protected function shouldNot ($value) {
 		$arguments = func_get_args();
 		foreach ($arguments as $argument) {
 			if ($argument) {
@@ -377,7 +487,7 @@ class Unitest {
 	/**
 	* Non-equality
 	*/
-	final public function shouldNotBeEqual ($value) {
+	final protected function shouldNotBeEqual ($value) {
 		$arguments = func_get_args();
 		return !$this->execute('shouldBeEqual', $arguments);
 	}
@@ -387,7 +497,7 @@ class Unitest {
 	/**
 	* Class exists
 	*/
-	final public function shouldBeAvailableClass ($value) {
+	final protected function shouldBeAvailableClass ($value) {
 		if (!class_exists($value)) {
 			$this->fail();
 		}
@@ -401,7 +511,7 @@ class Unitest {
 	*
 	* Fails if passed non-objects or no objects.
 	*/
-	final public function shouldBeOfClass ($testableObject, $targetClass) {
+	final protected function shouldBeOfClass ($testableObject, $targetClass) {
 
 		// Not an object
 		if (!is_object($testableObject)) {
@@ -422,7 +532,7 @@ class Unitest {
 	*
 	* Can be passed multiple parent target classes.
 	*/
-	final public function shouldExtendClass ($testableObjectOrClass, $targetClass) {
+	final protected function shouldExtendClass ($testableObjectOrClass, $targetClass) {
 		$arguments = func_get_args();
 		array_shift($arguments);
 
@@ -441,7 +551,7 @@ class Unitest {
 	/**
 	* A directory should exist in given location(s)
 	*/
-	final public function shouldBeDirectory ($path) {
+	final protected function shouldBeDirectory ($path) {
 		$arguments = func_get_args();
 		foreach ($arguments as $argument) {
 			if (!is_dir($argument)) {
@@ -456,7 +566,7 @@ class Unitest {
 	/**
 	* A file should exist in given location(s)
 	*/
-	final public function shouldBeFile ($path) {
+	final protected function shouldBeFile ($path) {
 		$arguments = func_get_args();
 		foreach ($arguments as $argument) {
 			if (!is_file($argument)) {
@@ -471,7 +581,7 @@ class Unitest {
 	/**
 	* A file or directory should exist in given location(s)
 	*/
-	final public function shouldBeFileOrDirectory ($path) {
+	final protected function shouldBeFileOrDirectory ($path) {
 		$arguments = func_get_args();
 		foreach ($arguments as $argument) {
 			if (!is_file($argument) and !is_dir($argument)) {
@@ -486,7 +596,7 @@ class Unitest {
 	/**
 	* A file or directory should NOT exist in given location(s)
 	*/
-	final public function shouldNotBeFileOrDirectory ($path) {
+	final protected function shouldNotBeFileOrDirectory ($path) {
 		$arguments = func_get_args();
 		foreach ($arguments as $argument) {
 			if (is_file($argument) or is_dir($argument)) {
@@ -501,7 +611,7 @@ class Unitest {
 	/**
 	* An abstract method should exist in class or object.
 	*/
-	final public function shouldHaveAbstractMethod ($testableObjectOrClass, $method) {
+	final protected function shouldHaveAbstractMethod ($testableObjectOrClass, $method) {
 		$arguments = func_get_args();
 		array_shift($arguments);
 
@@ -528,7 +638,7 @@ class Unitest {
 	/**
 	* An unoverridable method should exist in class or object.
 	*/
-	final public function shouldHaveFinalMethod ($testableObjectOrClass, $method) {
+	final protected function shouldHaveFinalMethod ($testableObjectOrClass, $method) {
 		$arguments = func_get_args();
 		array_shift($arguments);
 
@@ -555,7 +665,7 @@ class Unitest {
 	/**
 	* A method should exist in class or object.
 	*/
-	final public function shouldHaveMethod ($testableObjectOrClass, $method) {
+	final protected function shouldHaveMethod ($testableObjectOrClass, $method) {
 		$arguments = func_get_args();
 		array_shift($arguments);
 
@@ -574,7 +684,7 @@ class Unitest {
 	/**
 	* A method with the visibility "private" should exist in class or object.
 	*/
-	final public function shouldHavePrivateMethod ($testableObjectOrClass, $method) {
+	final protected function shouldHavePrivateMethod ($testableObjectOrClass, $method) {
 		$arguments = func_get_args();
 		array_shift($arguments);
 
@@ -595,7 +705,7 @@ class Unitest {
 	/**
 	* A method with the visibility "protected" should exist in class or object.
 	*/
-	final public function shouldHaveProtectedMethod ($testableObjectOrClass, $method) {
+	final protected function shouldHaveProtectedMethod ($testableObjectOrClass, $method) {
 		$arguments = func_get_args();
 		array_shift($arguments);
 
@@ -616,7 +726,7 @@ class Unitest {
 	/**
 	* A method with the visibility "public" should exist in class or object.
 	*/
-	final public function shouldHavePublicMethod ($testableObjectOrClass, $method) {
+	final protected function shouldHavePublicMethod ($testableObjectOrClass, $method) {
 		$arguments = func_get_args();
 		array_shift($arguments);
 
@@ -637,7 +747,7 @@ class Unitest {
 	/**
 	* A static method should exist in class.
 	*/
-	final public function shouldHaveStaticMethod ($testableClass, $method) {
+	final protected function shouldHaveStaticMethod ($testableClass, $method) {
 		$arguments = func_get_args();
 		array_shift($arguments);
 
@@ -664,7 +774,7 @@ class Unitest {
 	/**
 	* A property with the visibility "private" should exist in class or object.
 	*/
-	final public function shouldHavePrivateProperty ($testableObjectOrClass, $property) {
+	final protected function shouldHavePrivateProperty ($testableObjectOrClass, $property) {
 		$arguments = func_get_args();
 		array_shift($arguments);
 
@@ -685,7 +795,7 @@ class Unitest {
 	/**
 	* A property should exist in class or object.
 	*/
-	final public function shouldHaveProperty ($testableObjectOrClass, $property) {
+	final protected function shouldHaveProperty ($testableObjectOrClass, $property) {
 		$arguments = func_get_args();
 		array_shift($arguments);
 
@@ -704,7 +814,7 @@ class Unitest {
 	/**
 	* A property with the visibility "protected" should exist in class or object.
 	*/
-	final public function shouldHaveProtectedProperty ($testableObjectOrClass, $property) {
+	final protected function shouldHaveProtectedProperty ($testableObjectOrClass, $property) {
 		$arguments = func_get_args();
 		array_shift($arguments);
 
@@ -725,7 +835,7 @@ class Unitest {
 	/**
 	* A property with the visibility "public" should exist in class or object.
 	*/
-	final public function shouldHavePublicProperty ($testableObjectOrClass, $property) {
+	final protected function shouldHavePublicProperty ($testableObjectOrClass, $property) {
 		$arguments = func_get_args();
 		array_shift($arguments);
 
@@ -820,225 +930,6 @@ class Unitest {
 	*/
 	final protected function skips ($value) {
 		return $value === null;
-	}
-
-
-
-	/**
-	* Add a suite as a child of this suite
-	*/
-	final public function child ($child) {
-		$arguments = func_get_args();
-		foreach ($arguments as $argument) {
-			if ($this->isValidSuite($argument)) {
-
-				// Store reference to this in the child
-				$argument->parent($this, true);
-
-				// Add to own flock
-				$this->_propertyChildren[] = $argument;
-
-			}
-		}
-		return $this;
-	}
-
-
-
-	/**
-	* Child suites
-	*/
-	final public function children () {
-
-		// Set
-		$arguments = func_get_args();
-		if (!empty($arguments)) {
-			return $this->execute('child', $arguments);
-		}
-
-		// Get
-		return $this->_propertyChildren;
-	}
-
-
-
-	/**
-	* Parent suite
-	*/
-	final public function parent ($parent = null, $parentKnows = false) {
-
-		// Set
-		if (isset($parent)) {
-
-			// Validate parent
-			if (!$this->isValidSuite($parent)) {
-				throw new Exception('Invalid parent suite passed as parent.');
-			} else {
-
-				// Parent case adds this to its flock if needed
-				if (!$parentKnows) {
-					$parent->child($this);
-				}
-
-				// This stores a reference to its dad
-				$this->_propertyParent = $parent;
-
-			}
-
-			return $this;
-		}
-
-		// Get
-		return $this->_propertyParent;
-	}
-
-
-
-	/**
-	* All parents
-	*/
-	final public function parents () {
-		$parents = array();
-		if ($this->parent()) {
-			$parents = array_merge($this->parent()->parents(), array($this->parent()->name()));
-		}
-		return $parents;
-	}
-
-
-
-	/**
-	* Add a suite as a child of this suite
-	*/
-	final public function baseClass () {
-		return 'Unitest';
-	}
-
-
-
-	/**
-	* File where this class is defined in
-	*/
-	final public function file () {
-		$ref = new ReflectionClass($this);
-		return $ref->getFileName();
-	}
-
-
-
-	/**
-	* Line number of the file where this class is defined in
-	*/
-	final public function lineNumber () {
-		$ref = new ReflectionClass($this);
-		return $ref->getStartLine();
-	}
-
-
-
-	/**
-	* Name of this suite (i.e. class)
-	*/
-	final public function name () {
-		return get_class($this);
-	}
-
-
-
-	/**
-	* Test method prefix
-	*/
-	final public function prefix () {
-		return 'test';
-	}
-
-
-
-	/**
-	* All test methods of this suite
-	*/
-	final public function tests () {
-		$tests = array();
-
-		// All class methods
-		foreach (get_class_methods($this) as $method) {
-
-			// Class methods with the correct prefix
-			if (substr($method, 0, strlen($this->prefix())) === $this->prefix()) {
-
-				// Prefixed methods that aren't declared in base class
-				$ref = new ReflectionMethod($this, $method);
-				$class = $ref->getDeclaringClass();
-				if ($class->name !== $this->baseClass()) {
-					$tests[] = $method;
-				}
-
-			}
-		}
-
-		return $tests;
-	}
-
-
-
-	/**
-	* Run own method with arguments
-	*/
-	final private function execute ($method, $arguments) {
-		if (method_exists($this, $method)) {
-
-			// Get errors as exceptions
-			set_error_handler('__UnitestHandleError');
-
-			// Run method
-			$result = call_user_func_array(array($this, $method), (is_array($arguments) ? $arguments : array($arguments)));
-
-			// Restore previous error handler
-			restore_error_handler();
-
-			return $result;
-		}
-		// return null;
-	}
-
-
-
-	/**
-	* Flatten an array
-	*/
-	final private function flattenArray ($array) {
-		$result = array();
-		foreach ($array as $key => $value) {
-			if (is_array($value)) {
-				$result = array_merge($result, $this->flattenArray($value));
-			} else {
-				$result[] = $value;
-			}
-		}
-		return $result;
-	}
-
-
-
-	/**
-	* Round and format time script execution time
-	*
-	* @param float $microseconds
-	*
-	* @return float Time in milliseconds, rounded to nine decimal places
-	*
-	*/
-	final private function roundExecutionTime ($microseconds) {
-		return $microseconds;
-	}
-
-
-
-	/**
-	* Represent exception as string
-	*/
-	final private function stringifyException ($e) {
-		return ''.$e->getMessage().' ('.$e->getFile().' line '.$e->getLine().', error code '.$e->getCode().')';
 	}
 
 
@@ -1394,35 +1285,147 @@ class Unitest {
 
 
 	/**
-	* Which line method is defined in within its class file
+	* Unitest's class name
 	*/
-	final private function methodLineNumber ($method) {
-		$ref = new ReflectionMethod($this, $method);
+	final private function baseClass () {
+		return 'Unitest';
+	}
+
+
+
+	/**
+	* Test method prefix
+	*/
+	final private function prefix () {
+		return 'test';
+	}
+
+
+
+	/**
+	* Run own method with arguments
+	*/
+	final private function execute ($method, $arguments) {
+		if (method_exists($this, $method)) {
+
+			// Get errors as exceptions
+			set_error_handler('__UnitestHandleError');
+
+			// Run method
+			$result = call_user_func_array(array($this, $method), (is_array($arguments) ? $arguments : array($arguments)));
+
+			// Restore previous error handler
+			restore_error_handler();
+
+			return $result;
+		}
+		// return null;
+	}
+
+
+
+	/**
+	* Flatten an array
+	*/
+	final private function flattenArray ($array) {
+		$result = array();
+		foreach ($array as $key => $value) {
+			if (is_array($value)) {
+				$result = array_merge($result, $this->flattenArray($value));
+			} else {
+				$result[] = $value;
+			}
+		}
+		return $result;
+	}
+
+
+
+	/**
+	* Round and format time script execution time
+	*
+	* @param float $microseconds
+	*
+	* @return float Time in milliseconds, rounded to nine decimal places
+	*
+	*/
+	final private function roundExecutionTime ($microseconds) {
+		return $microseconds;
+	}
+
+
+
+	/**
+	* Represent exception as string
+	*/
+	final private function stringifyException ($e) {
+		return ''.$e->getMessage().' ('.$e->getFile().' line '.$e->getLine().', error code '.$e->getCode().')';
+	}
+
+
+
+	/**
+	* File where this class or object is defined in
+	*/
+	final private function classFile ($classOrObject) {
+		$ref = new ReflectionClass($classOrObject);
+		return $ref->getFileName();
+	}
+
+
+
+	/**
+	* Line number of the file where this class or object is defined in
+	*/
+	final private function classLineNumber ($classOrObject) {
+		$ref = new ReflectionClass($classOrObject);
 		return $ref->getStartLine();
 	}
 
 
 
 	/**
-	* Find out which variables a method is expecing
+	* Name of this class or object
 	*/
-	final private function methodParameterNames ($method) {
-		$results = array();
-		$ref = new ReflectionMethod($this, $method);
-		foreach ($ref->getParameters() as $parameter) {
-			$results[] = $parameter->name;
-		}
-		return $results;
+	final private function className ($classOrObject) {
+		return get_class($classOrObject);
 	}
 
 
 
 	/**
-	* See what visibility a method has
+	* Get the line number where method is defined in within its class file
 	*/
-	final private function methodVisibility ($subject, $methodName) {
-		if (method_exists($subject, $methodName)) {
-			$ref = new ReflectionMethod($subject, $methodName);
+	final private function methodLineNumber ($classOrObject, $method) {
+		$ref = new ReflectionMethod($classOrObject, $method);
+		return $ref->getStartLine();
+	}
+
+
+
+	/**
+	* List the names of the function parameters a method is expecing
+	*/
+	final private function methodParameterNames ($classOrObject, $method) {
+		if (method_exists($classOrObject, $method)) {
+			$results = array();
+			$ref = new ReflectionMethod($classOrObject, $method);
+			foreach ($ref->getParameters() as $parameter) {
+				$results[] = $parameter->name;
+			}
+			return $results;
+		}
+		return null;
+	}
+
+
+
+	/**
+	* Get the visibility of a method of any object or class
+	*/
+	final private function methodVisibility ($classOrObject, $method) {
+		if (method_exists($classOrObject, $method)) {
+			$ref = new ReflectionMethod($classOrObject, $method);
 			if ($ref->isPrivate()) {
 				return 'private';
 			} else if ($ref->isProtected()) {
@@ -1436,11 +1439,11 @@ class Unitest {
 
 
 	/**
-	* See what visibility a property has
+	* Get the visibility of a property of any object or class
 	*/
-	final private function propertyVisibility ($subject, $propertyName) {
-		if (property_exists($subject, $propertyName)) {
-			$ref = new ReflectionProperty($subject, $propertyName);
+	final private function propertyVisibility ($classOrObject, $propertyName) {
+		if (property_exists($classOrObject, $propertyName)) {
+			$ref = new ReflectionProperty($classOrObject, $propertyName);
 			if ($ref->isPrivate()) {
 				return 'private';
 			} else if ($ref->isProtected()) {

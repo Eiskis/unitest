@@ -5,7 +5,7 @@ class Unitest {
 	/**
 	* An abstract method should exist in class or object.
 	*/
-	final public function shouldHaveAbstractMethod ($testableObjectOrClass, $method) {
+	final protected function shouldHaveAbstractMethod ($testableObjectOrClass, $method) {
 		$arguments = func_get_args();
 		array_shift($arguments);
 

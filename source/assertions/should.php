@@ -5,7 +5,7 @@ class Unitest {
 	/**
 	* Truey
 	*/
-	final public function should ($value) {
+	final protected function should ($value) {
 		$arguments = func_get_args();
 		foreach ($arguments as $argument) {
 			if (!$argument) {

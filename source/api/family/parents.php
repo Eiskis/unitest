@@ -8,7 +8,7 @@ class Unitest {
 	final public function parents () {
 		$parents = array();
 		if ($this->parent()) {
-			$parents = array_merge($this->parent()->parents(), array($this->parent()->name()));
+			$parents = array_merge($this->parent()->parents(), array($this->className($this->parent())));
 		}
 		return $parents;
 	}

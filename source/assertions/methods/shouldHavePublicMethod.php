@@ -5,7 +5,7 @@ class Unitest {
 	/**
 	* A method with the visibility "public" should exist in class or object.
 	*/
-	final public function shouldHavePublicMethod ($testableObjectOrClass, $method) {
+	final protected function shouldHavePublicMethod ($testableObjectOrClass, $method) {
 		$arguments = func_get_args();
 		array_shift($arguments);
 

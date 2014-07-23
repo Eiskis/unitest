@@ -5,7 +5,7 @@ class Unitest {
 	/**
 	* A property with the visibility "private" should exist in class or object.
 	*/
-	final public function shouldHavePrivateProperty ($testableObjectOrClass, $property) {
+	final protected function shouldHavePrivateProperty ($testableObjectOrClass, $property) {
 		$arguments = func_get_args();
 		array_shift($arguments);
 

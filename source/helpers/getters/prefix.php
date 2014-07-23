@@ -5,7 +5,7 @@ class Unitest {
 	/**
 	* Test method prefix
 	*/
-	final public function prefix () {
+	final private function prefix () {
 		return 'test';
 	}
 

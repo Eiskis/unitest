@@ -5,7 +5,7 @@ class Unitest {
 	/**
 	* A static method should exist in class.
 	*/
-	final public function shouldHaveStaticMethod ($testableClass, $method) {
+	final protected function shouldHaveStaticMethod ($testableClass, $method) {
 		$arguments = func_get_args();
 		array_shift($arguments);
 

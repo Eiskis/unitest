@@ -7,7 +7,7 @@ class Unitest {
 	*
 	* Fails if passed non-objects or no objects.
 	*/
-	final public function shouldBeOfClass ($testableObject, $targetClass) {
+	final protected function shouldBeOfClass ($testableObject, $targetClass) {
 
 		// Not an object
 		if (!is_object($testableObject)) {

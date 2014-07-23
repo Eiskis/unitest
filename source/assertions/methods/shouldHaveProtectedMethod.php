@@ -5,7 +5,7 @@ class Unitest {
 	/**
 	* A method with the visibility "protected" should exist in class or object.
 	*/
-	final public function shouldHaveProtectedMethod ($testableObjectOrClass, $method) {
+	final protected function shouldHaveProtectedMethod ($testableObjectOrClass, $method) {
 		$arguments = func_get_args();
 		array_shift($arguments);
 

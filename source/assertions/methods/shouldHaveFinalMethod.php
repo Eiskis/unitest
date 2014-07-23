@@ -5,7 +5,7 @@ class Unitest {
 	/**
 	* An unoverridable method should exist in class or object.
 	*/
-	final public function shouldHaveFinalMethod ($testableObjectOrClass, $method) {
+	final protected function shouldHaveFinalMethod ($testableObjectOrClass, $method) {
 		$arguments = func_get_args();
 		array_shift($arguments);
 

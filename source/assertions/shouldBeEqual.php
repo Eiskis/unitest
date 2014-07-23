@@ -5,7 +5,7 @@ class Unitest {
 	/**
 	* Equality
 	*/
-	final public function shouldBeEqual ($value) {
+	final protected function shouldBeEqual ($value) {
 		$arguments = func_get_args();
 		$count = count($arguments);
 		if ($count > 1) {

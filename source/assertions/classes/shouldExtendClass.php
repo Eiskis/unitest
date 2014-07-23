@@ -7,7 +7,7 @@ class Unitest {
 	*
 	* Can be passed multiple parent target classes.
 	*/
-	final public function shouldExtendClass ($testableObjectOrClass, $targetClass) {
+	final protected function shouldExtendClass ($testableObjectOrClass, $targetClass) {
 		$arguments = func_get_args();
 		array_shift($arguments);
 

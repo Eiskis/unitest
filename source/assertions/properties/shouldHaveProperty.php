@@ -5,7 +5,7 @@ class Unitest {
 	/**
 	* A property should exist in class or object.
 	*/
-	final public function shouldHaveProperty ($testableObjectOrClass, $property) {
+	final protected function shouldHaveProperty ($testableObjectOrClass, $property) {
 		$arguments = func_get_args();
 		array_shift($arguments);
 

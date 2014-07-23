@@ -5,7 +5,7 @@ class Unitest {
 	/**
 	* A property with the visibility "protected" should exist in class or object.
 	*/
-	final public function shouldHaveProtectedProperty ($testableObjectOrClass, $property) {
+	final protected function shouldHaveProtectedProperty ($testableObjectOrClass, $property) {
 		$arguments = func_get_args();
 		array_shift($arguments);
 

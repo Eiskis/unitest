@@ -5,7 +5,7 @@ class Unitest {
 	/**
 	* A property with the visibility "public" should exist in class or object.
 	*/
-	final public function shouldHavePublicProperty ($testableObjectOrClass, $property) {
+	final protected function shouldHavePublicProperty ($testableObjectOrClass, $property) {
 		$arguments = func_get_args();
 		array_shift($arguments);
 
