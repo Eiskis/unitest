@@ -2,10 +2,8 @@
 # To do
 
 - Clear duplication in method/property assertions
-- method tests fail on object
 - xUnit-compliance
-- Maybe use helpers as static methods
-- Maybe prefix all internal private methods with underscores? The `Unitest` class is designed to be extended.
+- Maybe make helpers static
 - `->clone()`
 - Test coverage
 	- Event hook methods
@@ -26,10 +24,7 @@
 		- string
 		- boolean
 	- `shouldBeIncluded($file)`
-	- `shouldHaveMethod($subjectClassOrObject, $method)`
-		- `shouldHaveStaticMethod($subjectClassOrObject, $method)`
-	- `shouldHaveProperty($subjectClassOrObject, $property)`
-		- `shouldHaveStaticProperty($subjectClassOrObject, $property)`
+	- `shouldHaveStaticProperty($subjectClassOrObject, $property)`
 
 
 

@@ -514,14 +514,14 @@ class Unitest {
 	*
 	* Fails if passed non-objects or no objects.
 	*/
-	final protected function shouldBeOfClass ($testableObject, $targetClass) {
+	final protected function shouldBeOfClass ($object, $class) {
 
 		// Not an object
-		if (!is_object($testableObject)) {
+		if (!is_object($object)) {
 			return $this->fail();
 
 		// Wrong class
-		} else if (get_class($testableObject) !== $targetClass) {
+		} else if (get_class($object) !== $class) {
 			return $this->fail();
 		}
 
@@ -535,13 +535,13 @@ class Unitest {
 	*
 	* Can be passed multiple parent target classes.
 	*/
-	final protected function shouldExtendClass ($testableObjectOrClass, $targetClass) {
+	final protected function shouldExtendClass ($objectOrClass, $targetClass) {
 		$arguments = func_get_args();
 		array_shift($arguments);
 
 		// Test for wrong class
 		foreach ($arguments as $argument) {
-			if (!is_subclass_of($testableObjectOrClass, $argument)) {
+			if (!is_subclass_of($objectOrClass, $argument)) {
 				return $this->fail();
 			}
 		}
@@ -614,18 +614,18 @@ class Unitest {
 	/**
 	* An abstract method should exist in class or object.
 	*/
-	final protected function shouldHaveAbstractMethod ($testableObjectOrClass, $method) {
+	final protected function shouldHaveAbstractMethod ($objectOrClass, $method) {
 		$arguments = func_get_args();
 		array_shift($arguments);
 
 		// Test all given methods
 		foreach ($arguments as $argument) {
-			if (!method_exists($testableObjectOrClass, $argument)) {
+			if (!method_exists($objectOrClass, $argument)) {
 				return $this->fail();
 			} else {
 
 				// Use reflection to check method
-				$ref = new ReflectionMethod($testableObjectOrClass, $argument);
+				$ref = new ReflectionMethod($objectOrClass, $argument);
 				if (!$ref->isAbstract()) {
 					return $this->fail();
 				}
@@ -641,18 +641,18 @@ class Unitest {
 	/**
 	* An unoverridable method should exist in class or object.
 	*/
-	final protected function shouldHaveFinalMethod ($testableObjectOrClass, $method) {
+	final protected function shouldHaveFinalMethod ($objectOrClass, $method) {
 		$arguments = func_get_args();
 		array_shift($arguments);
 
 		// Test all given methods
 		foreach ($arguments as $argument) {
-			if (!method_exists($testableObjectOrClass, $argument)) {
+			if (!method_exists($objectOrClass, $argument)) {
 				return $this->fail();
 			} else {
 
 				// Use reflection to check method
-				$ref = new ReflectionMethod($testableObjectOrClass, $argument);
+				$ref = new ReflectionMethod($objectOrClass, $argument);
 				if (!$ref->isFinal()) {
 					return $this->fail();
 				}
@@ -668,13 +668,13 @@ class Unitest {
 	/**
 	* A method should exist in class or object.
 	*/
-	final protected function shouldHaveMethod ($testableObjectOrClass, $method) {
+	final protected function shouldHaveMethod ($objectOrClass, $method) {
 		$arguments = func_get_args();
 		array_shift($arguments);
 
 		// Test all given methods
 		foreach ($arguments as $argument) {
-			if (!method_exists($testableObjectOrClass, $argument)) {
+			if (!method_exists($objectOrClass, $argument)) {
 				return $this->fail();
 			}
 		}
@@ -687,15 +687,15 @@ class Unitest {
 	/**
 	* A method with the visibility "private" should exist in class or object.
 	*/
-	final protected function shouldHavePrivateMethod ($testableObjectOrClass, $method) {
+	final protected function shouldHavePrivateMethod ($objectOrClass, $method) {
 		$arguments = func_get_args();
 		array_shift($arguments);
 
 		// Test all given methods
 		foreach ($arguments as $argument) {
-			if (!method_exists($testableObjectOrClass, $argument)) {
+			if (!method_exists($objectOrClass, $argument)) {
 				return $this->fail();
-			} else if ($this->_methodVisibility($testableObjectOrClass, $argument) !== 'private') {
+			} else if ($this->_methodVisibility($objectOrClass, $argument) !== 'private') {
 				return $this->fail();
 			}
 		}
@@ -708,15 +708,15 @@ class Unitest {
 	/**
 	* A method with the visibility "protected" should exist in class or object.
 	*/
-	final protected function shouldHaveProtectedMethod ($testableObjectOrClass, $method) {
+	final protected function shouldHaveProtectedMethod ($objectOrClass, $method) {
 		$arguments = func_get_args();
 		array_shift($arguments);
 
 		// Test all given methods
 		foreach ($arguments as $argument) {
-			if (!method_exists($testableObjectOrClass, $argument)) {
+			if (!method_exists($objectOrClass, $argument)) {
 				return $this->fail();
-			} else if ($this->_methodVisibility($testableObjectOrClass, $argument) !== 'protected') {
+			} else if ($this->_methodVisibility($objectOrClass, $argument) !== 'protected') {
 				return $this->fail();
 			}
 		}
@@ -729,15 +729,15 @@ class Unitest {
 	/**
 	* A method with the visibility "public" should exist in class or object.
 	*/
-	final protected function shouldHavePublicMethod ($testableObjectOrClass, $method) {
+	final protected function shouldHavePublicMethod ($objectOrClass, $method) {
 		$arguments = func_get_args();
 		array_shift($arguments);
 
 		// Test all given methods
 		foreach ($arguments as $argument) {
-			if (!method_exists($testableObjectOrClass, $argument)) {
+			if (!method_exists($objectOrClass, $argument)) {
 				return $this->fail();
-			} else if ($this->_methodVisibility($testableObjectOrClass, $argument) !== 'public') {
+			} else if ($this->_methodVisibility($objectOrClass, $argument) !== 'public') {
 				return $this->fail();
 			}
 		}
@@ -750,18 +750,18 @@ class Unitest {
 	/**
 	* A static method should exist in class.
 	*/
-	final protected function shouldHaveStaticMethod ($testableClass, $method) {
+	final protected function shouldHaveStaticMethod ($objectOrClass, $method) {
 		$arguments = func_get_args();
 		array_shift($arguments);
 
 		// Test all given methods
 		foreach ($arguments as $argument) {
-			if (!method_exists($testableClass, $argument)) {
+			if (!method_exists($objectOrClass, $argument)) {
 				return $this->fail();
 			} else {
 
 				// Use reflection to check method
-				$ref = new ReflectionMethod($testableClass, $argument);
+				$ref = new ReflectionMethod($objectOrClass, $argument);
 				if (!$ref->isStatic()) {
 					return $this->fail();
 				}
@@ -777,15 +777,15 @@ class Unitest {
 	/**
 	* A property with the visibility "private" should exist in class or object.
 	*/
-	final protected function shouldHavePrivateProperty ($testableObjectOrClass, $property) {
+	final protected function shouldHavePrivateProperty ($objectOrClass, $property) {
 		$arguments = func_get_args();
 		array_shift($arguments);
 
 		// Test all given properties
 		foreach ($arguments as $argument) {
-			if (!property_exists($testableObjectOrClass, $argument)) {
+			if (!property_exists($objectOrClass, $argument)) {
 				return $this->fail();
-			} else if ($this->_propertyVisibility($testableObjectOrClass, $argument) !== 'private') {
+			} else if ($this->_propertyVisibility($objectOrClass, $argument) !== 'private') {
 				return $this->fail();
 			}
 		}
@@ -798,13 +798,13 @@ class Unitest {
 	/**
 	* A property should exist in class or object.
 	*/
-	final protected function shouldHaveProperty ($testableObjectOrClass, $property) {
+	final protected function shouldHaveProperty ($objectOrClass, $property) {
 		$arguments = func_get_args();
 		array_shift($arguments);
 
 		// Test all given properties
 		foreach ($arguments as $argument) {
-			if (!property_exists($testableObjectOrClass, $argument)) {
+			if (!property_exists($objectOrClass, $argument)) {
 				return $this->fail();
 			}
 		}
@@ -817,15 +817,15 @@ class Unitest {
 	/**
 	* A property with the visibility "protected" should exist in class or object.
 	*/
-	final protected function shouldHaveProtectedProperty ($testableObjectOrClass, $property) {
+	final protected function shouldHaveProtectedProperty ($objectOrClass, $property) {
 		$arguments = func_get_args();
 		array_shift($arguments);
 
 		// Test all given properties
 		foreach ($arguments as $argument) {
-			if (!property_exists($testableObjectOrClass, $argument)) {
+			if (!property_exists($objectOrClass, $argument)) {
 				return $this->fail();
-			} else if ($this->_propertyVisibility($testableObjectOrClass, $argument) !== 'protected') {
+			} else if ($this->_propertyVisibility($objectOrClass, $argument) !== 'protected') {
 				return $this->fail();
 			}
 		}
@@ -838,15 +838,43 @@ class Unitest {
 	/**
 	* A property with the visibility "public" should exist in class or object.
 	*/
-	final protected function shouldHavePublicProperty ($testableObjectOrClass, $property) {
+	final protected function shouldHavePublicProperty ($objectOrClass, $property) {
 		$arguments = func_get_args();
 		array_shift($arguments);
 
 		// Test all given properties
 		foreach ($arguments as $argument) {
-			if (!property_exists($testableObjectOrClass, $argument)) {
+			if (!property_exists($objectOrClass, $argument)) {
 				return $this->fail();
-			} else if ($this->_propertyVisibility($testableObjectOrClass, $argument) !== 'public') {
+			} else if ($this->_propertyVisibility($objectOrClass, $argument) !== 'public') {
+				return $this->fail();
+			}
+		}
+
+		return $this->pass();
+	}
+
+
+
+	/**
+	* A static property should exist in class.
+	*/
+	final protected function shouldHaveStaticProperty ($objectOrClass, $property) {
+		$arguments = func_get_args();
+		array_shift($arguments);
+
+		// Test all given properties
+		foreach ($arguments as $argument) {
+			if (!property_exists($objectOrClass, $argument)) {
+				return $this->fail();
+			} else {
+
+				// Use reflection to check property
+				$ref = new ReflectionProperty($objectOrClass, $argument);
+				if (!$ref->isStatic()) {
+					return $this->fail();
+				}
+
 				return $this->fail();
 			}
 		}

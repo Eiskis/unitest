@@ -5,15 +5,15 @@ class Unitest {
 	/**
 	* A method with the visibility "public" should exist in class or object.
 	*/
-	final protected function shouldHavePublicMethod ($testableObjectOrClass, $method) {
+	final protected function shouldHavePublicMethod ($objectOrClass, $method) {
 		$arguments = func_get_args();
 		array_shift($arguments);
 
 		// Test all given methods
 		foreach ($arguments as $argument) {
-			if (!method_exists($testableObjectOrClass, $argument)) {
+			if (!method_exists($objectOrClass, $argument)) {
 				return $this->fail();
-			} else if ($this->_methodVisibility($testableObjectOrClass, $argument) !== 'public') {
+			} else if ($this->_methodVisibility($objectOrClass, $argument) !== 'public') {
 				return $this->fail();
 			}
 		}

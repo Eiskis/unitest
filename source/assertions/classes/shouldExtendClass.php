@@ -7,13 +7,13 @@ class Unitest {
 	*
 	* Can be passed multiple parent target classes.
 	*/
-	final protected function shouldExtendClass ($testableObjectOrClass, $targetClass) {
+	final protected function shouldExtendClass ($objectOrClass, $targetClass) {
 		$arguments = func_get_args();
 		array_shift($arguments);
 
 		// Test for wrong class
 		foreach ($arguments as $argument) {
-			if (!is_subclass_of($testableObjectOrClass, $argument)) {
+			if (!is_subclass_of($objectOrClass, $argument)) {
 				return $this->fail();
 			}
 		}
