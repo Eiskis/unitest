@@ -20,7 +20,7 @@ class Unitest {
 				$allInjectionsCopy = $this->injections();
 
 				// Preparation method
-				$this->runBeforeTest($method);
+				$this->_runBeforeTest($method);
 
 				// Get innjections to pass to test method
 				foreach ($this->methodParameterNames($method) as $parameterName) {
@@ -37,7 +37,7 @@ class Unitest {
 
 			// Contain exceptions of clean-up
 			try {
-				$this->runAfterTest($method);
+				$this->_runAfterTest($method);
 			} catch (Exception $e) {
 				$result = $this->fail($this->stringifyException($e));
 			}

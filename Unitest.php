@@ -47,6 +47,146 @@ class Unitest {
 
 
 	/**
+	* String conversion
+	*/
+	final public function __toString () {
+		return get_class($this);
+	}
+
+
+
+	/**
+	* Run tests, some or all
+	*/
+	final public function run () {
+		$arguments = func_get_args();
+
+		$ref = new ReflectionClass($this);
+
+		$results = array(
+			'class'    => $this->name(),
+			'file'     => $this->file(),
+			'line'     => $this->lineNumber(),
+			'parents'  => $this->parents(),
+
+			'duration' => 0,
+
+			'failed'   => 0,
+			'passed'   => 0,
+			'skipped'  => 0,
+
+			'tests'    => array(),
+			'children' => array(),
+		);
+
+		// Default to tests of this and children arguments
+		if (empty($arguments)) {
+			$arguments = array($this->tests(), $this->children());
+		}
+
+		// Flatten arguments
+		$suitesOrTests = $this->flattenArray($arguments);
+
+		// Preparation before suite runs anything (possible exceptions are left uncaught)
+		$this->_runBeforeTests();
+
+		// Run tests
+		foreach ($suitesOrTests as $suiteOrTest) {
+
+			// Child suite
+			if ($this->isValidSuite($suiteOrTest)) {
+				$childResults = $suiteOrTest->run(array_merge($suiteOrTest->tests(), $suiteOrTest->children()));
+				$results['children'][] = $childResults;
+
+				// Iterate counters
+				foreach (array('failed', 'passed', 'skipped') as $key) {
+					$results[$key] = $results[$key] + $childResults[$key];
+					$results['duration'] += $childResults['duration'];
+				}
+
+			// Test method
+			} else if (is_string($suiteOrTest)) {
+				$testResult = $this->runTest($suiteOrTest);
+				$results['tests'][] = $testResult;
+
+				// Iterate counters
+				$results[$testResult['status']]++;
+				$results['duration'] += $testResult['duration'];
+
+			}
+
+		}
+
+		// Clean-up after suite has run everything (exceptions are left uncaught)
+		$this->_runAfterTests();
+
+		return $results;
+	}
+
+
+
+	/**
+	* Run an individual test method
+	*/
+	final public function runTest ($method) {
+		$injections = array();
+		$result = $this->skip();
+		$duration = 0;
+
+		if (method_exists($this, $method)) {
+			$startTime = microtime(true);
+
+			// Contain exceptions of test method
+			try {
+
+				// Take a snapshot of current injections
+				$allInjectionsCopy = $this->injections();
+
+				// Preparation method
+				$this->_runBeforeTest($method);
+
+				// Get innjections to pass to test method
+				foreach ($this->methodParameterNames($method) as $parameterName) {
+					$injections[] = $this->injection($parameterName);
+				}
+
+				// Call test method
+				$result = $this->execute($method, $injections);
+
+			// Fail test if there are exceptions
+			} catch (Exception $e) {
+				$result = $this->fail($this->stringifyException($e));
+			}
+
+			// Contain exceptions of clean-up
+			try {
+				$this->_runAfterTest($method);
+			} catch (Exception $e) {
+				$result = $this->fail($this->stringifyException($e));
+			}
+
+			// Restore injections as they were before the test
+			$this->_propertyInjections = $allInjectionsCopy;
+
+			$duration = microtime(true) - $startTime;
+		}
+
+		// Test report
+		return array(
+			'class'      => $this->name(),
+			'duration'   => $this->roundExecutionTime($duration),
+			'method'     => $method,
+			'file'       => $this->file(),
+			'line'       => $this->methodLineNumber($method),
+			'status'     => $this->assess($result),
+			'message'    => $result,
+			'injections' => $injections,
+		);
+	}
+
+
+
+	/**
 	* Initialize suites in locations
 	*/
 	final public function scrape () {
@@ -85,10 +225,601 @@ class Unitest {
 
 
 	/**
-	* String conversion
+	* Remove an injectable value
 	*/
-	final public function __toString () {
-		return get_class($this);
+	final public function eject ($name) {
+		$arguments = func_get_args();
+		$arguments = $this->flattenArray($arguments);
+		foreach ($arguments as $argument) {
+			if ($this->isInjection($argument)) {
+				unset($this->_propertyInjections[$argument]);
+			}
+		}
+		return $this;
+	}
+
+
+
+	/**
+	* Add an injectable value that can be passed to functions as parameter
+	*/
+	final public function inject ($name, $value) {
+		if (is_string($name)) {
+
+			// Sanitize variable name
+			$name = str_replace('-', '', preg_replace('/\s+/', '', $name));
+			if (!empty($name)) {
+				$this->_propertyInjections[$name] = $value;
+			}
+
+		}
+		return $this;
+	}
+
+
+
+	/**
+	* Get or set an injectable value
+	*/
+	final public function injection ($name) {
+
+		// Set
+		$arguments = func_get_args();
+		if (func_num_args() > 1) {
+			return $this->execute('inject', $arguments);
+		}
+
+		// Get own injections, bubble
+		$injections = $this->injections();
+		if (array_key_exists($name, $injections)) {
+			return $injections[$name];
+		}
+
+		// Missing injection
+		throw new Exception('Missing injection "'.$name.'".');
+		return $this;
+	}
+
+
+
+	/**
+	* Values available for test methods
+	*/
+	final public function injections () {
+
+		// Set
+		$arguments = func_get_args();
+		if (!empty($arguments)) {
+			return $this->execute('inject', $arguments);
+		}
+
+		// Get own injections, bubble
+		$results = array();
+		if ($this->parent()) {
+			$results = array_merge($results, $this->parent()->injections());
+		}
+		$results = array_merge($results, $this->_propertyInjections);	
+
+
+		return $results;
+	}
+
+
+
+	/**
+	* Find out if injection is available
+	*/
+	final public function isInjection ($name) {
+		$arguments = func_get_args();
+		$arguments = $this->flattenArray($arguments);
+		$injections = $this->injections();
+
+		// Fail if one of the equested injections is not available
+		foreach ($arguments as $argument) {
+			if (!array_key_exists($argument, $injections)) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+
+
+	/**
+	* Truey
+	*/
+	final public function should ($value) {
+		$arguments = func_get_args();
+		foreach ($arguments as $argument) {
+			if (!$argument) {
+				return $this->fail();
+			}
+		}
+		return $this->pass();
+	}
+
+
+
+	/**
+	* Equality
+	*/
+	final public function shouldBeEqual ($value) {
+		$arguments = func_get_args();
+		$count = count($arguments);
+		if ($count > 1) {
+			for ($i = 1; $i < $count; $i++) { 
+				if ($arguments[$i-1] !== $arguments[$i]) {
+					return $this->fail();
+				}
+			}
+		}
+		return $this->pass();
+	}
+
+
+
+	/**
+	* Falsey
+	*/
+	final public function shouldNot ($value) {
+		$arguments = func_get_args();
+		foreach ($arguments as $argument) {
+			if ($argument) {
+				return $this->fail();
+			}
+		}
+		return $this->pass();
+	}
+
+
+
+	/**
+	* Non-equality
+	*/
+	final public function shouldNotBeEqual ($value) {
+		$arguments = func_get_args();
+		return !$this->execute('shouldBeEqual', $arguments);
+	}
+
+
+
+	/**
+	* Class exists
+	*/
+	final public function shouldBeAvailableClass ($value) {
+		if (!class_exists($value)) {
+			$this->fail();
+		}
+		return $this->pass();
+	}
+
+
+
+	/**
+	* Should be of a specific class.
+	*
+	* Fails if passed non-objects or no objects.
+	*/
+	final public function shouldBeOfClass ($testableObject, $targetClass) {
+
+		// Not an object
+		if (!is_object($testableObject)) {
+			return $this->fail();
+
+		// Wrong class
+		} else if (get_class($testableObject) !== $targetClass) {
+			return $this->fail();
+		}
+
+		return $this->pass();
+	}
+
+
+
+	/**
+	* Object or class should be of any class that extends a specific class or classes.
+	*
+	* Can be passed multiple parent target classes.
+	*/
+	final public function shouldExtendClass ($testableObjectOrClass, $targetClass) {
+		$arguments = func_get_args();
+		array_shift($arguments);
+
+		// Test for wrong class
+		foreach ($arguments as $argument) {
+			if (!is_subclass_of($testableObjectOrClass, $argument)) {
+				return $this->fail();
+			}
+		}
+
+		return $this->pass();
+	}
+
+
+
+	/**
+	* A directory should exist in given location(s)
+	*/
+	final public function shouldBeDirectory ($path) {
+		$arguments = func_get_args();
+		foreach ($arguments as $argument) {
+			if (!is_dir($argument)) {
+				return $this->fail();
+			}
+		}
+		return $this->pass();
+	}
+
+
+
+	/**
+	* A file should exist in given location(s)
+	*/
+	final public function shouldBeFile ($path) {
+		$arguments = func_get_args();
+		foreach ($arguments as $argument) {
+			if (!is_file($argument)) {
+				return $this->fail();
+			}
+		}
+		return $this->pass();
+	}
+
+
+
+	/**
+	* A file or directory should exist in given location(s)
+	*/
+	final public function shouldBeFileOrDirectory ($path) {
+		$arguments = func_get_args();
+		foreach ($arguments as $argument) {
+			if (!is_file($argument) and !is_dir($argument)) {
+				return $this->fail();
+			}
+		}
+		return $this->pass();
+	}
+
+
+
+	/**
+	* A file or directory should NOT exist in given location(s)
+	*/
+	final public function shouldNotBeFileOrDirectory ($path) {
+		$arguments = func_get_args();
+		foreach ($arguments as $argument) {
+			if (is_file($argument) or is_dir($argument)) {
+				return $this->fail();
+			}
+		}
+		return $this->pass();
+	}
+
+
+
+	/**
+	* An abstract method should exist in class or object.
+	*/
+	final public function shouldHaveAbstractMethod ($testableObjectOrClass, $method) {
+		$arguments = func_get_args();
+		array_shift($arguments);
+
+		// Test all given methods
+		foreach ($arguments as $argument) {
+			if (!method_exists($testableObjectOrClass, $argument)) {
+				return $this->fail();
+			} else {
+
+				// Use reflection to check method
+				$ref = new ReflectionMethod($testableObjectOrClass, $argument);
+				if (!$ref->isAbstract()) {
+					return $this->fail();
+				}
+
+			}
+		}
+
+		return $this->pass();
+	}
+
+
+
+	/**
+	* An unoverridable method should exist in class or object.
+	*/
+	final public function shouldHaveFinalMethod ($testableObjectOrClass, $method) {
+		$arguments = func_get_args();
+		array_shift($arguments);
+
+		// Test all given methods
+		foreach ($arguments as $argument) {
+			if (!method_exists($testableObjectOrClass, $argument)) {
+				return $this->fail();
+			} else {
+
+				// Use reflection to check method
+				$ref = new ReflectionMethod($testableObjectOrClass, $argument);
+				if (!$ref->isFinal()) {
+					return $this->fail();
+				}
+
+			}
+		}
+
+		return $this->pass();
+	}
+
+
+
+	/**
+	* A method should exist in class or object.
+	*/
+	final public function shouldHaveMethod ($testableObjectOrClass, $method) {
+		$arguments = func_get_args();
+		array_shift($arguments);
+
+		// Test all given methods
+		foreach ($arguments as $argument) {
+			if (!method_exists($testableObjectOrClass, $argument)) {
+				return $this->fail();
+			}
+		}
+
+		return $this->pass();
+	}
+
+
+
+	/**
+	* A method with the visibility "private" should exist in class or object.
+	*/
+	final public function shouldHavePrivateMethod ($testableObjectOrClass, $method) {
+		$arguments = func_get_args();
+		array_shift($arguments);
+
+		// Test all given methods
+		foreach ($arguments as $argument) {
+			if (!method_exists($testableObjectOrClass, $argument)) {
+				return $this->fail();
+			} else if ($this->methodVisibility($testableObjectOrClass, $argument) !== 'private') {
+				return $this->fail();
+			}
+		}
+
+		return $this->pass();
+	}
+
+
+
+	/**
+	* A method with the visibility "protected" should exist in class or object.
+	*/
+	final public function shouldHaveProtectedMethod ($testableObjectOrClass, $method) {
+		$arguments = func_get_args();
+		array_shift($arguments);
+
+		// Test all given methods
+		foreach ($arguments as $argument) {
+			if (!method_exists($testableObjectOrClass, $argument)) {
+				return $this->fail();
+			} else if ($this->methodVisibility($testableObjectOrClass, $argument) !== 'protected') {
+				return $this->fail();
+			}
+		}
+
+		return $this->pass();
+	}
+
+
+
+	/**
+	* A method with the visibility "public" should exist in class or object.
+	*/
+	final public function shouldHavePublicMethod ($testableObjectOrClass, $method) {
+		$arguments = func_get_args();
+		array_shift($arguments);
+
+		// Test all given methods
+		foreach ($arguments as $argument) {
+			if (!method_exists($testableObjectOrClass, $argument)) {
+				return $this->fail();
+			} else if ($this->methodVisibility($testableObjectOrClass, $argument) !== 'public') {
+				return $this->fail();
+			}
+		}
+
+		return $this->pass();
+	}
+
+
+
+	/**
+	* A static method should exist in class.
+	*/
+	final public function shouldHaveStaticMethod ($testableClass, $method) {
+		$arguments = func_get_args();
+		array_shift($arguments);
+
+		// Test all given methods
+		foreach ($arguments as $argument) {
+			if (!method_exists($testableClass, $argument)) {
+				return $this->fail();
+			} else {
+
+				// Use reflection to check method
+				$ref = new ReflectionMethod($testableClass, $argument);
+				if (!$ref->isStatic()) {
+					return $this->fail();
+				}
+
+			}
+		}
+
+		return $this->pass();
+	}
+
+
+
+	/**
+	* A property with the visibility "private" should exist in class or object.
+	*/
+	final public function shouldHavePrivateProperty ($testableObjectOrClass, $property) {
+		$arguments = func_get_args();
+		array_shift($arguments);
+
+		// Test all given properties
+		foreach ($arguments as $argument) {
+			if (!property_exists($testableObjectOrClass, $argument)) {
+				return $this->fail();
+			} else if ($this->propertyVisibility($testableObjectOrClass, $argument) !== 'private') {
+				return $this->fail();
+			}
+		}
+
+		return $this->pass();
+	}
+
+
+
+	/**
+	* A property should exist in class or object.
+	*/
+	final public function shouldHaveProperty ($testableObjectOrClass, $property) {
+		$arguments = func_get_args();
+		array_shift($arguments);
+
+		// Test all given properties
+		foreach ($arguments as $argument) {
+			if (!property_exists($testableObjectOrClass, $argument)) {
+				return $this->fail();
+			}
+		}
+
+		return $this->pass();
+	}
+
+
+
+	/**
+	* A property with the visibility "protected" should exist in class or object.
+	*/
+	final public function shouldHaveProtectedProperty ($testableObjectOrClass, $property) {
+		$arguments = func_get_args();
+		array_shift($arguments);
+
+		// Test all given properties
+		foreach ($arguments as $argument) {
+			if (!property_exists($testableObjectOrClass, $argument)) {
+				return $this->fail();
+			} else if ($this->propertyVisibility($testableObjectOrClass, $argument) !== 'protected') {
+				return $this->fail();
+			}
+		}
+
+		return $this->pass();
+	}
+
+
+
+	/**
+	* A property with the visibility "public" should exist in class or object.
+	*/
+	final public function shouldHavePublicProperty ($testableObjectOrClass, $property) {
+		$arguments = func_get_args();
+		array_shift($arguments);
+
+		// Test all given properties
+		foreach ($arguments as $argument) {
+			if (!property_exists($testableObjectOrClass, $argument)) {
+				return $this->fail();
+			} else if ($this->propertyVisibility($testableObjectOrClass, $argument) !== 'public') {
+				return $this->fail();
+			}
+		}
+
+		return $this->pass();
+	}
+
+
+
+	/**
+	* Assess a value like it was a test result
+	*/
+	final protected function assess ($value) {
+		if ($this->passes($value)) {
+			return 'passed';
+		} else if ($this->skips($value)) {
+			return 'skipped';
+		}
+		return 'failed';
+	}
+
+
+
+	/**
+	* Test can fail with false, or a message (any value but null or true)
+	*/
+	final protected function fail () {
+		$arguments = func_get_args();
+		$count = func_num_args();
+
+		// Empty value is returned as false, otherwise returned as message
+		if ($count === 1) {
+			return !empty($arguments[0]) ? $arguments[0] : false;
+
+		// Multiple values provided, fail with those as message
+		} else if ($count > 1) {
+			return $arguments;
+		}
+
+		// Default to false
+		return false;
+	}
+
+
+
+	/**
+	* Assess failure
+	*/
+	final protected function fails ($value) {
+		return !($this->passes($value) or $this->skips($value));
+	}
+
+
+
+	/**
+	* Test always passes with true
+	*/
+	final protected function pass () {
+		return true;
+	}
+
+
+
+	/**
+	* Assess pass
+	*/
+	final protected function passes ($value) {
+		return $value === true;
+	}
+
+
+
+	/**
+	* Test skipped with null
+	*/
+	final protected function skip () {
+		return true;
+	}
+
+
+
+	/**
+	* Assess skip
+	*/
+	final protected function skips ($value) {
+		return $value === null;
 	}
 
 
@@ -723,262 +1454,9 @@ class Unitest {
 
 
 	/**
-	* Remove an injectable value
-	*/
-	final public function eject ($name) {
-		$arguments = func_get_args();
-		$arguments = $this->flattenArray($arguments);
-		foreach ($arguments as $argument) {
-			if ($this->isInjection($argument)) {
-				unset($this->_propertyInjections[$argument]);
-			}
-		}
-		return $this;
-	}
-
-
-
-	/**
-	* Add an injectable value that can be passed to functions as parameter
-	*/
-	final public function inject ($name, $value) {
-		if (is_string($name)) {
-
-			// Sanitize variable name
-			$name = str_replace('-', '', preg_replace('/\s+/', '', $name));
-			if (!empty($name)) {
-				$this->_propertyInjections[$name] = $value;
-			}
-
-		}
-		return $this;
-	}
-
-
-
-	/**
-	* Get or set an injectable value
-	*/
-	final public function injection ($name) {
-
-		// Set
-		$arguments = func_get_args();
-		if (func_num_args() > 1) {
-			return $this->execute('inject', $arguments);
-		}
-
-		// Get own injections, bubble
-		$injections = $this->injections();
-		if (array_key_exists($name, $injections)) {
-			return $injections[$name];
-		}
-
-		// Missing injection
-		throw new Exception('Missing injection "'.$name.'".');
-		return $this;
-	}
-
-
-
-	/**
-	* Values available for test methods
-	*/
-	final public function injections () {
-
-		// Set
-		$arguments = func_get_args();
-		if (!empty($arguments)) {
-			return $this->execute('inject', $arguments);
-		}
-
-		// Get own injections, bubble
-		$results = array();
-		if ($this->parent()) {
-			$results = array_merge($results, $this->parent()->injections());
-		}
-		$results = array_merge($results, $this->_propertyInjections);	
-
-
-		return $results;
-	}
-
-
-
-	/**
-	* Find out if injection is available
-	*/
-	final public function isInjection ($name) {
-		$arguments = func_get_args();
-		$arguments = $this->flattenArray($arguments);
-		$injections = $this->injections();
-
-		// Fail if one of the equested injections is not available
-		foreach ($arguments as $argument) {
-			if (!array_key_exists($argument, $injections)) {
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-
-
-	/**
-	* Assess a value like it was a test result
-	*/
-	final protected function assess ($value) {
-		if ($this->passes($value)) {
-			return 'passed';
-		} else if ($this->skips($value)) {
-			return 'skipped';
-		}
-		return 'failed';
-	}
-
-
-
-	/**
-	* Test can fail with false, or a message (any value but null or true)
-	*/
-	final protected function fail () {
-		$arguments = func_get_args();
-		$count = func_num_args();
-
-		// Empty value is returned as false, otherwise returned as message
-		if ($count === 1) {
-			return !empty($arguments[0]) ? $arguments[0] : false;
-
-		// Multiple values provided, fail with those as message
-		} else if ($count > 1) {
-			return $arguments;
-		}
-
-		// Default to false
-		return false;
-	}
-
-
-
-	/**
-	* Assess failure
-	*/
-	final protected function fails ($value) {
-		return !($this->passes($value) or $this->skips($value));
-	}
-
-
-
-	/**
-	* Test always passes with true
-	*/
-	final protected function pass () {
-		return true;
-	}
-
-
-
-	/**
-	* Assess pass
-	*/
-	final protected function passes ($value) {
-		return $value === true;
-	}
-
-
-
-	/**
-	* Test skipped with null
-	*/
-	final protected function skip () {
-		return true;
-	}
-
-
-
-	/**
-	* Assess skip
-	*/
-	final protected function skips ($value) {
-		return $value === null;
-	}
-
-
-
-	/**
-	* Run tests, some or all
-	*/
-	final public function run () {
-		$arguments = func_get_args();
-
-		$ref = new ReflectionClass($this);
-
-		$results = array(
-			'class'    => $this->name(),
-			'file'     => $this->file(),
-			'line'     => $this->lineNumber(),
-			'parents'  => $this->parents(),
-
-			'duration' => 0,
-
-			'failed'   => 0,
-			'passed'   => 0,
-			'skipped'  => 0,
-
-			'tests'    => array(),
-			'children' => array(),
-		);
-
-		// Default to tests of this and children arguments
-		if (empty($arguments)) {
-			$arguments = array($this->tests(), $this->children());
-		}
-
-		// Flatten arguments
-		$suitesOrTests = $this->flattenArray($arguments);
-
-		// Preparation before suite runs anything (possible exceptions are left uncaught)
-		$this->runBeforeTests();
-
-		// Run tests
-		foreach ($suitesOrTests as $suiteOrTest) {
-
-			// Child suite
-			if ($this->isValidSuite($suiteOrTest)) {
-				$childResults = $suiteOrTest->run(array_merge($suiteOrTest->tests(), $suiteOrTest->children()));
-				$results['children'][] = $childResults;
-
-				// Iterate counters
-				foreach (array('failed', 'passed', 'skipped') as $key) {
-					$results[$key] = $results[$key] + $childResults[$key];
-					$results['duration'] += $childResults['duration'];
-				}
-
-			// Test method
-			} else if (is_string($suiteOrTest)) {
-				$testResult = $this->runTest($suiteOrTest);
-				$results['tests'][] = $testResult;
-
-				// Iterate counters
-				$results[$testResult['status']]++;
-				$results['duration'] += $testResult['duration'];
-
-			}
-
-		}
-
-		// Clean-up after suite has run everything (exceptions are left uncaught)
-		$this->runAfterTests();
-
-		return $results;
-	}
-
-
-
-	/**
 	* When a singe test has been run
 	*/
-	final private function runAfterTest ($method) {
+	final private function _runAfterTest ($method) {
 		$arguments = func_get_args();
 		$this->execute('afterTest', $arguments);
 		return $this;
@@ -989,7 +1467,7 @@ class Unitest {
 	/**
 	* When a suite has run tests
 	*/
-	final private function runAfterTests () {
+	final private function _runAfterTests () {
 		$arguments = func_get_args();
 		$this->execute('afterTests', $arguments);
 		return $this;
@@ -1000,7 +1478,7 @@ class Unitest {
 	/**
 	* When a singe test is about to run
 	*/
-	final private function runBeforeTest ($method) {
+	final private function _runBeforeTest ($method) {
 		$arguments = func_get_args();
 		$this->execute('beforeTest', $arguments);
 		return $this;
@@ -1011,7 +1489,7 @@ class Unitest {
 	/**
 	* When a suite is about to run
 	*/
-	final private function runBeforeTests () {
+	final private function _runBeforeTests () {
 		$arguments = func_get_args();
 		$this->execute('beforeTests', $arguments);
 		return $this;
@@ -1026,484 +1504,6 @@ class Unitest {
 		$arguments = func_get_args();
 		$this->execute('init', $arguments);
 		return $this;
-	}
-
-
-
-	/**
-	* Run an individual test method
-	*/
-	final public function runTest ($method) {
-		$injections = array();
-		$result = $this->skip();
-		$duration = 0;
-
-		if (method_exists($this, $method)) {
-			$startTime = microtime(true);
-
-			// Contain exceptions of test method
-			try {
-
-				// Take a snapshot of current injections
-				$allInjectionsCopy = $this->injections();
-
-				// Preparation method
-				$this->runBeforeTest($method);
-
-				// Get innjections to pass to test method
-				foreach ($this->methodParameterNames($method) as $parameterName) {
-					$injections[] = $this->injection($parameterName);
-				}
-
-				// Call test method
-				$result = $this->execute($method, $injections);
-
-			// Fail test if there are exceptions
-			} catch (Exception $e) {
-				$result = $this->fail($this->stringifyException($e));
-			}
-
-			// Contain exceptions of clean-up
-			try {
-				$this->runAfterTest($method);
-			} catch (Exception $e) {
-				$result = $this->fail($this->stringifyException($e));
-			}
-
-			// Restore injections as they were before the test
-			$this->_propertyInjections = $allInjectionsCopy;
-
-			$duration = microtime(true) - $startTime;
-		}
-
-		// Test report
-		return array(
-			'class'      => $this->name(),
-			'duration'   => $this->roundExecutionTime($duration),
-			'method'     => $method,
-			'file'       => $this->file(),
-			'line'       => $this->methodLineNumber($method),
-			'status'     => $this->assess($result),
-			'message'    => $result,
-			'injections' => $injections,
-		);
-	}
-
-
-
-	/**
-	* Truey
-	*/
-	final public function should ($value) {
-		$arguments = func_get_args();
-		foreach ($arguments as $argument) {
-			if (!$argument) {
-				return $this->fail();
-			}
-		}
-		return $this->pass();
-	}
-
-
-
-	/**
-	* Equality
-	*/
-	final public function shouldBeEqual ($value) {
-		$arguments = func_get_args();
-		$count = count($arguments);
-		if ($count > 1) {
-			for ($i = 1; $i < $count; $i++) { 
-				if ($arguments[$i-1] !== $arguments[$i]) {
-					return $this->fail();
-				}
-			}
-		}
-		return $this->pass();
-	}
-
-
-
-	/**
-	* Falsey
-	*/
-	final public function shouldNot ($value) {
-		$arguments = func_get_args();
-		foreach ($arguments as $argument) {
-			if ($argument) {
-				return $this->fail();
-			}
-		}
-		return $this->pass();
-	}
-
-
-
-	/**
-	* Non-equality
-	*/
-	final public function shouldNotBeEqual ($value) {
-		$arguments = func_get_args();
-		return !$this->execute('shouldBeEqual', $arguments);
-	}
-
-
-
-	/**
-	* Class exists
-	*/
-	final public function shouldBeAvailableClass ($value) {
-		if (!class_exists($value)) {
-			$this->fail();
-		}
-		return $this->pass();
-	}
-
-
-
-	/**
-	* Should be of a specific class.
-	*
-	* Fails if passed non-objects or no objects.
-	*/
-	final public function shouldBeOfClass ($testableObject, $targetClass) {
-
-		// Not an object
-		if (!is_object($testableObject)) {
-			return $this->fail();
-
-		// Wrong class
-		} else if (get_class($testableObject) !== $targetClass) {
-			return $this->fail();
-		}
-
-		return $this->pass();
-	}
-
-
-
-	/**
-	* Object or class should be of any class that extends a specific class or classes.
-	*
-	* Can be passed multiple parent target classes.
-	*/
-	final public function shouldExtendClass ($testableObjectOrClass, $targetClass) {
-		$arguments = func_get_args();
-		array_shift($arguments);
-
-		// Test for wrong class
-		foreach ($arguments as $argument) {
-			if (!is_subclass_of($testableObjectOrClass, $argument)) {
-				return $this->fail();
-			}
-		}
-
-		return $this->pass();
-	}
-
-
-
-	/**
-	* A directory should exist in given location(s)
-	*/
-	final public function shouldBeDirectory ($path) {
-		$arguments = func_get_args();
-		foreach ($arguments as $argument) {
-			if (!is_dir($argument)) {
-				return $this->fail();
-			}
-		}
-		return $this->pass();
-	}
-
-
-
-	/**
-	* A file should exist in given location(s)
-	*/
-	final public function shouldBeFile ($path) {
-		$arguments = func_get_args();
-		foreach ($arguments as $argument) {
-			if (!is_file($argument)) {
-				return $this->fail();
-			}
-		}
-		return $this->pass();
-	}
-
-
-
-	/**
-	* A file or directory should exist in given location(s)
-	*/
-	final public function shouldBeFileOrDirectory ($path) {
-		$arguments = func_get_args();
-		foreach ($arguments as $argument) {
-			if (!is_file($argument) and !is_dir($argument)) {
-				return $this->fail();
-			}
-		}
-		return $this->pass();
-	}
-
-
-
-	/**
-	* A file or directory should NOT exist in given location(s)
-	*/
-	final public function shouldNotBeFileOrDirectory ($path) {
-		$arguments = func_get_args();
-		foreach ($arguments as $argument) {
-			if (is_file($argument) or is_dir($argument)) {
-				return $this->fail();
-			}
-		}
-		return $this->pass();
-	}
-
-
-
-	/**
-	* An abstract method should exist in class or object.
-	*/
-	final public function shouldHaveAbstractMethod ($testableObjectOrClass, $method) {
-		$arguments = func_get_args();
-		array_shift($arguments);
-
-		// Test all given methods
-		foreach ($arguments as $argument) {
-			if (!method_exists($testableObjectOrClass, $argument)) {
-				return $this->fail();
-			} else {
-
-				// Use reflection to check method
-				$ref = new ReflectionMethod($testableObjectOrClass, $argument);
-				if (!$ref->isAbstract()) {
-					return $this->fail();
-				}
-
-			}
-		}
-
-		return $this->pass();
-	}
-
-
-
-	/**
-	* An unoverridable method should exist in class or object.
-	*/
-	final public function shouldHaveFinalMethod ($testableObjectOrClass, $method) {
-		$arguments = func_get_args();
-		array_shift($arguments);
-
-		// Test all given methods
-		foreach ($arguments as $argument) {
-			if (!method_exists($testableObjectOrClass, $argument)) {
-				return $this->fail();
-			} else {
-
-				// Use reflection to check method
-				$ref = new ReflectionMethod($testableObjectOrClass, $argument);
-				if (!$ref->isFinal()) {
-					return $this->fail();
-				}
-
-			}
-		}
-
-		return $this->pass();
-	}
-
-
-
-	/**
-	* A method should exist in class or object.
-	*/
-	final public function shouldHaveMethod ($testableObjectOrClass, $method) {
-		$arguments = func_get_args();
-		array_shift($arguments);
-
-		// Test all given methods
-		foreach ($arguments as $argument) {
-			if (!method_exists($testableObjectOrClass, $argument)) {
-				return $this->fail();
-			}
-		}
-
-		return $this->pass();
-	}
-
-
-
-	/**
-	* A method with the visibility "private" should exist in class or object.
-	*/
-	final public function shouldHavePrivateMethod ($testableObjectOrClass, $method) {
-		$arguments = func_get_args();
-		array_shift($arguments);
-
-		// Test all given methods
-		foreach ($arguments as $argument) {
-			if (!method_exists($testableObjectOrClass, $argument)) {
-				return $this->fail();
-			} else if ($this->methodVisibility($testableObjectOrClass, $argument) !== 'private') {
-				return $this->fail();
-			}
-		}
-
-		return $this->pass();
-	}
-
-
-
-	/**
-	* A method with the visibility "protected" should exist in class or object.
-	*/
-	final public function shouldHaveProtectedMethod ($testableObjectOrClass, $method) {
-		$arguments = func_get_args();
-		array_shift($arguments);
-
-		// Test all given methods
-		foreach ($arguments as $argument) {
-			if (!method_exists($testableObjectOrClass, $argument)) {
-				return $this->fail();
-			} else if ($this->methodVisibility($testableObjectOrClass, $argument) !== 'protected') {
-				return $this->fail();
-			}
-		}
-
-		return $this->pass();
-	}
-
-
-
-	/**
-	* A method with the visibility "public" should exist in class or object.
-	*/
-	final public function shouldHavePublicMethod ($testableObjectOrClass, $method) {
-		$arguments = func_get_args();
-		array_shift($arguments);
-
-		// Test all given methods
-		foreach ($arguments as $argument) {
-			if (!method_exists($testableObjectOrClass, $argument)) {
-				return $this->fail();
-			} else if ($this->methodVisibility($testableObjectOrClass, $argument) !== 'public') {
-				return $this->fail();
-			}
-		}
-
-		return $this->pass();
-	}
-
-
-
-	/**
-	* A static method should exist in class.
-	*/
-	final public function shouldHaveStaticMethod ($testableClass, $method) {
-		$arguments = func_get_args();
-		array_shift($arguments);
-
-		// Test all given methods
-		foreach ($arguments as $argument) {
-			if (!method_exists($testableClass, $argument)) {
-				return $this->fail();
-			} else {
-
-				// Use reflection to check method
-				$ref = new ReflectionMethod($testableClass, $argument);
-				if (!$ref->isStatic()) {
-					return $this->fail();
-				}
-
-			}
-		}
-
-		return $this->pass();
-	}
-
-
-
-	/**
-	* A property with the visibility "private" should exist in class or object.
-	*/
-	final public function shouldHavePrivateProperty ($testableObjectOrClass, $property) {
-		$arguments = func_get_args();
-		array_shift($arguments);
-
-		// Test all given properties
-		foreach ($arguments as $argument) {
-			if (!property_exists($testableObjectOrClass, $argument)) {
-				return $this->fail();
-			} else if ($this->propertyVisibility($testableObjectOrClass, $argument) !== 'private') {
-				return $this->fail();
-			}
-		}
-
-		return $this->pass();
-	}
-
-
-
-	/**
-	* A property should exist in class or object.
-	*/
-	final public function shouldHaveProperty ($testableObjectOrClass, $property) {
-		$arguments = func_get_args();
-		array_shift($arguments);
-
-		// Test all given properties
-		foreach ($arguments as $argument) {
-			if (!property_exists($testableObjectOrClass, $argument)) {
-				return $this->fail();
-			}
-		}
-
-		return $this->pass();
-	}
-
-
-
-	/**
-	* A property with the visibility "protected" should exist in class or object.
-	*/
-	final public function shouldHaveProtectedProperty ($testableObjectOrClass, $property) {
-		$arguments = func_get_args();
-		array_shift($arguments);
-
-		// Test all given properties
-		foreach ($arguments as $argument) {
-			if (!property_exists($testableObjectOrClass, $argument)) {
-				return $this->fail();
-			} else if ($this->propertyVisibility($testableObjectOrClass, $argument) !== 'protected') {
-				return $this->fail();
-			}
-		}
-
-		return $this->pass();
-	}
-
-
-
-	/**
-	* A property with the visibility "public" should exist in class or object.
-	*/
-	final public function shouldHavePublicProperty ($testableObjectOrClass, $property) {
-		$arguments = func_get_args();
-		array_shift($arguments);
-
-		// Test all given properties
-		foreach ($arguments as $argument) {
-			if (!property_exists($testableObjectOrClass, $argument)) {
-				return $this->fail();
-			} else if ($this->propertyVisibility($testableObjectOrClass, $argument) !== 'public') {
-				return $this->fail();
-			}
-		}
-
-		return $this->pass();
 	}
 
 
