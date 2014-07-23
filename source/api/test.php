@@ -5,7 +5,7 @@ class Unitest {
 	/**
 	* Run an individual test method
 	*/
-	final public function runTest ($method) {
+	final public function test ($method) {
 		$injections = array();
 		$result = $this->skip();
 		$duration = 0;

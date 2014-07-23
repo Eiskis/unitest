@@ -53,7 +53,7 @@ class Unitest {
 
 			// Test method
 			} else if (is_string($suiteOrTest)) {
-				$testResult = $this->runTest($suiteOrTest);
+				$testResult = $this->test($suiteOrTest);
 				$results['tests'][] = $testResult;
 
 				// Iterate counters
