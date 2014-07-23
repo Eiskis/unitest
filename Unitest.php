@@ -935,105 +935,30 @@ class Unitest {
 
 
 	/**
-	* Find out which classes will be defined in a script
+	* File where this class or object is defined in
 	*/
-	final private function classesInScript ($code = '') {
-		$classes = array();
-
-		// Find tokens that are classes
-		$tokens = token_get_all($code);
-		for ($i = 2; $i < count($tokens); $i++) {
-
-			// Assess tokens to find class declarations of subclasses
-			if (
-				$tokens[$i-2][0] === T_CLASS and
-				$tokens[$i-1][0] === T_WHITESPACE and
-				$tokens[$i][0]   === T_STRING and
-				$tokens[$i+1][0] === T_WHITESPACE and
-				$tokens[$i+2][0] === T_EXTENDS and
-				$tokens[$i+3][0] === T_WHITESPACE and
-				$tokens[$i+4][0] === T_STRING
-			) {
-				$inheritedFrom = $tokens[$i+4][1];
-
-				// See if class extends Unitest
-				if ($this->isValidSuiteClass($inheritedFrom)) {
-					$classes[] = $tokens[$i][1];
-				}
-
-			}
-		}
-
-		return $classes;
+	final private function classFile ($classOrObject) {
+		$ref = new ReflectionClass($classOrObject);
+		return $ref->getFileName();
 	}
 
 
 
 	/**
-	* Go through a list of classes, merge parent classes
-	*
-	* INPUT
-	*	 array('Unitest', 'Alpha', 'Bravo', 'Charlie')
-	*
-	* OUTPUT
-	*	 array(
-	*		'Unitest' => array(
-	*			'Alpha' => array(
-	*				'Bravo' => array(
-	*					'Charlie' => array(
-	*					),
-	*				),
-	*			),
-	*		),
-	*	 )
+	* Line number of the file where this class or object is defined in
 	*/
-	final private function generateClassMap ($classes) {
-		$results = array();
-
-		// Go deeper if there's any children
-		if (is_array($classes) and !empty($classes)) {
-			$children = $classes;
-			$parent = array_shift($children);
-
-			// Recursion for treating children
-			$results[$parent] = $this->generateClassMap($children);
-
-		}
-
-		return $results;
+	final private function classLineNumber ($classOrObject) {
+		$ref = new ReflectionClass($classOrObject);
+		return $ref->getStartLine();
 	}
 
 
 
 	/**
-	* Instantiate suite objects based on class names recursively
+	* Name of this class or object
 	*/
-	final private function generateSuites ($classes, $parent = null) {
-		$suites = array();
-
-		// Default to self
-		if (!isset($parent)) {
-			$parent = $this;
-		}
-
-		// Validate parent
-		if (!$this->isValidSuite($parent)) {
-			throw new Exception('Invalid parent suite passed as parent.');
-		}
-
-		foreach ($classes as $class => $children) {
-			$suite = new $class();
-
-			// Recursion
-			if (!empty($children)) {
-				$this->generateSuites($children, $suite);
-			}
-
-			// Add to own flock
-			$parent->child($suite);
-
-		}
-		return $this;
+	final private function className ($classOrObject) {
+		return get_class($classOrObject);
 	}
 
 
@@ -1064,78 +989,64 @@ class Unitest {
 
 
 	/**
-	* Go through a list of classes, merge parent classes
-	*
-	* INPUT
-	*	 array(
-	*		 array(
-	*			'Unitest' => array(
-	*				'Alpha' => array(
-	*					'Bravo' => array(
-	*						'Charlie' => array(
-	*						),
-	*					),
-	*				),
-	*			),
-	*		 ),
-	*		 array(
-	*			'Unitest' => array(
-	*				'Alpha' => array(
-	*					'Uniform' => array(
-	*					),
-	*				),
-	*			),
-	*		 ),
-	*	 )
-	*
-	* OUTPUT
-	*	 array(
-	*		'Unitest' => array(
-	*			'Alpha' => array(
-	*				'Bravo' => array(
-	*					'Charlie' => array(),
-	*				),
-	*				'Uniform' => array(),
-	*			),
-	*		),
-	*	 )
+	* Get the line number where method is defined in within its class file
 	*/
-	final private function mergeClassMap ($classTrees) {
-		$results = array();
+	final private function methodLineNumber ($classOrObject, $method) {
+		$ref = new ReflectionMethod($classOrObject, $method);
+		return $ref->getStartLine();
+	}
 
-		// Array of each
-		if (!empty($classTrees)) {
-			foreach ($classTrees as $classTree) {
-				foreach ($classTree as $name => $children) {
 
-					// New set
-					if (!isset($results[$name])) {
-						$results[$name] = array();
-					}
 
-					// Collect all children here
-					$results[$name][] = $children;
-
-				}
+	/**
+	* List the names of the function parameters a method is expecing
+	*/
+	final private function methodParameterNames ($classOrObject, $method) {
+		if (method_exists($classOrObject, $method)) {
+			$results = array();
+			$ref = new ReflectionMethod($classOrObject, $method);
+			foreach ($ref->getParameters() as $parameter) {
+				$results[] = $parameter->name;
 			}
-
-			// Organize children
-			foreach ($results as $key => $value) {
-				if (empty($value)) {
-					$results[$key] = array();
-				} else if (count($value) === 1) {
-					$results[$key] = $value[0];
-				} else {
-					$results[$key] = $this->mergeClassMap($value);
-				}
-			}
-
+			return $results;
 		}
+		return null;
+	}
 
-		// Sort by key
-		ksort($results);
 
-		return $results;
+
+	/**
+	* Get the visibility of a method of any object or class
+	*/
+	final private function methodVisibility ($classOrObject, $method) {
+		if (method_exists($classOrObject, $method)) {
+			$ref = new ReflectionMethod($classOrObject, $method);
+			if ($ref->isPrivate()) {
+				return 'private';
+			} else if ($ref->isProtected()) {
+				return 'protected';
+			}
+			return 'public';
+		}
+		return null;
+	}
+
+
+
+	/**
+	* Get the visibility of a property of any object or class
+	*/
+	final private function propertyVisibility ($classOrObject, $propertyName) {
+		if (property_exists($classOrObject, $propertyName)) {
+			$ref = new ReflectionProperty($classOrObject, $propertyName);
+			if ($ref->isPrivate()) {
+				return 'private';
+			} else if ($ref->isProtected()) {
+				return 'protected';
+			}
+			return 'public';
+		}
+		return null;
 	}
 
 
@@ -1365,93 +1276,182 @@ class Unitest {
 
 
 	/**
-	* File where this class or object is defined in
+	* Find out which classes will be defined in a script
 	*/
-	final private function classFile ($classOrObject) {
-		$ref = new ReflectionClass($classOrObject);
-		return $ref->getFileName();
-	}
+	final private function classesInScript ($code = '') {
+		$classes = array();
 
+		// Find tokens that are classes
+		$tokens = token_get_all($code);
+		for ($i = 2; $i < count($tokens); $i++) {
 
+			// Assess tokens to find class declarations of subclasses
+			if (
+				$tokens[$i-2][0] === T_CLASS and
+				$tokens[$i-1][0] === T_WHITESPACE and
+				$tokens[$i][0]   === T_STRING and
+				$tokens[$i+1][0] === T_WHITESPACE and
+				$tokens[$i+2][0] === T_EXTENDS and
+				$tokens[$i+3][0] === T_WHITESPACE and
+				$tokens[$i+4][0] === T_STRING
+			) {
+				$inheritedFrom = $tokens[$i+4][1];
 
-	/**
-	* Line number of the file where this class or object is defined in
-	*/
-	final private function classLineNumber ($classOrObject) {
-		$ref = new ReflectionClass($classOrObject);
-		return $ref->getStartLine();
-	}
+				// See if class extends Unitest
+				if ($this->isValidSuiteClass($inheritedFrom)) {
+					$classes[] = $tokens[$i][1];
+				}
 
-
-
-	/**
-	* Name of this class or object
-	*/
-	final private function className ($classOrObject) {
-		return get_class($classOrObject);
-	}
-
-
-
-	/**
-	* Get the line number where method is defined in within its class file
-	*/
-	final private function methodLineNumber ($classOrObject, $method) {
-		$ref = new ReflectionMethod($classOrObject, $method);
-		return $ref->getStartLine();
-	}
-
-
-
-	/**
-	* List the names of the function parameters a method is expecing
-	*/
-	final private function methodParameterNames ($classOrObject, $method) {
-		if (method_exists($classOrObject, $method)) {
-			$results = array();
-			$ref = new ReflectionMethod($classOrObject, $method);
-			foreach ($ref->getParameters() as $parameter) {
-				$results[] = $parameter->name;
 			}
-			return $results;
 		}
-		return null;
+
+		return $classes;
 	}
 
 
 
 	/**
-	* Get the visibility of a method of any object or class
+	* Go through a list of classes, merge parent classes
+	*
+	* INPUT
+	*	 array('Unitest', 'Alpha', 'Bravo', 'Charlie')
+	*
+	* OUTPUT
+	*	 array(
+	*		'Unitest' => array(
+	*			'Alpha' => array(
+	*				'Bravo' => array(
+	*					'Charlie' => array(
+	*					),
+	*				),
+	*			),
+	*		),
+	*	 )
 	*/
-	final private function methodVisibility ($classOrObject, $method) {
-		if (method_exists($classOrObject, $method)) {
-			$ref = new ReflectionMethod($classOrObject, $method);
-			if ($ref->isPrivate()) {
-				return 'private';
-			} else if ($ref->isProtected()) {
-				return 'protected';
-			}
-			return 'public';
+	final private function generateClassMap ($classes) {
+		$results = array();
+
+		// Go deeper if there's any children
+		if (is_array($classes) and !empty($classes)) {
+			$children = $classes;
+			$parent = array_shift($children);
+
+			// Recursion for treating children
+			$results[$parent] = $this->generateClassMap($children);
+
 		}
-		return null;
+
+		return $results;
 	}
 
 
 
 	/**
-	* Get the visibility of a property of any object or class
+	* Instantiate suite objects based on class names recursively
 	*/
-	final private function propertyVisibility ($classOrObject, $propertyName) {
-		if (property_exists($classOrObject, $propertyName)) {
-			$ref = new ReflectionProperty($classOrObject, $propertyName);
-			if ($ref->isPrivate()) {
-				return 'private';
-			} else if ($ref->isProtected()) {
-				return 'protected';
-			}
-			return 'public';
+	final private function generateSuites ($classes, $parent = null) {
+		$suites = array();
+
+		// Default to self
+		if (!isset($parent)) {
+			$parent = $this;
 		}
-		return null;
+
+		// Validate parent
+		if (!$this->isValidSuite($parent)) {
+			throw new Exception('Invalid parent suite passed as parent.');
+		}
+
+		foreach ($classes as $class => $children) {
+			$suite = new $class();
+
+			// Recursion
+			if (!empty($children)) {
+				$this->generateSuites($children, $suite);
+			}
+
+			// Add to own flock
+			$parent->child($suite);
+
+		}
+		return $this;
+	}
+
+
+
+	/**
+	* Go through a list of classes, merge parent classes
+	*
+	* INPUT
+	*	 array(
+	*		 array(
+	*			'Unitest' => array(
+	*				'Alpha' => array(
+	*					'Bravo' => array(
+	*						'Charlie' => array(
+	*						),
+	*					),
+	*				),
+	*			),
+	*		 ),
+	*		 array(
+	*			'Unitest' => array(
+	*				'Alpha' => array(
+	*					'Uniform' => array(
+	*					),
+	*				),
+	*			),
+	*		 ),
+	*	 )
+	*
+	* OUTPUT
+	*	 array(
+	*		'Unitest' => array(
+	*			'Alpha' => array(
+	*				'Bravo' => array(
+	*					'Charlie' => array(),
+	*				),
+	*				'Uniform' => array(),
+	*			),
+	*		),
+	*	 )
+	*/
+	final private function mergeClassMap ($classTrees) {
+		$results = array();
+
+		// Array of each
+		if (!empty($classTrees)) {
+			foreach ($classTrees as $classTree) {
+				foreach ($classTree as $name => $children) {
+
+					// New set
+					if (!isset($results[$name])) {
+						$results[$name] = array();
+					}
+
+					// Collect all children here
+					$results[$name][] = $children;
+
+				}
+			}
+
+			// Organize children
+			foreach ($results as $key => $value) {
+				if (empty($value)) {
+					$results[$key] = array();
+				} else if (count($value) === 1) {
+					$results[$key] = $value[0];
+				} else {
+					$results[$key] = $this->mergeClassMap($value);
+				}
+			}
+
+		}
+
+		// Sort by key
+		ksort($results);
+
+		return $results;
 	}
 
 
