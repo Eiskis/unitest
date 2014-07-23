@@ -14,7 +14,7 @@ class Unitest {
 				$argument->parent($this, true);
 
 				// Add to own flock
-				$this->propertyChildren[] = $argument;
+				$this->_propertyChildren[] = $argument;
 
 			}
 		}

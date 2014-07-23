@@ -11,7 +11,7 @@ class Unitest {
 			// Sanitize variable name
 			$name = str_replace('-', '', preg_replace('/\s+/', '', $name));
 			if (!empty($name)) {
-				$this->propertyInjections[$name] = $value;
+				$this->_propertyInjections[$name] = $value;
 			}
 
 		}

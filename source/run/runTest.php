@@ -43,7 +43,7 @@ class Unitest {
 			}
 
 			// Restore injections as they were before the test
-			$this->propertyInjections = $allInjectionsCopy;
+			$this->_propertyInjections = $allInjectionsCopy;
 
 			$duration = microtime(true) - $startTime;
 		}

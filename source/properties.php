@@ -5,11 +5,11 @@ class Unitest {
 	/**
 	* Properties
 	*/
-	private $propertyBaseClass     = 'Unitest';
-	private $propertyPrefix        = 'test';
-	private $propertyChildren      = array();
-	private $propertyInjections    = array();
-	private $propertyParent        = null;
+	private $_propertyBaseClass = 'Unitest';
+	private $_propertyPrefix = 'test';
+	private $_propertyChildren = array();
+	private $_propertyInjections = array();
+	private $_propertyParent = null;
 
 }
 

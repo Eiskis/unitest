@@ -40,11 +40,11 @@ class Unitest {
 	/**
 	* Properties
 	*/
-	private $propertyBaseClass     = 'Unitest';
-	private $propertyPrefix        = 'test';
-	private $propertyChildren      = array();
-	private $propertyInjections    = array();
-	private $propertyParent        = null;
+	private $_propertyBaseClass = 'Unitest';
+	private $_propertyPrefix = 'test';
+	private $_propertyChildren = array();
+	private $_propertyInjections = array();
+	private $_propertyParent = null;
 
 
 
@@ -99,7 +99,7 @@ class Unitest {
 	* Add a suite as a child of this suite
 	*/
 	final public function baseClass () {
-		return $this->propertyBaseClass;
+		return $this->_propertyBaseClass;
 	}
 
 
@@ -116,7 +116,7 @@ class Unitest {
 				$argument->parent($this, true);
 
 				// Add to own flock
-				$this->propertyChildren[] = $argument;
+				$this->_propertyChildren[] = $argument;
 
 			}
 		}
@@ -137,7 +137,7 @@ class Unitest {
 		}
 
 		// Get
-		return $this->propertyChildren;
+		return $this->_propertyChildren;
 	}
 
 
@@ -150,7 +150,7 @@ class Unitest {
 		$arguments = $this->flattenArray($arguments);
 		foreach ($arguments as $argument) {
 			if ($this->isInjection($argument)) {
-				unset($this->propertyInjections[$argument]);
+				unset($this->_propertyInjections[$argument]);
 			}
 		}
 		return $this;
@@ -177,7 +177,7 @@ class Unitest {
 			// Sanitize variable name
 			$name = str_replace('-', '', preg_replace('/\s+/', '', $name));
 			if (!empty($name)) {
-				$this->propertyInjections[$name] = $value;
+				$this->_propertyInjections[$name] = $value;
 			}
 
 		}
@@ -226,7 +226,7 @@ class Unitest {
 		if ($this->parent()) {
 			$results = array_merge($results, $this->parent()->injections());
 		}
-		$results = array_merge($results, $this->propertyInjections);	
+		$results = array_merge($results, $this->_propertyInjections);	
 
 
 		return $results;
@@ -292,7 +292,7 @@ class Unitest {
 				}
 
 				// This stores a reference to its dad
-				$this->propertyParent = $parent;
+				$this->_propertyParent = $parent;
 
 			}
 
@@ -300,7 +300,7 @@ class Unitest {
 		}
 
 		// Get
-		return $this->propertyParent;
+		return $this->_propertyParent;
 	}
 
 
@@ -322,7 +322,7 @@ class Unitest {
 	* Test method prefix
 	*/
 	final public function prefix () {
-		return $this->propertyPrefix;
+		return $this->_propertyPrefix;
 	}
 
 
@@ -1073,7 +1073,7 @@ class Unitest {
 			}
 
 			// Restore injections as they were before the test
-			$this->propertyInjections = $allInjectionsCopy;
+			$this->_propertyInjections = $allInjectionsCopy;
 
 			$duration = microtime(true) - $startTime;
 		}

@@ -14,7 +14,7 @@ class Unitest {
 		}
 
 		// Get
-		return $this->propertyChildren;
+		return $this->_propertyChildren;
 	}
 
 }

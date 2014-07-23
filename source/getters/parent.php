@@ -21,7 +21,7 @@ class Unitest {
 				}
 
 				// This stores a reference to its dad
-				$this->propertyParent = $parent;
+				$this->_propertyParent = $parent;
 
 			}
 
@@ -29,7 +29,7 @@ class Unitest {
 		}
 
 		// Get
-		return $this->propertyParent;
+		return $this->_propertyParent;
 	}
 
 }

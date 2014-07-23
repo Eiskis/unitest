@@ -18,7 +18,7 @@ class Unitest {
 		if ($this->parent()) {
 			$results = array_merge($results, $this->parent()->injections());
 		}
-		$results = array_merge($results, $this->propertyInjections);	
+		$results = array_merge($results, $this->_propertyInjections);	
 
 
 		return $results;
