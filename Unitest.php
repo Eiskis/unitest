@@ -904,6 +904,268 @@ class Unitest {
 
 
 	/**
+	* Value's type should be array.
+	*/
+	final protected function shouldBeArray ($value) {
+		$arguments = func_get_args();
+		foreach ($arguments as $argument) {
+			if (!is_array($argument)) {
+				return $this->fail();
+			}
+		}
+		return $this->pass();
+	}
+
+
+
+	/**
+	* Value's type should be boolean
+	*/
+	final protected function shouldBeBoolean ($value) {
+		$arguments = func_get_args();
+		foreach ($arguments as $argument) {
+			if (!is_bool($argument)) {
+				return $this->fail();
+			}
+		}
+		return $this->pass();
+	}
+
+
+
+	/**
+	* Value's type should be float
+	*/
+	final protected function shouldBeFloat ($value) {
+		$arguments = func_get_args();
+		foreach ($arguments as $argument) {
+			if (!is_float($argument)) {
+				return $this->fail();
+			}
+		}
+		return $this->pass();
+	}
+
+
+
+	/**
+	* Value's type should be integer
+	*/
+	final protected function shouldBeInteger ($value) {
+		$arguments = func_get_args();
+		foreach ($arguments as $argument) {
+			if (!is_int($argument)) {
+				return $this->fail();
+			}
+		}
+		return $this->pass();
+	}
+
+
+
+	/**
+	* Value's type should be null
+	*/
+	final protected function shouldBeNull ($value) {
+		$arguments = func_get_args();
+		foreach ($arguments as $argument) {
+			if (!is_null($argument)) {
+				return $this->fail();
+			}
+		}
+		return $this->pass();
+	}
+
+
+
+	/**
+	* Value's type should be object
+	*/
+	final protected function shouldBeObject ($value) {
+		$arguments = func_get_args();
+		foreach ($arguments as $argument) {
+			if (!is_object($argument)) {
+				return $this->fail();
+			}
+		}
+		return $this->pass();
+	}
+
+
+
+	/**
+	* Value's type should be string
+	*/
+	final protected function shouldBeString ($value) {
+		$arguments = func_get_args();
+		foreach ($arguments as $argument) {
+			if (!is_string($argument)) {
+				return $this->fail();
+			}
+		}
+		return $this->pass();
+	}
+
+
+
+	/**
+	* Array value(s) should not contain subarrays
+	*/
+	final protected function shouldBeFlatArray ($value) {
+		$arguments = func_get_args();
+		foreach ($arguments as $argument) {
+			if (!is_array($argument)) {
+				return $this->fail();
+			} else {
+
+				// Fail if child array key found
+				foreach ($argument as $child) {
+					if (is_array($child)) {
+						return $this->fail();
+					}
+				}
+
+			}
+		}
+		return $this->pass();
+	}
+
+
+
+	/**
+	* Array value's keys should be sequential and numerical.
+	*/
+	final protected function shouldHaveIndexedKeys ($value) {
+		$arguments = func_get_args();
+		foreach ($arguments as $argument) {
+			if (!is_array($argument)) {
+				return $this->fail();
+			} else {
+
+				// Fail if incorrect key found
+				$keys = array_keys($argument);
+				for ($i = 0; $i < count($array); $i++) { 
+					if ($keys[$i] !== $i) {
+						return $this->fail();
+					}
+				}
+
+			}
+		}
+		return $this->pass();
+	}
+
+
+
+	/**
+	* Array value's keys should be numerical, potentially non-sequential.
+	*/
+	final protected function shouldHaveNumericalKeys ($value) {
+		$arguments = func_get_args();
+		foreach ($arguments as $argument) {
+			if (!is_array($argument)) {
+				return $this->fail();
+			} else {
+
+				// Fail if incorrect key found
+				foreach (array_keys($argument) as $key) {
+					if (!is_int($key)) {
+						return $this->fail();
+					}
+				}
+
+			}
+		}
+		return $this->pass();
+	}
+
+
+
+	/**
+	* Array value's keys should be strings.
+	*/
+	final protected function shouldHaveStringKeys ($value) {
+		$arguments = func_get_args();
+		foreach ($arguments as $argument) {
+			if (!is_array($argument)) {
+				return $this->fail();
+			} else {
+
+				// Fail if incorrect key found
+				foreach (array_keys($argument) as $key) {
+					if (!is_string($key)) {
+						return $this->fail();
+					}
+				}
+
+			}
+		}
+		return $this->pass();
+	}
+
+
+
+	/**
+	* Numeric value should be above zero
+	*/
+	final protected function shouldBeAboveZero ($value) {
+		$arguments = func_get_args();
+		foreach ($arguments as $argument) {
+			if (!is_numeric($argument) or $argument <= 0) {
+				return $this->fail();
+			}
+		}
+		return $this->pass();
+	}
+
+
+
+	/**
+	* Numeric value should be below zero
+	*/
+	final protected function shouldBeBelowZero ($value) {
+		$arguments = func_get_args();
+		foreach ($arguments as $argument) {
+			if (!is_numeric($argument) or $argument >= 0) {
+				return $this->fail();
+			}
+		}
+		return $this->pass();
+	}
+
+
+
+	/**
+	* Numeric value should be exactly zero
+	*/
+	final protected function shouldBeZero ($value) {
+		$arguments = func_get_args();
+		foreach ($arguments as $argument) {
+			if (!is_numeric($argument) or $argument < 0 or $argument > 0) {
+				return $this->fail();
+			}
+		}
+		return $this->pass();
+	}
+
+
+
+	/**
+	* String value's length should be zero
+	*/
+	final protected function shouldBeEmptyString ($value) {
+		$arguments = func_get_args();
+		foreach ($arguments as $argument) {
+			if (!is_string($argument) or strlen($argument)) {
+				return $this->fail();
+			}
+		}
+		return $this->pass();
+	}
+
+
+
+	/**
 	* Assess a value like it was a test result
 	*/
 	final protected function assess ($value) {

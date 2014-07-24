@@ -13,19 +13,11 @@
 		- Make sure injections are passed as clones (when self-injecting in suite `init()`)
 		- Test all types, and with a dummy class object
 		- Test inherited injections
-- shoulds
-	- types
-		- object
-		- array
-		- indexed array (queue)
-		- assoc array (hash)
-		- integer
-		- float
-		- string
-		- boolean
-	- aliases
-		- `...Directory` -> `...Dir`
-		- `ShouldBeFile` -> `should_be_file`
+- should aliases
+	- `...Directory` -> `...Dir`
+	- `...Integer` -> `...Int`
+	- `...Boolean` -> `...Bool`
+	- `ShouldBeFile` -> `should_be_file`
 
 
 
