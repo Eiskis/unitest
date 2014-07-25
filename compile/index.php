@@ -15,6 +15,8 @@ date_default_timezone_set('UTC');
 $root = '../';
 $sourcePath = $root.'source/';
 $exportPath = $root.'Unitest.php';
+$tempPath = 'TempUnitest.php';
+$output = '';
 
 // Something for parsing
 $prefix = '<?php
@@ -28,7 +30,7 @@ $suffix = '}
 require_once 'baseline.php';
 
 // Go through all source files
-$output = '';
+$classOutput = '';
 foreach (rglob_files($sourcePath, 'php') as $file) {
 	$fileContents = trim(file_get_contents($file));
 	$prefixLength = strlen($prefix);
@@ -44,11 +46,29 @@ foreach (rglob_files($sourcePath, 'php') as $file) {
 		$fileContents = substr($fileContents, 0, strlen($fileContents)-$suffixLength);
 	}
 
-	$output .= "\n\n".'	'.trim($fileContents)."\n\n";
+	$classOutput .= "\n\n".'	'.trim($fileContents)."\n\n";
 	unset($fileContents);
 }
 
-// Wrap output in PHP tags, add comments
+// Wrap output in PHP tags to include temporarily
+$tempOutput = '<?php
+class TempUnitest {
+'.$classOutput.'
+}
+?>';
+file_put_contents($tempPath, $tempOutput);
+require_once $tempPath;
+
+
+
+// Output aliasing declarations
+$aliasesOutput = '';
+require_once 'aliases.php';
+unlink($tempPath);
+
+
+
+// Wrap final output in PHP tags, add comments
 $output = '<?php
 
 /**
@@ -74,7 +94,13 @@ $output = '<?php
 
 class Unitest {
 
-'.$output.'
+'.$classOutput.'
+
+	/**
+	* Aliases
+	*/
+
+'.$aliasesOutput.'
 
 }
 

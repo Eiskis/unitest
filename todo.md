@@ -13,6 +13,7 @@
 		- Make sure injections are passed as clones (when self-injecting in suite `init()`)
 		- Test all types, and with a dummy class object
 		- Test inherited injections
+- Create aliases intelligently using reflection
 - should aliases
 	- `...Directory` -> `...Dir`
 	- `...Integer` -> `...Int`
@@ -29,17 +30,17 @@
 > If you're using PHP5 (>= 5.3.2) with PHPUnit, you can test your private and protected methods by using reflection to set them to be public prior to running your tests:
 
 	protected static function getMethod($name) {
-	  $class = new ReflectionClass('MyClass');
-	  $method = $class->getMethod($name);
-	  $method->setAccessible(true);
-	  return $method;
+		$class = new ReflectionClass('MyClass');
+		$method = $class->getMethod($name);
+		$method->setAccessible(true);
+		return $method;
 	}
 
 	public function testFoo() {
-	  $foo = self::getMethod('foo');
-	  $obj = new MyClass();
-	  $foo->invokeArgs($obj, array(...));
-	  ...
+		$foo = self::getMethod('foo');
+		$obj = new MyClass();
+		$foo->invokeArgs($obj, array(...));
+		...
 	}
 
 ## Report dashboard

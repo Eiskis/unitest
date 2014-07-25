@@ -34,6 +34,7 @@ class Unitest {
 
 	private $_baseClass = 'Unitest';
 	private $_testMethodPrefix = 'test';
+	private $_assertionMethodPrefix = 'should';
 
 
 
@@ -54,6 +55,25 @@ class Unitest {
 	*/
 	final public function __toString () {
 		return get_class($this);
+	}
+
+
+
+	/**
+	* All assertion methods of this suite (methods beginning with should)
+	*/
+	final public function assertions () {
+		$assertions = array();
+		$ref = new ReflectionClass($this);
+
+		// All methods beginning with the prefix 'should'
+		foreach ($ref->getMethods() as $method) {
+			if (substr($method->name, 0, strlen($this->_assertionMethodPrefix)) === $this->_assertionMethodPrefix) {
+				$assertions[] = $method->name;
+			}
+		}
+
+		return $assertions;
 	}
 
 
@@ -1789,6 +1809,232 @@ class Unitest {
 		return $this;
 	}
 
+
+
+	/**
+	* Aliases
+	*/
+
+
+	final  protected function shouldBeBool ($value) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldBeBoolean'), $arguments);
+	}
+
+	final  protected function shouldBeInt ($value) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldBeInteger'), $arguments);
+	}
+
+	final  protected function shouldBeDouble ($value) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldBeFloat'), $arguments);
+	}
+
+	final  protected function should_be_bool ($value) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldBeBoolean'), $arguments);
+	}
+
+	final  protected function should_be_int ($value) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldBeInteger'), $arguments);
+	}
+
+	final  protected function should_be_double ($value) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldBeFloat'), $arguments);
+	}
+
+	final  protected function should_be_equal ($value) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldBeEqual'), $arguments);
+	}
+
+	final  protected function should_not ($value) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldNot'), $arguments);
+	}
+
+	final  protected function should_not_be_equal ($value) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldNotBeEqual'), $arguments);
+	}
+
+	final  protected function should_be_available_class ($value) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldBeAvailableClass'), $arguments);
+	}
+
+	final  protected function should_be_of_class ($object, $class) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldBeOfClass'), $arguments);
+	}
+
+	final  protected function should_extend_class ($objectOrClass, $targetClass) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldExtendClass'), $arguments);
+	}
+
+	final  protected function should_be_directory ($path) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldBeDirectory'), $arguments);
+	}
+
+	final  protected function should_be_file ($path) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldBeFile'), $arguments);
+	}
+
+	final  protected function should_be_file_or_directory ($path) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldBeFileOrDirectory'), $arguments);
+	}
+
+	final  protected function should_be_included_file ($path) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldBeIncludedFile'), $arguments);
+	}
+
+	final  protected function should_not_be_file_or_directory ($path) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldNotBeFileOrDirectory'), $arguments);
+	}
+
+	final  protected function should_have_abstract_method ($objectOrClass, $method) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldHaveAbstractMethod'), $arguments);
+	}
+
+	final  protected function should_have_final_method ($objectOrClass, $method) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldHaveFinalMethod'), $arguments);
+	}
+
+	final  protected function should_have_method ($objectOrClass, $method) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldHaveMethod'), $arguments);
+	}
+
+	final  protected function should_have_private_method ($objectOrClass, $method) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldHavePrivateMethod'), $arguments);
+	}
+
+	final  protected function should_have_protected_method ($objectOrClass, $method) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldHaveProtectedMethod'), $arguments);
+	}
+
+	final  protected function should_have_public_method ($objectOrClass, $method) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldHavePublicMethod'), $arguments);
+	}
+
+	final  protected function should_have_static_method ($objectOrClass, $method) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldHaveStaticMethod'), $arguments);
+	}
+
+	final  protected function should_have_private_property ($objectOrClass, $property) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldHavePrivateProperty'), $arguments);
+	}
+
+	final  protected function should_have_property ($objectOrClass, $property) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldHaveProperty'), $arguments);
+	}
+
+	final  protected function should_have_protected_property ($objectOrClass, $property) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldHaveProtectedProperty'), $arguments);
+	}
+
+	final  protected function should_have_public_property ($objectOrClass, $property) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldHavePublicProperty'), $arguments);
+	}
+
+	final  protected function should_have_static_property ($objectOrClass, $property) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldHaveStaticProperty'), $arguments);
+	}
+
+	final  protected function should_be_array ($value) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldBeArray'), $arguments);
+	}
+
+	final  protected function should_be_boolean ($value) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldBeBoolean'), $arguments);
+	}
+
+	final  protected function should_be_float ($value) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldBeFloat'), $arguments);
+	}
+
+	final  protected function should_be_integer ($value) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldBeInteger'), $arguments);
+	}
+
+	final  protected function should_be_null ($value) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldBeNull'), $arguments);
+	}
+
+	final  protected function should_be_object ($value) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldBeObject'), $arguments);
+	}
+
+	final  protected function should_be_string ($value) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldBeString'), $arguments);
+	}
+
+	final  protected function should_be_flat_array ($value) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldBeFlatArray'), $arguments);
+	}
+
+	final  protected function should_have_indexed_keys ($value) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldHaveIndexedKeys'), $arguments);
+	}
+
+	final  protected function should_have_numerical_keys ($value) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldHaveNumericalKeys'), $arguments);
+	}
+
+	final  protected function should_have_string_keys ($value) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldHaveStringKeys'), $arguments);
+	}
+
+	final  protected function should_be_above_zero ($value) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldBeAboveZero'), $arguments);
+	}
+
+	final  protected function should_be_below_zero ($value) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldBeBelowZero'), $arguments);
+	}
+
+	final  protected function should_be_zero ($value) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldBeZero'), $arguments);
+	}
+
+	final  protected function should_be_empty_string ($value) {
+		$arguments = func_get_args();
+		return call_user_func_array(array($this, 'shouldBeEmptyString'), $arguments);
+	}
 
 
 }

@@ -13,6 +13,7 @@ class Unitest {
 
 	private $_baseClass = 'Unitest';
 	private $_testMethodPrefix = 'test';
+	private $_assertionMethodPrefix = 'should';
 
 
 
