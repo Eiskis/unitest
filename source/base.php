@@ -19,11 +19,9 @@ class Unitest {
 
 	/**
 	* Initialization
-	*
-	* Parent suite and script variables can be passed
 	*/
 	final public function __construct () {
-		$this->_runInit();
+		$this->_runHook('init');
 		return $this;
 	}
 

@@ -35,7 +35,7 @@ class Unitest {
 		$suitesOrTests = $this->_flattenArray($arguments);
 
 		// Preparation before suite runs anything (possible exceptions are left uncaught)
-		$this->_runBeforeTests();
+		$this->_runHook('beforeTests');
 
 		// Run tests
 		foreach ($suitesOrTests as $suiteOrTest) {
@@ -65,7 +65,7 @@ class Unitest {
 		}
 
 		// Clean-up after suite has run everything (exceptions are left uncaught)
-		$this->_runAfterTests();
+		$this->_runHook('afterTests');
 
 		return $results;
 	}

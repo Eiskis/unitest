@@ -38,11 +38,9 @@ class Unitest {
 
 	/**
 	* Initialization
-	*
-	* Parent suite and script variables can be passed
 	*/
 	final public function __construct () {
-		$this->_runInit();
+		$this->_runHook('init');
 		return $this;
 	}
 
@@ -109,7 +107,7 @@ class Unitest {
 		$suitesOrTests = $this->_flattenArray($arguments);
 
 		// Preparation before suite runs anything (possible exceptions are left uncaught)
-		$this->_runBeforeTests();
+		$this->_runHook('beforeTests');
 
 		// Run tests
 		foreach ($suitesOrTests as $suiteOrTest) {
@@ -139,7 +137,7 @@ class Unitest {
 		}
 
 		// Clean-up after suite has run everything (exceptions are left uncaught)
-		$this->_runAfterTests();
+		$this->_runHook('afterTests');
 
 		return $results;
 	}
@@ -202,7 +200,7 @@ class Unitest {
 			try {
 
 				// Preparation method
-				$this->_runBeforeTest();
+				$this->_runHook('beforeTest');
 
 				// Get innjections to pass to test method
 				foreach ($this->_methodParameterNames($this, $method) as $parameterName) {
@@ -219,7 +217,7 @@ class Unitest {
 
 			// Contain exceptions of clean-up
 			try {
-				$this->_runAfterTest();
+				$this->_runHook('afterTest');
 			} catch (Exception $e) {
 				$result = $this->fail($this->_stringifyException($e));
 			}
@@ -1505,6 +1503,28 @@ class Unitest {
 
 
 	/**
+	* Run a suite's hook method, passing it injections
+	*/
+	final private function _runHook ($hookMethod) {
+		$injections = array();
+
+		if (method_exists($this, $hookMethod)) {
+
+			// Get innjections to pass to hook method
+			foreach ($this->_methodParameterNames($this, $hookMethod) as $parameterName) {
+				$injections[] = $this->injection($parameterName);
+			}
+
+			$this->_execute($hookMethod, $injections);
+
+		}
+
+		return $this;
+	}
+
+
+
+	/**
 	* Represent exception as string
 	*/
 	final private function _stringifyException ($e) {
@@ -1750,121 +1770,6 @@ class Unitest {
 		ksort($results);
 
 		return $results;
-	}
-
-
-
-	/**
-	* When a singe test has been run
-	*/
-	final private function _runAfterTest () {
-		$method = 'afterTest';
-		$injections = array();
-
-		if (method_exists($this, $method)) {
-
-			// Get innjections to pass to hook method
-			foreach ($this->_methodParameterNames($this, $method) as $parameterName) {
-				$injections[] = $this->injection($parameterName);
-			}
-
-			$this->_execute($method, $injections);
-
-		}
-
-		return $this;
-	}
-
-
-
-	/**
-	* When a suite has run tests
-	*/
-	final private function _runAfterTests () {
-		$injections = array();
-		$method = 'afterTests';
-
-		if (method_exists($this, $method)) {
-
-			// Get innjections to pass to hook method
-			foreach ($this->_methodParameterNames($this, $method) as $parameterName) {
-				$injections[] = $this->injection($parameterName);
-			}
-
-			$this->_execute($method, $injections);
-
-		}
-
-		return $this;
-	}
-
-
-
-	/**
-	* When a singe test is about to run
-	*/
-	final private function _runBeforeTest () {
-		$method = 'beforeTest';
-		$injections = array();
-
-		if (method_exists($this, $method)) {
-
-			// Get innjections to pass to hook method
-			foreach ($this->_methodParameterNames($this, $method) as $parameterName) {
-				$injections[] = $this->injection($parameterName);
-			}
-
-			$this->_execute($method, $injections);
-
-		}
-
-		return $this;
-	}
-
-
-
-	/**
-	* When a suite is about to run
-	*/
-	final private function _runBeforeTests () {
-		$method = 'beforeTests';
-		$injections = array();
-
-		if (method_exists($this, $method)) {
-
-			// Get innjections to pass to hook method
-			foreach ($this->_methodParameterNames($this, $method) as $parameterName) {
-				$injections[] = $this->injection($parameterName);
-			}
-
-			$this->_execute($method, $injections);
-
-		}
-
-		return $this;
-	}
-
-
-
-	/**
-	* When instance is created
-	*/
-	final private function _runInit () {
-		$method = 'init';
-		$injections = array();
-
-		if (method_exists($this, $method)) {
-
-			// Get innjections to pass to hook method
-			foreach ($this->_methodParameterNames($this, $method) as $parameterName) {
-				$injections[] = $this->injection($parameterName);
-			}
-
-			$this->_execute($method, $injections);
-
-		}
-
-		return $this;
 	}
 
 

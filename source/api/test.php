@@ -20,7 +20,7 @@ class Unitest {
 			try {
 
 				// Preparation method
-				$this->_runBeforeTest();
+				$this->_runHook('beforeTest');
 
 				// Get innjections to pass to test method
 				foreach ($this->_methodParameterNames($this, $method) as $parameterName) {
@@ -37,7 +37,7 @@ class Unitest {
 
 			// Contain exceptions of clean-up
 			try {
-				$this->_runAfterTest();
+				$this->_runHook('afterTest');
 			} catch (Exception $e) {
 				$result = $this->fail($this->_stringifyException($e));
 			}
