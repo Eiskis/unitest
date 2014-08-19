@@ -13,14 +13,14 @@ class Unitest {
 		if (method_exists($this, $method)) {
 			$startTime = microtime(true);
 
+			// Take a snapshot of current injections
+			$allInjectionsCopy = $this->injections();
+
 			// Contain exceptions of test method
 			try {
 
-				// Take a snapshot of current injections
-				$allInjectionsCopy = $this->injections();
-
 				// Preparation method
-				$this->_runBeforeTest($method);
+				$this->_runBeforeTest();
 
 				// Get innjections to pass to test method
 				foreach ($this->_methodParameterNames($this, $method) as $parameterName) {
@@ -37,7 +37,7 @@ class Unitest {
 
 			// Contain exceptions of clean-up
 			try {
-				$this->_runAfterTest($method);
+				$this->_runAfterTest();
 			} catch (Exception $e) {
 				$result = $this->fail($this->_stringifyException($e));
 			}

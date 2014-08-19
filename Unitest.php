@@ -1,17 +1,15 @@
 <?php
 
 /**
-* Unitest
+* Unitest 0.1.0
 *
 * A one-class miniature unit testing framework for PHP.
 *
 * This class is a test suite that can contain test methods and child suites. It can also search for test files in the file system, generating suites automatically.
 *
-* Test results are reported as array data, which can then be converted into HTML, JSON or any other format easily.
+* Test results are reported as raw array data, which can then be converted into HTML, JSON or any other format easily.
 *
 *
-*
-* Version 0.1.0
 *
 * Released under MIT License
 * Authored by Jerry Jäppinen
@@ -197,14 +195,14 @@ class Unitest {
 		if (method_exists($this, $method)) {
 			$startTime = microtime(true);
 
+			// Take a snapshot of current injections
+			$allInjectionsCopy = $this->injections();
+
 			// Contain exceptions of test method
 			try {
 
-				// Take a snapshot of current injections
-				$allInjectionsCopy = $this->injections();
-
 				// Preparation method
-				$this->_runBeforeTest($method);
+				$this->_runBeforeTest();
 
 				// Get innjections to pass to test method
 				foreach ($this->_methodParameterNames($this, $method) as $parameterName) {
@@ -221,7 +219,7 @@ class Unitest {
 
 			// Contain exceptions of clean-up
 			try {
-				$this->_runAfterTest($method);
+				$this->_runAfterTest();
 			} catch (Exception $e) {
 				$result = $this->fail($this->_stringifyException($e));
 			}
@@ -1759,9 +1757,21 @@ class Unitest {
 	/**
 	* When a singe test has been run
 	*/
-	final private function _runAfterTest ($method) {
-		$arguments = func_get_args();
-		$this->_execute('afterTest', $arguments);
+	final private function _runAfterTest () {
+		$method = 'afterTest';
+		$injections = array();
+
+		if (method_exists($this, $method)) {
+
+			// Get innjections to pass to hook method
+			foreach ($this->_methodParameterNames($this, $method) as $parameterName) {
+				$injections[] = $this->injection($parameterName);
+			}
+
+			$this->_execute($method, $injections);
+
+		}
+
 		return $this;
 	}
 
@@ -1771,8 +1781,20 @@ class Unitest {
 	* When a suite has run tests
 	*/
 	final private function _runAfterTests () {
-		$arguments = func_get_args();
-		$this->_execute('afterTests', $arguments);
+		$injections = array();
+		$method = 'afterTests';
+
+		if (method_exists($this, $method)) {
+
+			// Get innjections to pass to hook method
+			foreach ($this->_methodParameterNames($this, $method) as $parameterName) {
+				$injections[] = $this->injection($parameterName);
+			}
+
+			$this->_execute($method, $injections);
+
+		}
+
 		return $this;
 	}
 
@@ -1781,9 +1803,21 @@ class Unitest {
 	/**
 	* When a singe test is about to run
 	*/
-	final private function _runBeforeTest ($method) {
-		$arguments = func_get_args();
-		$this->_execute('beforeTest', $arguments);
+	final private function _runBeforeTest () {
+		$method = 'beforeTest';
+		$injections = array();
+
+		if (method_exists($this, $method)) {
+
+			// Get innjections to pass to hook method
+			foreach ($this->_methodParameterNames($this, $method) as $parameterName) {
+				$injections[] = $this->injection($parameterName);
+			}
+
+			$this->_execute($method, $injections);
+
+		}
+
 		return $this;
 	}
 
@@ -1793,8 +1827,20 @@ class Unitest {
 	* When a suite is about to run
 	*/
 	final private function _runBeforeTests () {
-		$arguments = func_get_args();
-		$this->_execute('beforeTests', $arguments);
+		$method = 'beforeTests';
+		$injections = array();
+
+		if (method_exists($this, $method)) {
+
+			// Get innjections to pass to hook method
+			foreach ($this->_methodParameterNames($this, $method) as $parameterName) {
+				$injections[] = $this->injection($parameterName);
+			}
+
+			$this->_execute($method, $injections);
+
+		}
+
 		return $this;
 	}
 
@@ -1804,8 +1850,20 @@ class Unitest {
 	* When instance is created
 	*/
 	final private function _runInit () {
-		$arguments = func_get_args();
-		$this->_execute('init', $arguments);
+		$method = 'init';
+		$injections = array();
+
+		if (method_exists($this, $method)) {
+
+			// Get innjections to pass to hook method
+			foreach ($this->_methodParameterNames($this, $method) as $parameterName) {
+				$injections[] = $this->injection($parameterName);
+			}
+
+			$this->_execute($method, $injections);
+
+		}
+
 		return $this;
 	}
 

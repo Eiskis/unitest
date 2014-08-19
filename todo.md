@@ -1,10 +1,11 @@
 
 # To do
 
+- Pass injections to `beforeTest` and other hook methods
 - Clear duplication in method/property assertions
-- xUnit-compliance
+- `->_clone()`
 - Maybe make helpers static
-- `->clone()`
+- xUnit-compliance (?)
 - Test coverage
 	- Event hook methods
 		- Test that they're run at the right time
@@ -14,11 +15,7 @@
 		- Test all types, and with a dummy class object
 		- Test inherited injections
 - Create aliases intelligently using reflection
-- should aliases
-	- `...Directory` -> `...Dir`
-	- `...Integer` -> `...Int`
-	- `...Boolean` -> `...Bool`
-	- `ShouldBeFile` -> `should_be_file`
+- Superficial report templating
 
 
 

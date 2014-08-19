@@ -72,17 +72,15 @@ unlink($tempPath);
 $output = '<?php
 
 /**
-* Unitest
+* Unitest 0.1.0
 *
 * A one-class miniature unit testing framework for PHP.
 *
 * This class is a test suite that can contain test methods and child suites. It can also search for test files in the file system, generating suites automatically.
 *
-* Test results are reported as array data, which can then be converted into HTML, JSON or any other format easily.
+* Test results are reported as raw array data, which can then be converted into HTML, JSON or any other format easily.
 *
 *
-*
-* Version 0.1.0
 *
 * Released under MIT License
 * Authored by Jerry Jäppinen
