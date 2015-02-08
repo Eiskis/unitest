@@ -3,24 +3,25 @@
 
 Unitest is a one-class miniature unit testing framework for PHP. It's a great way to get started with unit testing - and do as much as makes sense for your project. For the major leagues, you should probably use [PHPUnit](http://phpunit.de/).
 
-- [Bitbucket repo](https://bitbucket.org/Eiskis/unitest/)
-- [Download](https://bitbucket.org/Eiskis/unitest/src/master/Unitest.php)
+- [GitHub repo](https://github.com/Eiskis/unitest)
+- [Download](https://raw.githubusercontent.com/Eiskis/unitest/master/Unitest.php)
 
 ## Quick start
 
-	// Init
-	include_once 'Unitest.php';
-	$suite = new Unitest();
+```php
+// Init
+include_once 'Unitest.php';
+$suite = new Unitest();
 
-	// Your code that needs testing
-	include_once 'YourClass.php';
+// Your code that needs testing
+include_once 'YourClass.php';
 
-	// Test classes that extend Unitest (will be loaded into $suite)
-	$suite->scrape('my-tests/');
+// Test classes that extend Unitest (will be loaded into $suite)
+$suite->scrape('my-tests/');
 
-	// Run tests and get a results array
-	$results = $suite->run();
-
+// Run tests and get a results array
+$results = $suite->run();
+```
 
 
 ## Repo contents
@@ -44,11 +45,15 @@ Unitest is very simple to use. It's easy to get started with, but also extendabl
 
 Unitest is a one-class framework. First load the class file:
 
+```php
 	include_once 'Unitest.php';
+```
 
 Then, instantiate a new suite by creating a Unitest object:
 
-	$mainSuite = new Unitest();
+```php
+$mainSuite = new Unitest();
+```
 
 Any Unitest object can contain both test methods and child suites.
 
@@ -58,21 +63,23 @@ Any Unitest object can contain both test methods and child suites.
 
 You write tests as methods (prefixed with `test`) to any class that extends the `Unitest` class. Each test suite you write should have its own class. For example:
 
-	class TestSomeMath extends Unitest {
+```php
+class TestSomeMath extends Unitest {
 
-		function testPlus () {
-			return $this->should(0 + 1);
-		}
-
-		function testOnePlusOne () {
-			return $this->should(1 + 1 === 2);
-		}
-
-		function testMinus () {
-			return $this->shouldBeEqual(0, 1-1, 2-2, 3-3);
-		}
-
+	function testPlus () {
+		return $this->should(0 + 1);
 	}
+
+	function testOnePlusOne () {
+		return $this->should(1 + 1 === 2);
+	}
+
+	function testMinus () {
+		return $this->shouldBeEqual(0, 1-1, 2-2, 3-3);
+	}
+
+}
+```
 
 
 
@@ -80,7 +87,9 @@ You write tests as methods (prefixed with `test`) to any class that extends the 
 
 Since your tests come in classes, to run them you need to load the classes and instantiate them and run each one. Unitest can take care of all of this:
 
-	$mainSuite->scrape('path/to/your/test/files/');
+```php
+$mainSuite->scrape('path/to/your/test/files/');
+```
 
 Unitest will:
 
@@ -97,11 +106,13 @@ To run all tests of your suite, call:
 
 You can run only part of your tests as well:
 
-	$mainSuite->run($mainSuite->ownTests());
-	$mainSuite->run($mainSuite->children());
-	$mainSuite->run('nameOfTestMethod');
-	$anySuite->run();
-	$anySuite->run('anyTestMehod');
+```php
+$mainSuite->run($mainSuite->ownTests());
+$mainSuite->run($mainSuite->children());
+$mainSuite->run('nameOfTestMethod');
+$anySuite->run();
+$anySuite->run('anyTestMehod');
+```
 
 
 
@@ -123,7 +134,9 @@ You can run only part of your tests as well:
 
 Parent case and script variables can be passed.
 
-	$case = new Unitest($parent = null)
+```php
+$case = new Unitest($parent = null)
+```
 
 ## Properties
 

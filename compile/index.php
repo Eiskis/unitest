@@ -87,7 +87,7 @@ $output = '<?php
 * http://eiskis.net/
 * eiskis@gmail.com
 *
-* https://bitbucket.org/Eiskis/unitest/
+* https://github.com/Eiskis/unitest
 */
 
 class Unitest {
