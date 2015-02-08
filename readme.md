@@ -46,7 +46,7 @@ Unitest is very simple to use. It's easy to get started with, but also extendabl
 Unitest is a one-class framework. First load the class file:
 
 ```php
-	include_once 'Unitest.php';
+include_once 'Unitest.php';
 ```
 
 Then, instantiate a new suite by creating a Unitest object:
